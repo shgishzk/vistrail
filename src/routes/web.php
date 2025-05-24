@@ -24,5 +24,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('users', [\App\Http\Controllers\Admin\UsersController::class, 'index'])->name('users');
         Route::get('users/create', [\App\Http\Controllers\Admin\UsersController::class, 'create'])->name('users.create');
         Route::post('users', [\App\Http\Controllers\Admin\UsersController::class, 'store'])->name('users.store');
+        Route::get('users/{user}/edit', [\App\Http\Controllers\Admin\UsersController::class, 'edit'])->name('users.edit');
+        Route::put('users/{user}', [\App\Http\Controllers\Admin\UsersController::class, 'update'])->name('users.update');
+        Route::delete('users/{user}', [\App\Http\Controllers\Admin\UsersController::class, 'destroy'])->name('users.destroy');
     });
 });
