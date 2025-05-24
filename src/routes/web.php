@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\DashboardController;
 
 Route::view('/', 'home')->name('home');
 
@@ -11,4 +13,12 @@ Route::view('/', 'home')->name('home');
 //     Route::delete('/pins/{id}', [PinController::class, 'destroy']);
 // });
 
-Route::view('/admin', 'admin.dashboard');
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    
+    Route::middleware('admin.auth')->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    });
+});
