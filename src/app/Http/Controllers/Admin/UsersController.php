@@ -37,9 +37,8 @@ class UsersController extends Controller
     {
         $validated = $request->validated();
         
-        $validated['password'] = Hash::make($validated['password']);
-        
-        User::create($validated);
+        $storeUserService = new \App\Services\User\StoreUserService();
+        $storeUserService->execute($validated);
         
         return redirect()->route('admin.users')
             ->with('success', 'ユーザーが正常に作成されました。');
