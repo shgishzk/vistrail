@@ -1,0 +1,73 @@
+services:
+  app:
+    build:
+      context: ./docker/php
+    volumes:
+      - ./src:/var/www
+    working_dir: /var/www
+    depends_on:
+      - db
+    networks:
+      - vistrail-net
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "11111:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./src:/var/www
+    depends_on:
+      - app
+    networks:
+      - vistrail-net
+
+  frontend:
+    image: node:18
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+    networks:
+      - vistrail-net
+      
+  db:
+    image: mariadb:10.9
+    env_file:
+      - ./docker/env/db.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - vistrail-net
+
+  npm:
+    image: node:18
+    working_dir: /var/www
+    entrypoint: [ 'npm' ]
+    volumes:
+      - ./src:/var/www
+    profiles:
+      - command
+
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - "11119:80"
+    env_file:
+      - ./docker/env/phpmyadmin.env
+    depends_on:
+      - db
+    networks:
+      - vistrail-net
+
+networks:
+  vistrail-net:
+
+volumes:
+  db-data:
