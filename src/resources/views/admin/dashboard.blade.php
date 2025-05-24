@@ -6,8 +6,8 @@
     <title>@lang('Admin Dashboard')</title>
     @vite(['resources/js/admin.js', 'resources/css/admin.css'])
 </head>
-<body class="d-flex">
-    <div class="sidebar sidebar-lg sidebar-fixed sidebar-self-hiding-md border-end px-xl-4 docs-sidebar elevation-0" id="sidebar">
+<body class="d-flex  bg-light">
+    <div class="sidebar sidebar-lg sidebar-dark sidebar-fixed sidebar-self-hiding-md border-end px-xl-4 docs-sidebar elevation-0" id="sidebar">
         <div class="sidebar-header border-bottom">
             <div class="sidebar-brand">Vistrail Admin</div>
           </div>
@@ -17,6 +17,27 @@
                     <i class="nav-icon cil-speedometer"></i> @lang('Dashboard')
                 </a>
             </li>
+
+            <li class="nav-title">@lang('Users')</li>
+            <li class="nav-item">
+                <a class="nav-link" href="/users">
+                    <i class="nav-icon cil-user"></i> @lang('Users')
+                </a>
+            </li>
+
+            <li class="nav-title">@lang('Territory')</li>
+            <li class="nav-item">
+                <a class="nav-link" href="/areas">
+                    <i class="nav-icon cil-folder-open"></i> @lang('Areas')
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/visits">
+                    <i class="nav-icon cil-briefcase"></i> @lang('Visits')
+                </a>
+            </li>
+
+            <li class="nav-title">@lang('Account')</li>
             <li class="nav-item">
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
@@ -26,9 +47,6 @@
                 </form>
             </li>
         </ul>
-        <div class="sidebar-footer border-top d-flex">
-            <button class="sidebar-toggler" type="button" onclick="coreui.Sidebar.getOrCreateInstance(document.querySelector('#sidebar')).toggle()"></button>
-          </div>
     </div>
     
     <div class="wrapper flex-grow-1" style="min-width: 0;">
