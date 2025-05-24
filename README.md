@@ -15,6 +15,20 @@ This document describes how to prepare and deploy the Vistrail application to pr
 
 ---
 
+## 🛠️ Install
+
+Run the following command to install the application. Make sure you have Docker and Docker Compose installed.
+
+```bash
+$ make install
+```
+
+For development, you can use the following command to seed the database with test data:
+
+```bash
+$ make seed
+```
+
 ## ✅ Environment Variables (.env)
 
 Set the following in your `.env` file:
