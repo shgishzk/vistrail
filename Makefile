@@ -33,6 +33,8 @@ migrate-fresh:
 	docker compose exec app php artisan migrate:fresh
 migrate-refresh:
 	docker compose exec app php artisan migrate:refresh
+seed:
+	docker compose exec app php artisan db:seed
 
 # Composer
 composer-install:
