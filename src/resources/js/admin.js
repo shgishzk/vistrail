@@ -9,5 +9,9 @@ import '@coreui/icons/css/all.min.css';
 
 // Initialize CoreUI components
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize any CoreUI components that require JS initialization
+  // Initialize sidebar
+  const sidebarElement = document.querySelector('#sidebar');
+  if (sidebarElement) {
+    new coreui.Sidebar(sidebarElement);
+  }
 });
