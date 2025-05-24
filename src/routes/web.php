@@ -20,6 +20,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     
     Route::middleware('admin.auth')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
         Route::get('users', [\App\Http\Controllers\Admin\UsersController::class, 'index'])->name('users');
+        Route::get('users/create', [\App\Http\Controllers\Admin\UsersController::class, 'create'])->name('users.create');
+        Route::post('users', [\App\Http\Controllers\Admin\UsersController::class, 'store'])->name('users.store');
     });
 });

@@ -2,10 +2,20 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <strong>@lang('Users')</strong>
+        <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+            <i class="cil-plus"></i> @lang('Add new')
+        </a>
     </div>
     <div class="card-body">
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        
         <table class="table table-responsive-sm table-striped">
             <thead>
                 <tr>
