@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@lang('Admin Dashboard')</title>
-    @vite(['resources/css/admin.css'])
+    @vite(['resources/js/admin.js', 'resources/css/admin.css'])
 </head>
 <body class="c-app">
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">

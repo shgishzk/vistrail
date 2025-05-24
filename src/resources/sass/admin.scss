@@ -1,2 +1,5 @@
+// Import Bootstrap
 @import "~bootstrap/scss/bootstrap";
-@import "coreui";
+
+// Import CoreUI
+@use "~coreui/coreui/scss/coreui";
