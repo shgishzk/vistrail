@@ -25,6 +25,7 @@ APP_URL=https://your-domain.com
 
 # The following should be removed or commented out in production:
 # VITE_DEV_SERVER_URL=http://localhost:5173
+```
 
 ## 🌐 Other Languages
 
