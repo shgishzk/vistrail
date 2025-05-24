@@ -11,6 +11,7 @@ class Visit extends Model
 
     protected $fillable = [
         'user_id',
+        'area_id',
         'start_date',
         'end_date',
         'memo',
@@ -32,5 +33,10 @@ class Visit extends Model
     public function pins()
     {
         return $this->hasMany(Pin::class);
+    }
+
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
     }
 }
