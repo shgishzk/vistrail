@@ -8,6 +8,8 @@ install:
 	docker compose exec app cp .env.example .env
 	docker compose exec app php artisan key:generate
 	docker compose exec app php artisan migrate:fresh --seed
+	docker compose exec app php artisan storage:link
+	$(MAKE) init-test
 stop:
 	docker compose down
 delete:
@@ -25,8 +27,6 @@ shell:
 # Artisan
 artisan:
 	docker compose exec app php artisan $(args)
-test:
-	docker compose exec app php artisan test
 migrate:
 	docker compose exec app php artisan migrate
 migrate-fresh:
@@ -51,3 +51,10 @@ npm-update:
 	docker compose run --rm npm update
 npm-run-dev:
 	docker compose run --rm npm run dev
+
+# PHPUnit
+test:
+	docker compose exec app vendor/bin/phpunit
+init-test:
+	docker compose exec db sh -c "export MYSQL_PWD=secret; mysql -uroot -e \"CREATE DATABASE test_vistrail;\""
+	docker compose exec db sh -c "export MYSQL_PWD=secret; mysql -uroot -e \"GRANT ALL PRIVILEGES ON *.* TO 'vistrail'@'%';\""
