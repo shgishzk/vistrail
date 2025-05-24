@@ -6,11 +6,11 @@
     <title>@lang('Admin Dashboard')</title>
     @vite(['resources/js/admin.js', 'resources/css/admin.css'])
 </head>
-<body class="sidebar-fixed">
-    <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
-        <div class="sidebar-brand d-none d-md-flex">
-            <h5 class="m-0">Vistrail Admin</h5>
-        </div>
+<body class="d-flex">
+    <div class="sidebar sidebar-lg sidebar-fixed sidebar-self-hiding-md border-end px-xl-4 docs-sidebar elevation-0" id="sidebar">
+        <div class="sidebar-header border-bottom">
+            <div class="sidebar-brand">Vistrail Admin</div>
+          </div>
         <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="">
             <li class="nav-item">
                 <a class="nav-link active" href="{{ route('admin.dashboard') }}">
@@ -26,14 +26,14 @@
                 </form>
             </li>
         </ul>
+        <div class="sidebar-footer border-top d-flex">
+            <button class="sidebar-toggler" type="button" onclick="coreui.Sidebar.getOrCreateInstance(document.querySelector('#sidebar')).toggle()"></button>
+          </div>
     </div>
     
-    <div class="wrapper d-flex flex-column min-vh-100">
-        <header class="header header-sticky mb-4">
+    <div class="wrapper flex-grow-1" style="min-width: 0;">
+        <header class="docs-header header header-sticky elevation-0 mb-5">
             <div class="container-fluid">
-                <button class="header-toggler px-md-0 me-md-3 d-md-none" type="button" onclick="coreui.Sidebar.getOrCreateInstance(document.querySelector('#sidebar')).toggle()">
-                    <i class="icon cil-menu"></i>
-                </button>
                 <ul class="header-nav ms-auto">
                     <li class="nav-item dropdown">
                         <span class="nav-link">{{ Auth::guard('admin')->user()->name ?? 'Admin' }}</span>

@@ -1,2 +1,10 @@
 // Import CoreUI
 @use "@coreui/coreui/scss/coreui";
+
+.wrapper {
+    width: 100%;
+    -webkit-padding-start: var(--cui-sidebar-occupy-start, 0);
+    padding-inline-start:var(--cui-sidebar-occupy-start, 0);
+    will-change:auto;
+    transition:padding .15s;
+}
