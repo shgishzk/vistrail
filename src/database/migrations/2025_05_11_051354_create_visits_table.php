@@ -13,6 +13,9 @@ class CreateVisitsTable extends Migration
             $table->foreignId('user_id')
                 ->comment('User ID')
                 ->constrained()->onDelete('cascade');
+            $table->foreignId('area_id')
+                ->comment('Area ID')
+                ->constrained()->onDelete('cascade');
             $table->date('start_date')->comment('Start Date');
             $table->date('end_date')->nullable()->comment('End Date');
             $table->text('memo')->nullable()->comment('Memo');
