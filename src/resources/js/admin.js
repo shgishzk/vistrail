@@ -1,10 +1,11 @@
-// Import CoreUI
-import '@coreui/coreui/dist/css/coreui.min.css';
-import '@coreui/coreui/dist/js/coreui.bundle.min.js';
-import '@coreui/icons/css/all.min.css';
+// Import our custom CSS
+import '../sass/admin.scss';
 
-// Import Bootstrap dependencies
-import 'bootstrap';
+// Import all of CoreUI's JS
+import * as coreui from '@coreui/coreui';
+
+// Import CoreUI icons
+import '@coreui/icons/css/all.min.css';
 
 // Initialize CoreUI components
 document.addEventListener('DOMContentLoaded', () => {
