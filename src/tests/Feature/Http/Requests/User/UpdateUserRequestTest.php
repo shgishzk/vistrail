@@ -18,9 +18,12 @@ class UpdateUserRequestTest extends TestCase
      */
     public function test_validation_passes_with_valid_data(): void
     {
+        $user = User::factory()->create();
         $request = new UpdateUserRequest();
-        $request->setRouteResolver(function () {
-            return new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+        $request->setRouteResolver(function () use ($user) {
+            $route = new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+            $route->parameters = ['user' => $user->id];
+            return $route;
         });
         
         $validator = Validator::make([
@@ -37,9 +40,12 @@ class UpdateUserRequestTest extends TestCase
      */
     public function test_validation_passes_with_valid_data_without_password(): void
     {
+        $user = User::factory()->create();
         $request = new UpdateUserRequest();
-        $request->setRouteResolver(function () {
-            return new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+        $request->setRouteResolver(function () use ($user) {
+            $route = new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+            $route->parameters = ['user' => $user->id];
+            return $route;
         });
         
         $validator = Validator::make([
@@ -55,9 +61,12 @@ class UpdateUserRequestTest extends TestCase
      */
     public function test_validation_fails_when_required_fields_are_missing(): void
     {
+        $user = User::factory()->create();
         $request = new UpdateUserRequest();
-        $request->setRouteResolver(function () {
-            return new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+        $request->setRouteResolver(function () use ($user) {
+            $route = new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+            $route->parameters = ['user' => $user->id];
+            return $route;
         });
         
         $validator = Validator::make([], $request->rules());
@@ -72,9 +81,12 @@ class UpdateUserRequestTest extends TestCase
      */
     public function test_validation_fails_when_email_is_invalid(): void
     {
+        $user = User::factory()->create();
         $request = new UpdateUserRequest();
-        $request->setRouteResolver(function () {
-            return new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+        $request->setRouteResolver(function () use ($user) {
+            $route = new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+            $route->parameters = ['user' => $user->id];
+            return $route;
         });
         
         $validator = Validator::make([
@@ -91,9 +103,12 @@ class UpdateUserRequestTest extends TestCase
      */
     public function test_validation_fails_when_password_is_too_short(): void
     {
+        $user = User::factory()->create();
         $request = new UpdateUserRequest();
-        $request->setRouteResolver(function () {
-            return new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+        $request->setRouteResolver(function () use ($user) {
+            $route = new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+            $route->parameters = ['user' => $user->id];
+            return $route;
         });
         
         $validator = Validator::make([
@@ -111,9 +126,12 @@ class UpdateUserRequestTest extends TestCase
      */
     public function test_validation_fails_when_password_has_no_uppercase(): void
     {
+        $user = User::factory()->create();
         $request = new UpdateUserRequest();
-        $request->setRouteResolver(function () {
-            return new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+        $request->setRouteResolver(function () use ($user) {
+            $route = new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+            $route->parameters = ['user' => $user->id];
+            return $route;
         });
         
         $validator = Validator::make([
