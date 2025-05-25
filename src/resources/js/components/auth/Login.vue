@@ -92,7 +92,8 @@ import axios from 'axios';
 
 export default {
   name: 'Login',
-  setup() {
+  emits: ['login-success'],
+  setup(props, { emit }) {
     const form = reactive({
       email: '',
       password: '',
@@ -118,14 +119,8 @@ export default {
         
         // Handle successful response
         if (response.data.success) {
-          // Store user data if needed
-          if (response.data.user) {
-            // You could store user data in localStorage or Vuex store here
-            console.log('User logged in:', response.data.user);
-          }
-          
-          // Redirect to the specified URL or home page
-          window.location.href = response.data.redirect || '/';
+          // Emit login success event to parent component
+          emit('login-success');
         } else {
           // Handle unexpected success response format
           error.value = response.data.message || '予期しないエラーが発生しました。';

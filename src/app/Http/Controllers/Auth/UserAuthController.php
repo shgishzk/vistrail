@@ -12,9 +12,9 @@ use Illuminate\View\View;
 class UserAuthController extends Controller
 {
     /**
-     * Show the user login form.
+     * Show the home page.
      */
-    public function showLoginForm(): View
+    public function showHome(): View
     {
         return view('home');
     }
@@ -30,7 +30,6 @@ class UserAuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'redirect' => route('home'),
                 'user' => Auth::user(),
             ]);
         } catch (\Exception $e) {

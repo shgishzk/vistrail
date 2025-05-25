@@ -5,11 +5,10 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\UserAuthController;
 
-Route::view('/', 'home')->name('home');
-
-Route::get('login', [UserAuthController::class, 'showLoginForm'])->name('login');
+Route::get('/', [UserAuthController::class, 'showHome'])->name('home');
 Route::post('login', [UserAuthController::class, 'login']);
 Route::post('logout', [UserAuthController::class, 'logout'])->name('logout');
+Route::get('/api/user', [UserAuthController::class, 'user']);
 
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('/pins', [PinController::class, 'index']);
