@@ -3,10 +3,10 @@
     <div class="max-w-md w-full space-y-8">
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          @lang('ログイン')
+          ログイン
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600">
-          @lang('アカウントにサインインしてください')
+          アカウントにサインインしてください
         </p>
       </div>
       <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
@@ -19,7 +19,7 @@
         </div>
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
-            <label for="email" class="sr-only">@lang('メールアドレス')</label>
+            <label for="email" class="sr-only">メールアドレス</label>
             <input
               id="email"
               v-model="form.email"
@@ -29,12 +29,12 @@
               required
               class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               :class="{ 'border-red-500': errors.email }"
-              placeholder="@lang('メールアドレス')"
+              placeholder="メールアドレス"
             />
             <p v-if="errors.email" class="mt-1 text-sm text-red-600">{{ errors.email }}</p>
           </div>
           <div>
-            <label for="password" class="sr-only">@lang('パスワード')</label>
+            <label for="password" class="sr-only">パスワード</label>
             <input
               id="password"
               v-model="form.password"
@@ -44,7 +44,7 @@
               required
               class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               :class="{ 'border-red-500': errors.password }"
-              placeholder="@lang('パスワード')"
+              placeholder="パスワード"
             />
             <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password }}</p>
           </div>
@@ -60,7 +60,7 @@
               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             />
             <label for="remember" class="ml-2 block text-sm text-gray-900">
-              @lang('ログイン状態を保存')
+              ログイン状態を保存
             </label>
           </div>
         </div>
@@ -78,7 +78,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </span>
-            @lang('ログイン')
+            ログイン
           </button>
         </div>
       </form>
@@ -113,21 +113,44 @@ export default {
         // Get CSRF token
         await axios.get('/sanctum/csrf-cookie');
         
-        // Submit login request
-        await axios.post('/login', form);
+        // Submit login request as JSON
+        const response = await axios.post('/login', form);
         
-        // Redirect to home page on success
-        window.location.href = '/';
-      } catch (e) {
-        if (e.response && e.response.status === 422) {
-          // Validation errors
-          const responseErrors = e.response.data.errors;
-          Object.keys(responseErrors).forEach(key => {
-            errors[key] = responseErrors[key][0];
-          });
+        // Handle successful response
+        if (response.data.success) {
+          // Store user data if needed
+          if (response.data.user) {
+            // You could store user data in localStorage or Vuex store here
+            console.log('User logged in:', response.data.user);
+          }
+          
+          // Redirect to the specified URL or home page
+          window.location.href = response.data.redirect || '/';
         } else {
-          // General error
-          error.value = e.response?.data?.message || '@lang("認証に失敗しました。入力内容を確認してください。")';
+          // Handle unexpected success response format
+          error.value = response.data.message || '予期しないエラーが発生しました。';
+        }
+      } catch (e) {
+        if (e.response) {
+          if (e.response.status === 422) {
+            // Validation errors
+            if (e.response.data.errors) {
+              // Laravel validation error format
+              const responseErrors = e.response.data.errors;
+              Object.keys(responseErrors).forEach(key => {
+                errors[key] = responseErrors[key][0];
+              });
+            } else if (e.response.data.message) {
+              // Single error message
+              error.value = e.response.data.message;
+            }
+          } else {
+            // Other error statuses
+            error.value = e.response.data.message || '認証に失敗しました。入力内容を確認してください。';
+          }
+        } else {
+          // Network error or other issues
+          error.value = 'サーバーに接続できませんでした。インターネット接続を確認してください。';
         }
       } finally {
         loading.value = false;

@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
 class UserAuthController extends Controller
@@ -21,34 +22,48 @@ class UserAuthController extends Controller
     /**
      * Handle a user login request.
      */
-    public function login(Request $request): RedirectResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        try {
+            $request->authenticate();
             $request->session()->regenerate();
 
-            return redirect()->intended(route('home'));
+            return response()->json([
+                'success' => true,
+                'redirect' => route('home'),
+                'user' => Auth::user(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
         }
-
-        return back()->withErrors([
-            'email' => __('The provided credentials do not match our records.'),
-        ])->onlyInput('email');
     }
 
     /**
      * Log the user out of the application.
      */
-    public function logout(Request $request): RedirectResponse
+    public function logout(Request $request): JsonResponse
     {
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('home');
+        return response()->json([
+            'success' => true,
+            'redirect' => route('home'),
+        ]);
+    }
+
+    /**
+     * Get the authenticated user.
+     */
+    public function user(Request $request): JsonResponse
+    {
+        return response()->json([
+            'user' => $request->user(),
+        ]);
     }
 }
