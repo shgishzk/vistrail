@@ -3,8 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Auth\UserAuthController;
 
 Route::view('/', 'home')->name('home');
+
+Route::get('login', [UserAuthController::class, 'showLoginForm'])->name('login');
+Route::post('login', [UserAuthController::class, 'login']);
+Route::post('logout', [UserAuthController::class, 'logout'])->name('logout');
 
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('/pins', [PinController::class, 'index']);
