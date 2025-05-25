@@ -137,8 +137,9 @@ class UpdateUserRequestTest extends TestCase
         
         $request = new UpdateUserRequest();
         $request->setRouteResolver(function () use ($user) {
-            return new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', [])
-                ->setParameter('user', $user->id);
+            $route = new \Illuminate\Routing\Route('PUT', 'admin/users/{user}', []);
+            $route->setParameter('user', $user->id);
+            return $route;
         });
         
         $validator = Validator::make([
