@@ -10,8 +10,10 @@ class CreateAreasTable extends Migration
     {
         Schema::create('areas', function (Blueprint $table) {
             $table->id()->comment('Area ID');
-            $table->string('name')->comment('Area Name');
+            $table->string('number')->comment('Area Number');
+            $table->string('name')->nullable()->comment('Area Name');
             $table->longText('boundary_geojson')->comment('Boundary GeoJSON');
+            $table->text('memo')->nullable()->comment('Memo');
             $table->timestamps();
         });
     }

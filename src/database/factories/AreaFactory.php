@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AreaFactory extends Factory
 {
+    protected $sequence = 1;
+
     /**
      * Define the model's default state.
      *
@@ -18,6 +20,7 @@ class AreaFactory extends Factory
     public function definition(): array
     {
         return [
+            'number' => $this->sequence++,
             'name' => fake()->city(),
             'boundary_geojson' => json_encode([
                 'type' => 'Polygon',
