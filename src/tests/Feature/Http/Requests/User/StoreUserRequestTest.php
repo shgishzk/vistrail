@@ -9,6 +9,7 @@ use Tests\TestCase;
 
 class StoreUserRequestTest extends TestCase
 {
+    use RefreshDatabase;
     /**
      * Test validation passes with valid data.
      */

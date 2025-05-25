@@ -34,12 +34,35 @@
                     <td>{{ $user->email }}</td>
                     <td>{{ $user->created_at->format('Y-m-d H:i') }}</td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <a href="#" class="btn btn-sm btn-danger">
+                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $user->id }}">
                             <i class="cil-trash"></i>
-                        </a>
+                        </button>
+                        
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteModal{{ $user->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $user->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="deleteModalLabel{{ $user->id }}">@lang('Confirm Delete')</h5>
+                                        <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        @lang('Are you sure you want to delete user :name?', ['name' => $user->name])
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">@lang('Cancel')</button>
+                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">@lang('Delete')</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 @endforeach
