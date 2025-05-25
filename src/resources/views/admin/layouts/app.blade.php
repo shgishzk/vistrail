@@ -27,7 +27,7 @@
 
             <li class="nav-title">@lang('Territory')</li>
             <li class="nav-item">
-                <a class="nav-link" href="/areas">
+                <a class="nav-link {{ request()->routeIs('admin.areas*') ? 'active' : '' }}" href="{{ route('admin.areas') }}">
                     <i class="nav-icon cil-folder-open"></i> @lang('Areas')
                 </a>
             </li>
