@@ -27,7 +27,21 @@ $ make install
 $ make seed
 ```
 
-## ✅ 環境変数の設定（.env）
+## ✅ テストの実行
+
+テストを実行する前に、以下のコマンドで依存関係をインストールします。
+
+```bash
+$ make init-test
+```
+
+その後、テストを実行します。
+
+```bash
+$ make test
+```
+
+## 🚀 環境変数の設定（.env）
 
 ```env
 APP_ENV=production

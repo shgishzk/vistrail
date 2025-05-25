@@ -29,7 +29,21 @@ For development, you can use the following command to seed the database with tes
 $ make seed
 ```
 
-## ✅ Environment Variables (.env)
+## ✅ Testing
+
+Before running test, run the following command to ensure all dependencies are installed:
+
+```bash
+$ make init-test
+```
+
+Then, you can run the tests with:
+
+```bash
+$ make test
+```
+
+## 🚀 Environment Variables (.env)
 
 Set the following in your `.env` file:
 
