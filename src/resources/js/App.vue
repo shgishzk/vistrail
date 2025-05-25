@@ -10,7 +10,9 @@
     </template>
     <template v-else>
       <Login v-if="!isAuthenticated" @login-success="checkAuth" />
-      <MainMenu v-else />
+      <Layout v-else>
+        <MainMenu />
+      </Layout>
     </template>
   </div>
 </template>
@@ -19,12 +21,14 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Login from './components/auth/Login.vue';
+import Layout from './components/Layout.vue';
 import MainMenu from './components/MainMenu.vue';
 
 export default {
   name: 'App',
   components: {
     Login,
+    Layout,
     MainMenu
   },
   setup() {
