@@ -9,6 +9,7 @@ use App\Models\Area;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class VisitsController extends Controller
@@ -29,11 +30,26 @@ class VisitsController extends Controller
     /**
      * Show the form for creating a new visit.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
         [$users, $areas] = $this->getSuggestionLists();
 
-        return view('admin.visits.create', compact('users', 'areas'));
+        $preselectedAreaId = null;
+        $requestedAreaId = $request->query('area_id');
+
+        if (!empty($requestedAreaId)) {
+            $requestedAreaId = (int) $requestedAreaId;
+
+            if ($areas->contains('id', $requestedAreaId)) {
+                $preselectedAreaId = $requestedAreaId;
+            }
+        }
+
+        return view('admin.visits.create', [
+            'users' => $users,
+            'areas' => $areas,
+            'preselectedAreaId' => $preselectedAreaId,
+        ]);
     }
 
     /**
@@ -57,7 +73,12 @@ class VisitsController extends Controller
     {
         [$users, $areas] = $this->getSuggestionLists();
 
-        return view('admin.visits.edit', compact('visit', 'users', 'areas'));
+        return view('admin.visits.edit', [
+            'visit' => $visit,
+            'users' => $users,
+            'areas' => $areas,
+            'preselectedAreaId' => null,
+        ]);
     }
 
     /**

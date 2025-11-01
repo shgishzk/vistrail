@@ -38,9 +38,15 @@
                         <small class="text-muted d-block">{{ $visit->user?->email }}</small>
                     </td>
                     <td>
-                        {{ $visit->area?->number }}
-                        @if($visit->area?->name)
-                            <small class="text-muted d-block">{{ $visit->area->name }}</small>
+                        @if($visit->area)
+                            <a href="{{ route('admin.areas.edit', $visit->area) }}">
+                                {{ $visit->area->number }}
+                            </a>
+                            @if($visit->area->name)
+                                <small class="text-muted d-block">{{ $visit->area->name }}</small>
+                            @endif
+                        @else
+                            <span class="text-muted">@lang('Area not found')</span>
                         @endif
                     </td>
                     <td>{{ optional($visit->start_date)->format('Y-m-d') }}</td>

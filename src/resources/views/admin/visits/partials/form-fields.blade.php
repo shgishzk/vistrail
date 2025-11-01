@@ -1,6 +1,8 @@
 @php
+    $preselectedAreaId = $preselectedAreaId ?? null;
+
     $selectedUserId = old('user_id', optional($visit)->user_id);
-    $selectedAreaId = old('area_id', optional($visit)->area_id);
+    $selectedAreaId = old('area_id', optional($visit)->area_id ?? $preselectedAreaId);
 
     $selectedUser = $users->firstWhere('id', $selectedUserId);
     $selectedArea = $areas->firstWhere('id', $selectedAreaId);

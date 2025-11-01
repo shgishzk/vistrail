@@ -16,6 +16,7 @@
                 'visit' => $visit,
                 'users' => $users,
                 'areas' => $areas,
+                'preselectedAreaId' => null,
             ])
 
             <div class="d-flex justify-content-between">
