@@ -38,6 +38,95 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+
+            @if(!empty($googleMapsApiKey))
+                <div class="mb-3">
+                    <label class="form-label">@lang('Map Preview')</label>
+                    <div id="boundary-map" class="border rounded" style="height: 320px;"></div>
+                    <div id="boundary-map-error" class="form-text text-danger d-none">@lang('Failed to parse GeoJSON. Please check the format.')</div>
+                    <div class="form-text">@lang('Valid GeoJSON updates will be shown on the map automatically.')</div>
+                </div>
+
+                <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&callback=initBoundaryGeoJsonMap" async defer></script>
+                <script>
+                    function initBoundaryGeoJsonMap() {
+                        const textarea = document.getElementById('boundary_geojson');
+                        const mapElement = document.getElementById('boundary-map');
+                        const errorElement = document.getElementById('boundary-map-error');
+
+                        if (!textarea || !mapElement) {
+                            return;
+                        }
+
+                        const defaultCenter = { lat: 35.681236, lng: 139.767125 };
+                        const map = new google.maps.Map(mapElement, {
+                            center: defaultCenter,
+                            zoom: 10,
+                            mapTypeId: 'roadmap'
+                        });
+
+                        const clearDataLayer = () => {
+                            map.data.forEach(feature => {
+                                map.data.remove(feature);
+                            });
+                        };
+
+                        const processPoints = (geometry, callback, thisArg) => {
+                            if (!geometry) {
+                                return;
+                            }
+
+                            if (geometry instanceof google.maps.LatLng) {
+                                callback.call(thisArg, geometry);
+                            } else if (geometry instanceof google.maps.Data.Point) {
+                                callback.call(thisArg, geometry.get());
+                            } else {
+                                geometry.getArray().forEach(g => processPoints(g, callback, thisArg));
+                            }
+                        };
+
+                        const renderGeoJson = () => {
+                            clearTimeout(renderGeoJson.debounceId);
+                            renderGeoJson.debounceId = setTimeout(() => {
+                                clearDataLayer();
+                                if (errorElement) {
+                                    errorElement.classList.add('d-none');
+                                }
+
+                                const raw = textarea.value.trim();
+                                if (!raw) {
+                                    return;
+                                }
+
+                                try {
+                                    const geoJson = JSON.parse(raw);
+                                    const features = map.data.addGeoJson(geoJson);
+
+                                    if (features.length > 0) {
+                                        const bounds = new google.maps.LatLngBounds();
+                                        map.data.forEach(feature => {
+                                            processPoints(feature.getGeometry(), latLng => {
+                                                bounds.extend(latLng);
+                                            });
+                                        });
+
+                                        if (!bounds.isEmpty()) {
+                                            map.fitBounds(bounds);
+                                        }
+                                    }
+                                } catch (error) {
+                                    if (errorElement) {
+                                        errorElement.classList.remove('d-none');
+                                    }
+                                }
+                            }, 250);
+                        };
+
+                        textarea.addEventListener('input', renderGeoJson);
+                        renderGeoJson();
+                    }
+                </script>
+            @endif
             
             <div class="mb-3">
                 <label for="memo" class="form-label">@lang('Memo')</label>

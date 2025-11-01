@@ -48,7 +48,9 @@ class AreasController extends Controller
      */
     public function edit(Area $area): View
     {
-        return view('admin.areas.edit', compact('area'));
+        $googleMapsApiKey = config('services.google.maps_api_key');
+
+        return view('admin.areas.edit', compact('area', 'googleMapsApiKey'));
     }
 
     /**

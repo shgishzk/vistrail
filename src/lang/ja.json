@@ -28,6 +28,7 @@
     "Login": "ログイン",
     "Logout": "ログアウト",
     "Memo": "メモ",
+    "Map Preview": "地図プレビュー",
     "Name": "氏名",
     "Name Kana": "氏名（かな）",
     "Number": "番号",
@@ -49,5 +50,7 @@
     "Visits": "訪問記録",
     "Welcome to the Admin Dashboard": "オンライン区域の管理画面へようこそ。",
     "e.g. たなかたろう": "例）たなかたろう",
-    "e.g. 田中太郎": "例）田中太郎"
+    "e.g. 田中太郎": "例）田中太郎",
+    "Failed to parse GeoJSON. Please check the format.": "GeoJSONの解析に失敗しました。形式を確認してください。",
+    "Valid GeoJSON updates will be shown on the map automatically.": "有効なGeoJSONを入力すると地図が自動で更新されます。"
 }
