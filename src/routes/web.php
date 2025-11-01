@@ -27,5 +27,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('users/{user}/edit', [\App\Http\Controllers\Admin\UsersController::class, 'edit'])->name('users.edit');
         Route::put('users/{user}', [\App\Http\Controllers\Admin\UsersController::class, 'update'])->name('users.update');
         Route::delete('users/{user}', [\App\Http\Controllers\Admin\UsersController::class, 'destroy'])->name('users.destroy');
+        
+        Route::get('areas', [\App\Http\Controllers\Admin\AreasController::class, 'index'])->name('areas');
+        Route::get('areas/create', [\App\Http\Controllers\Admin\AreasController::class, 'create'])->name('areas.create');
+        Route::post('areas', [\App\Http\Controllers\Admin\AreasController::class, 'store'])->name('areas.store');
+        Route::get('areas/{area}/edit', [\App\Http\Controllers\Admin\AreasController::class, 'edit'])->name('areas.edit');
+        Route::put('areas/{area}', [\App\Http\Controllers\Admin\AreasController::class, 'update'])->name('areas.update');
+        Route::delete('areas/{area}', [\App\Http\Controllers\Admin\AreasController::class, 'destroy'])->name('areas.destroy');
     });
 });

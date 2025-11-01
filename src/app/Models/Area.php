@@ -10,8 +10,10 @@ class Area extends Model
     use HasFactory;
 
     protected $fillable = [
+        'number',
         'name',
         'boundary_geojson',
+        'memo',
     ];
 
     /**
