@@ -49,7 +49,7 @@
 
                 <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&callback=initBoundaryKmlMap" async defer></script>
                 <script>
-                    function initBoundaryKmlMap() {
+                    async function initBoundaryKmlMap() {
                         const textarea = document.getElementById('boundary_kml');
                         const mapElement = document.getElementById('boundary-map');
                         const errorElement = document.getElementById('boundary-map-error');
@@ -58,23 +58,134 @@
                             return;
                         }
 
+                        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
+
                         const defaultCenter = { lat: 35.024842, lng: 135.762106 };
                         const map = new google.maps.Map(mapElement, {
                             center: defaultCenter,
                             zoom: 10,
-                            mapTypeId: 'roadmap'
+                            mapId: 'roadmap'
                         });
 
                         const polygons = [];
                         const markers = [];
+                        let infoWindow = null;
+
+                        const parseKmlColor = (value, defaultColor, defaultOpacity) => {
+                            if (!value) {
+                                return { color: defaultColor, opacity: defaultOpacity };
+                            }
+
+                            let color = value.trim();
+                            if (color.startsWith('#')) {
+                                color = color.slice(1);
+                            }
+                            if (color.length === 6) {
+                                color = `ff${color}`;
+                            }
+                            if (color.length !== 8) {
+                                return { color: defaultColor, opacity: defaultOpacity };
+                            }
+
+                            const alpha = parseInt(color.slice(0, 2), 16);
+                            const blue = color.slice(2, 4);
+                            const green = color.slice(4, 6);
+                            const red = color.slice(6, 8);
+
+                            const opacity = Number.isNaN(alpha) ? defaultOpacity : Math.min(Math.max(alpha / 255, 0), 1);
+                            return {
+                                color: `#${red}${green}${blue}`,
+                                opacity,
+                            };
+                        };
+
+                        const parseCoordinates = (text) => {
+                            if (!text) {
+                                return [];
+                            }
+
+                            return text
+                                .trim()
+                                .split(/\s+/)
+                                .map(pair => {
+                                    const [lng, lat] = pair.split(',');
+                                    const parsedLng = parseFloat(lng);
+                                    const parsedLat = parseFloat(lat);
+                                    if (Number.isNaN(parsedLng) || Number.isNaN(parsedLat)) {
+                                        return null;
+                                    }
+                                    return { lat: parsedLat, lng: parsedLng };
+                                })
+                                .filter(Boolean);
+                        };
+
+                        const parseStyles = (xml) => {
+                            const styles = {};
+
+                            const registerStyle = (key, data) => {
+                                if (!key || !data) {
+                                    return;
+                                }
+
+                                const normalized = key.startsWith('#') ? key.slice(1) : key;
+                                const copy = { ...data };
+
+                                styles[`#${normalized}`] = copy;
+                                styles[normalized] = { ...copy };
+                            };
+
+                            Array.from(xml.getElementsByTagName('Style')).forEach(styleNode => {
+                                const id = styleNode.getAttribute('id');
+                                if (!id) {
+                                    return;
+                                }
+
+                                registerStyle(id, {
+                                    lineColor: styleNode.querySelector('LineStyle > color')?.textContent?.trim() || null,
+                                    lineWidth: styleNode.querySelector('LineStyle > width')?.textContent?.trim() || null,
+                                    polyColor: styleNode.querySelector('PolyStyle > color')?.textContent?.trim() || null,
+                                    polyFill: styleNode.querySelector('PolyStyle > fill')?.textContent?.trim() || null,
+                                    polyOutline: styleNode.querySelector('PolyStyle > outline')?.textContent?.trim() || null,
+                                    iconColor: styleNode.querySelector('IconStyle > color')?.textContent?.trim() || null,
+                                });
+                            });
+
+                            Array.from(xml.getElementsByTagName('StyleMap')).forEach(styleMapNode => {
+                                const id = styleMapNode.getAttribute('id');
+                                if (!id) {
+                                    return;
+                                }
+
+                                const normalPair = Array.from(styleMapNode.getElementsByTagName('Pair')).find(pair => {
+                                    return pair.querySelector('key')?.textContent?.trim() === 'normal';
+                                });
+
+                                const styleUrl = normalPair?.querySelector('styleUrl')?.textContent?.trim();
+                                if (!styleUrl) {
+                                    return;
+                                }
+
+                                const referenced = styles[styleUrl] || styles[styleUrl.replace(/^#/, '')];
+                                if (referenced) {
+                                    registerStyle(id, referenced);
+                                }
+                            });
+
+                            return styles;
+                        };
 
                         const renderKml = () => {
                             clearTimeout(renderKml.debounceId);
                             renderKml.debounceId = setTimeout(() => {
                                 polygons.forEach(polygon => polygon.setMap(null));
                                 polygons.length = 0;
-                                markers.forEach(marker => marker.setMap(null));
+                                markers.forEach(marker => {
+                                    marker.map = null;
+                                });
                                 markers.length = 0;
+                                if (infoWindow) {
+                                    infoWindow.close();
+                                }
                                 if (errorElement) {
                                     errorElement.classList.add('d-none');
                                 }
@@ -92,61 +203,95 @@
                                         throw new Error('invalid_xml');
                                     }
 
-                                    const coordinateNodes = Array.from(xml.getElementsByTagName('coordinates'));
+                                    const styles = parseStyles(xml);
+                                    const placemarks = Array.from(xml.getElementsByTagName('Placemark'));
                                     const bounds = new google.maps.LatLngBounds();
+                                    let geometryCount = 0;
 
-                                    coordinateNodes.forEach(node => {
-                                        const text = (node.textContent || '').trim();
-                                        if (!text) {
-                                            return;
-                                        }
+                                    placemarks.forEach(placemark => {
+                                        const styleUrl = placemark.querySelector('styleUrl')?.textContent?.trim();
+                                        const style = (styleUrl && (styles[styleUrl] || styles[styleUrl.replace(/^#/, '')])) || {};
+                                        const name = placemark.querySelector('name')?.textContent?.trim() || null;
 
-                                        const points = text
-                                            .split(/\s+/)
-                                            .map(pair => {
-                                                const [lng, lat] = pair.split(',');
-                                                const parsedLng = parseFloat(lng);
-                                                const parsedLat = parseFloat(lat);
-                                                if (Number.isNaN(parsedLng) || Number.isNaN(parsedLat)) {
-                                                    return null;
-                                                }
-                                                return { lat: parsedLat, lng: parsedLng };
-                                            })
-                                            .filter(Boolean);
+                                        Array.from(placemark.getElementsByTagName('Polygon')).forEach(polygonNode => {
+                                            const coordinateNode = polygonNode.querySelector('outerBoundaryIs coordinates') || polygonNode.querySelector('coordinates');
+                                            const points = parseCoordinates(coordinateNode?.textContent || '');
+                                            if (points.length < 3) {
+                                                return;
+                                            }
 
-                                        if (points.length === 1) {
-                                            const marker = new google.maps.Marker({
-                                                position: points[0],
-                                                map,
-                                                icon: {
-                                                    path: google.maps.SymbolPath.CIRCLE,
-                                                    scale: 5,
-                                                    fillColor: '#0288D1',
-                                                    fillOpacity: 0.9,
-                                                    strokeColor: '#ffffff',
-                                                    strokeWeight: 1,
-                                                },
-                                            });
-                                            markers.push(marker);
-                                            bounds.extend(points[0]);
-                                        } else if (points.length >= 3) {
                                             points.forEach(point => bounds.extend(point));
+
+                                            const strokeEnabled = style.polyOutline !== '0';
+                                            const fillEnabled = style.polyFill !== '0';
+                                            const stroke = parseKmlColor(style.lineColor, '#FF0000', strokeEnabled ? 0.8 : 0);
+                                            const fill = parseKmlColor(style.polyColor, '#FF0000', fillEnabled ? 0.15 : 0);
+                                            const strokeWeight = Number.parseFloat(style.lineWidth);
 
                                             const polygon = new google.maps.Polygon({
                                                 paths: points,
-                                                strokeColor: '#FF0000',
-                                                strokeOpacity: 0.8,
-                                                strokeWeight: 2,
-                                                fillColor: '#FF0000',
-                                                fillOpacity: 0.15,
+                                                strokeColor: stroke.color,
+                                                strokeOpacity: stroke.opacity,
+                                                strokeWeight: Number.isFinite(strokeWeight) ? strokeWeight : 2,
+                                                fillColor: fill.color,
+                                                fillOpacity: fill.opacity,
                                             });
 
                                             polygon.setMap(map);
                                             polygons.push(polygon);
-                                        }
+                                            geometryCount++;
+                                        });
+
+                                        Array.from(placemark.getElementsByTagName('Point')).forEach(pointNode => {
+                                            const coordinateNode = pointNode.querySelector('coordinates');
+                                            const points = parseCoordinates(coordinateNode?.textContent || '');
+                                            if (!points.length) {
+                                                return;
+                                            }
+
+                                            const markerStyle = parseKmlColor(style.iconColor || style.lineColor || style.polyColor, '#0288D1', 1);
+                                            const pin = new PinElement({
+                                                background: markerStyle.color,
+                                                borderColor: '#ffffff',
+                                                glyphColor: '#000000',
+                                                scale: 1.2,
+                                            });
+                                            pin.element.style.opacity = markerStyle.opacity;
+
+                                            const marker = new AdvancedMarkerElement({
+                                                map,
+                                                position: points[0],
+                                                content: pin.element,
+                                            });
+
+                                            markers.push(marker);
+                                            bounds.extend(points[0]);
+                                            geometryCount++;
+
+                                            const description = placemark.querySelector('description')?.textContent?.trim() || '';
+
+                                            if (name || description) {
+                                                marker.addListener('click', () => {
+                                                    if (!infoWindow) {
+                                                        infoWindow = new google.maps.InfoWindow();
+                                                    }
+
+                                                    const titleHtml = name ? `<div class="fw-bold mb-1" style="font-size:1.05rem;">${name}</div>` : '';
+                                                    const descriptionHtml = description
+                                                        ? `<div class="text-muted" style="white-space: pre-line;font-size:0.95rem;">${description}</div>`
+                                                        : '';
+
+                                                    infoWindow.setContent(`<div>${titleHtml}${descriptionHtml}</div>`);
+                                                    infoWindow.open({
+                                                        anchor: marker,
+                                                        map,
+                                                    });
+                                                });
+                                            }
+                                        });
                                     });
 
-                                    if (!polygons.length && !markers.length) {
+                                    if (!geometryCount) {
                                         throw new Error('no_coordinates');
                                     }
 
