@@ -91,7 +91,7 @@ class VisitsController extends Controller
     private function getSuggestionLists(): array
     {
         $users = User::orderBy('name')
-            ->get(['id', 'name', 'email']);
+            ->get(['id', 'name', 'name_kana', 'email']);
 
         $areas = Area::orderBy('number')
             ->get(['id', 'number', 'name']);

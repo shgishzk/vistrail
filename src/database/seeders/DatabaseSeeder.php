@@ -17,13 +17,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::factory()->create([
-            'name' => 'Test User',
+            'name' => 'テストユーザー',
+            'name_kana' => 'てすとゆーざー',
             'email' => 'user@example.com',
             'password' => Hash::make('Vistrail123!'),
         ]);
 
         Admin::factory()->create([
-            'name' => 'Test Admin',
+            'name' => '管理者',
             'email' => 'admin@example.com',
             'password' => Hash::make('Vistrail123!'),
         ]);

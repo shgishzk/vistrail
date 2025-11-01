@@ -5,9 +5,20 @@
     $selectedUser = $users->firstWhere('id', $selectedUserId);
     $selectedArea = $areas->firstWhere('id', $selectedAreaId);
 
-    $userDisplayValue = $selectedUser
-        ? $selectedUser->name . ' (' . $selectedUser->email . ')'
-        : '';
+    $formatUserDisplay = function ($user) {
+        if (!$user) {
+            return '';
+        }
+
+        $parts = [$user->name];
+        if (!empty($user->name_kana)) {
+            $parts[] = $user->name_kana;
+        }
+
+        return implode(' / ', $parts) . ' (' . $user->email . ')';
+    };
+
+    $userDisplayValue = $formatUserDisplay($selectedUser);
 
     $areaDisplayValue = $selectedArea
         ? $selectedArea->number . ($selectedArea->name ? ' - ' . $selectedArea->name : '')
@@ -31,7 +42,14 @@
     <input type="hidden" name="user_id" id="user_id" value="{{ $selectedUserId }}">
     <datalist id="users-list">
         @foreach($users as $user)
-            <option data-value="{{ $user->id }}" value="{{ $user->name }} ({{ $user->email }})"></option>
+            @php
+                $parts = [$user->name];
+                if (!empty($user->name_kana)) {
+                    $parts[] = $user->name_kana;
+                }
+                $optionValue = implode(' / ', $parts);
+            @endphp
+            <option data-value="{{ $user->id }}" value="{{ $optionValue }}"></option>
         @endforeach
     </datalist>
     @error('user_id')

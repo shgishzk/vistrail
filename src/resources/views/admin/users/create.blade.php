@@ -13,8 +13,17 @@
             
             <div class="mb-3">
                 <label for="name" class="form-label">@lang('Name')</label>
-                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="@lang('e.g. 田中太郎')" required>
                 @error('name')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="name_kana" class="form-label">@lang('Name Kana')</label>
+                <input type="text" class="form-control @error('name_kana') is-invalid @enderror" id="name_kana" name="name_kana" value="{{ old('name_kana') }}" placeholder="@lang('e.g. たなかたろう')">
+                <div class="form-text">@lang('Optional. Enter in Hiragana.')</div>
+                @error('name_kana')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
