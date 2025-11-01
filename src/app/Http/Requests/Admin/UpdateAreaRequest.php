@@ -32,8 +32,8 @@ class UpdateAreaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'number.required' => 'エリア番号は必須です。',
-            'number.unique' => 'このエリア番号は既に使用されています。',
+            'number.required' => '区域番号は必須です。',
+            'number.unique' => 'この区域番号は既に使用されています。',
             'boundary_kml.required' => '境界KMLは必須です。',
         ];
     }

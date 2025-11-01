@@ -40,7 +40,7 @@ class AreasController extends Controller
         $storeAreaService->execute($validated);
         
         return redirect()->route('admin.areas')
-            ->with('success', 'エリアが正常に作成されました。');
+            ->with('success', __('Area created successfully.'));
     }
     
     /**
@@ -64,7 +64,7 @@ class AreasController extends Controller
         $updateAreaService->execute($area, $validated);
         
         return redirect()->route('admin.areas')
-            ->with('success', 'エリアが正常に更新されました。');
+            ->with('success', __('Area updated successfully.'));
     }
 
     /**
@@ -76,6 +76,6 @@ class AreasController extends Controller
         $deleteAreaService->execute($area);
         
         return redirect()->route('admin.areas')
-            ->with('success', 'エリアが正常に削除されました。');
+            ->with('success', __('Area deleted successfully.'));
     }
 }

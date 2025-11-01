@@ -27,8 +27,8 @@ class StoreVisitRequest extends FormRequest
         return [
             'user_id.required' => 'ユーザーは必須です。',
             'user_id.exists' => '選択したユーザーが存在しません。',
-            'area_id.required' => 'エリアは必須です。',
-            'area_id.exists' => '選択したエリアが存在しません。',
+            'area_id.required' => '区域は必須です。',
+            'area_id.exists' => '選択した区域が存在しません。',
             'start_date.required' => '訪問開始日は必須です。',
             'start_date.date' => '訪問開始日は日付形式で入力してください。',
             'end_date.date' => '訪問終了日は日付形式で入力してください。',

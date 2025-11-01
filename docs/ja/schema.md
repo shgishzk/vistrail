@@ -102,9 +102,9 @@
 
 | カラム | 型 | NULL | キー | 既定値 | 説明 |
 | --- | --- | --- | --- | --- | --- |
-| id | unsignedBigInteger | NO | PK | auto increment | エリアID |
-| number | string(255) | NO |  |  | エリア番号 |
-| name | string(255) | YES |  |  | エリア名称 |
+| id | unsignedBigInteger | NO | PK | auto increment | 区域ID |
+| number | string(255) | NO |  |  | 区域番号 |
+| name | string(255) | YES |  |  | 区域名称 |
 | boundary_kml | longText | NO |  |  | 境界情報（KML） |
 | memo | text | YES |  |  | メモ |
 | created_at | timestamp | YES |  |  | 作成日時 |
@@ -116,7 +116,7 @@
 | --- | --- | --- | --- | --- | --- |
 | id | unsignedBigInteger | NO | PK | auto increment | 訪問ID |
 | user_id | unsignedBigInteger | NO | FK, INDEX |  | ユーザーID |
-| area_id | unsignedBigInteger | NO | FK, INDEX |  | エリアID |
+| area_id | unsignedBigInteger | NO | FK, INDEX |  | 区域ID |
 | start_date | date | NO |  |  | 訪問開始日 |
 | end_date | date | YES |  |  | 訪問終了日 |
 | memo | text | YES |  |  | メモ |
@@ -133,7 +133,7 @@
 | --- | --- | --- | --- | --- | --- |
 | id | unsignedBigInteger | NO | PK | auto increment | ピンID |
 | user_id | unsignedBigInteger | NO | FK, INDEX |  | ユーザーID |
-| area_id | unsignedBigInteger | NO | FK, INDEX |  | エリアID |
+| area_id | unsignedBigInteger | NO | FK, INDEX |  | 区域ID |
 | visit_id | unsignedBigInteger | YES | FK |  | 紐付く訪問ID |
 | lat | decimal(10, 7) | NO |  |  | 緯度 |
 | lng | decimal(10, 7) | NO |  |  | 経度 |

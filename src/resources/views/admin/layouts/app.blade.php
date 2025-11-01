@@ -18,14 +18,14 @@
                 </a>
             </li>
 
-            <li class="nav-title">@lang('Users')</li>
+            <li class="nav-title">@lang('Users Management')</li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}" href="{{ route('admin.users') }}">
                     <i class="nav-icon cil-user"></i> @lang('Users')
                 </a>
             </li>
 
-            <li class="nav-title">@lang('Territory')</li>
+            <li class="nav-title">@lang('Territory Management')</li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.areas*') ? 'active' : '' }}" href="{{ route('admin.areas') }}">
                     <i class="nav-icon cil-folder-open"></i> @lang('Areas')
@@ -37,7 +37,7 @@
                 </a>
             </li>
 
-            <li class="nav-title">@lang('Account')</li>
+            <li class="nav-title">@lang('Account Management')</li>
             <li class="nav-item">
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf

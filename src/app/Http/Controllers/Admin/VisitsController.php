@@ -63,7 +63,7 @@ class VisitsController extends Controller
         $storeVisitService->execute($validated);
 
         return redirect()->route('admin.visits')
-            ->with('success', '訪問記録を作成しました。');
+            ->with('success', __('Visit created successfully.'));
     }
 
     /**
@@ -92,7 +92,7 @@ class VisitsController extends Controller
         $updateVisitService->execute($visit, $validated);
 
         return redirect()->route('admin.visits')
-            ->with('success', '訪問記録を更新しました。');
+            ->with('success', __('Visit updated successfully.'));
     }
 
     /**
@@ -104,7 +104,7 @@ class VisitsController extends Controller
         $deleteVisitService->execute($visit);
 
         return redirect()->route('admin.visits')
-            ->with('success', '訪問記録を削除しました。');
+            ->with('success', __('Visit deleted successfully.'));
     }
 
     /**
