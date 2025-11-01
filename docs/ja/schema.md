@@ -106,6 +106,8 @@
 | number | string(255) | NO |  |  | エリア番号 |
 | name | string(255) | YES |  |  | エリア名称 |
 | boundary_geojson | longText | NO |  |  | 境界情報（GeoJSON） |
+| center_lat | decimal(10, 7) | YES |  |  | 中心緯度 |
+| center_lng | decimal(10, 7) | YES |  |  | 中心経度 |
 | memo | text | YES |  |  | メモ |
 | created_at | timestamp | YES |  |  | 作成日時 |
 | updated_at | timestamp | YES |  |  | 更新日時 |
