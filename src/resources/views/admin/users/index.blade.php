@@ -1,5 +1,7 @@
 @extends('admin.layouts.app')
 
+@section('title', __('Users'))
+
 @section('content')
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">

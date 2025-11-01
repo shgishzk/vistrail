@@ -3,7 +3,7 @@
     <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 shadow-md">
       <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
         <a href="/" class="flex items-center">
-          <span class="self-center text-xl font-semibold whitespace-nowrap">Vistrail</span>
+          <span class="self-center text-xl font-semibold whitespace-nowrap">管理画面</span>
         </a>
         <div class="flex items-center lg:order-2">
           <button 

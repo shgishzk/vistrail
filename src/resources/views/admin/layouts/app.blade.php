@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Vistrail Admin')</title>
+    <title>@yield('title', __('Admin Dashboard'))</title>
     @vite(['resources/js/admin.js', 'resources/css/admin.css'])
 </head>
 <body class="d-flex bg-light">
     <div class="sidebar sidebar-lg sidebar-dark sidebar-fixed sidebar-self-hiding-md border-end px-xl-4 docs-sidebar elevation-0" id="sidebar">
         <div class="sidebar-header border-bottom">
-            <div class="sidebar-brand">Vistrail Admin</div>
+            <div class="sidebar-brand">@lang('Online Territory') @lang('Admin')</div>
         </div>
         <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="">
             <li class="nav-item">
