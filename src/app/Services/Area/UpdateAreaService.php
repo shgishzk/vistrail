@@ -3,7 +3,7 @@
 namespace App\Services\Area;
 
 use App\Models\Area;
-use App\Support\GeoJsonCenterCalculator;
+use App\Support\KmlCenterCalculator;
 
 class UpdateAreaService
 {
@@ -12,8 +12,8 @@ class UpdateAreaService
      */
     public function execute(Area $area, array $data): Area
     {
-        if (!empty($data['boundary_geojson'])) {
-            $center = GeoJsonCenterCalculator::calculate($data['boundary_geojson']);
+        if (!empty($data['boundary_kml'])) {
+            $center = KmlCenterCalculator::calculate($data['boundary_kml']);
             $data['center_lat'] = $center['lat'] ?? null;
             $data['center_lng'] = $center['lng'] ?? null;
         } elseif (!array_key_exists('center_lat', $data) && !array_key_exists('center_lng', $data)) {

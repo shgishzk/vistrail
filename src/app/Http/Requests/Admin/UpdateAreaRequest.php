@@ -24,7 +24,7 @@ class UpdateAreaRequest extends FormRequest
                 Rule::unique('areas')->ignore($areaId)
             ],
             'name' => 'nullable|string|max:255',
-            'boundary_geojson' => 'required|string',
+            'boundary_kml' => 'required|string',
             'memo' => 'nullable|string',
         ];
     }
@@ -34,7 +34,7 @@ class UpdateAreaRequest extends FormRequest
         return [
             'number.required' => 'エリア番号は必須です。',
             'number.unique' => 'このエリア番号は既に使用されています。',
-            'boundary_geojson.required' => '境界GeoJSONは必須です。',
+            'boundary_kml.required' => '境界KMLは必須です。',
         ];
     }
 }

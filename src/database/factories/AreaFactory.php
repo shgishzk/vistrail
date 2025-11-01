@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Area;
-use App\Support\GeoJsonCenterCalculator;
+use App\Support\KmlCenterCalculator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,26 +20,38 @@ class AreaFactory extends Factory
      */
     public function definition(): array
     {
-        $polygon = [
-            'type' => 'Polygon',
-            'coordinates' => [
-                [
-                    [fake()->longitude(), fake()->latitude()],
-                    [fake()->longitude(), fake()->latitude()],
-                    [fake()->longitude(), fake()->latitude()],
-                    [fake()->longitude(), fake()->latitude()],
-                    [fake()->longitude(), fake()->latitude()],
-                ],
-            ],
-        ];
+        $coordinates = [];
 
-        $boundary = json_encode($polygon);
-        $center = GeoJsonCenterCalculator::calculate($boundary);
+        for ($i = 0; $i < 5; $i++) {
+            $coordinates[] = fake()->longitude() . ',' . fake()->latitude() . ',0';
+        }
+
+        $coordinateString = implode(' ', $coordinates);
+
+        $boundary = <<<KML
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Placemark>
+    <name>Area {$this->sequence}</name>
+    <Polygon>
+      <outerBoundaryIs>
+        <LinearRing>
+          <coordinates>
+            {$coordinateString}
+          </coordinates>
+        </LinearRing>
+      </outerBoundaryIs>
+    </Polygon>
+  </Placemark>
+</kml>
+KML;
+
+        $center = KmlCenterCalculator::calculate($boundary);
 
         return [
             'number' => $this->sequence++,
             'name' => fake()->city(),
-            'boundary_geojson' => $boundary,
+            'boundary_kml' => $boundary,
             'center_lat' => $center['lat'] ?? null,
             'center_lng' => $center['lng'] ?? null,
         ];

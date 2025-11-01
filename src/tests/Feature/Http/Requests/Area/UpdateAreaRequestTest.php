@@ -31,7 +31,7 @@ class UpdateAreaRequestTest extends TestCase
         $validator = Validator::make([
             'number' => 'B456',
             'name' => 'Updated Area',
-            'boundary_geojson' => '{"type":"Polygon","coordinates":[[[139.7671,35.6812],[139.7681,35.6802],[139.7661,35.6792],[139.7671,35.6812]]]}',
+            'boundary_kml' => $this->sampleKml(),
             'memo' => 'Updated memo',
         ], $request->rules());
         
@@ -57,7 +57,7 @@ class UpdateAreaRequestTest extends TestCase
         $validator = Validator::make([
             'number' => 'A123', // Same number
             'name' => 'Updated Area',
-            'boundary_geojson' => '{"type":"Polygon","coordinates":[[[139.7671,35.6812],[139.7681,35.6802],[139.7661,35.6792],[139.7671,35.6812]]]}',
+            'boundary_kml' => $this->sampleKml(),
         ], $request->rules());
         
         $this->assertTrue($validator->passes());
@@ -83,7 +83,7 @@ class UpdateAreaRequestTest extends TestCase
         
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('number', $validator->errors()->toArray());
-        $this->assertArrayHasKey('boundary_geojson', $validator->errors()->toArray());
+        $this->assertArrayHasKey('boundary_kml', $validator->errors()->toArray());
     }
     
     /**
@@ -109,10 +109,30 @@ class UpdateAreaRequestTest extends TestCase
         $validator = Validator::make([
             'number' => 'A123', // Already used by area1
             'name' => 'Updated Area',
-            'boundary_geojson' => '{"type":"Polygon","coordinates":[[[139.7671,35.6812],[139.7681,35.6802],[139.7661,35.6792],[139.7671,35.6812]]]}',
+            'boundary_kml' => $this->sampleKml(),
         ], $request->rules());
         
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('number', $validator->errors()->toArray());
+    }
+
+    private function sampleKml(): string
+    {
+        return <<<KML
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Placemark>
+    <Polygon>
+      <outerBoundaryIs>
+        <LinearRing>
+          <coordinates>
+            139.7671,35.6812,0 139.7681,35.6802,0 139.7661,35.6792,0 139.7671,35.6812,0
+          </coordinates>
+        </LinearRing>
+      </outerBoundaryIs>
+    </Polygon>
+  </Placemark>
+</kml>
+KML;
     }
 }

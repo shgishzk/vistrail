@@ -105,7 +105,7 @@
 | id | unsignedBigInteger | NO | PK | auto increment | エリアID |
 | number | string(255) | NO |  |  | エリア番号 |
 | name | string(255) | YES |  |  | エリア名称 |
-| boundary_geojson | longText | NO |  |  | 境界情報（GeoJSON） |
+| boundary_kml | longText | NO |  |  | 境界情報（KML） |
 | center_lat | decimal(10, 7) | YES |  |  | 中心緯度 |
 | center_lng | decimal(10, 7) | YES |  |  | 中心経度 |
 | memo | text | YES |  |  | メモ |

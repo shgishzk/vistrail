@@ -28,12 +28,12 @@
             </div>
             
             <div class="mb-3">
-                <label for="boundary_geojson" class="form-label">@lang('Boundary GeoJSON')</label>
-                <textarea class="form-control @error('boundary_geojson') is-invalid @enderror" id="boundary_geojson" name="boundary_geojson" rows="8" required>{{ old('boundary_geojson') }}</textarea>
+                <label for="boundary_kml" class="form-label">@lang('Boundary KML')</label>
+                <textarea class="form-control @error('boundary_kml') is-invalid @enderror" id="boundary_kml" name="boundary_kml" rows="8" required>{{ old('boundary_kml') }}</textarea>
                 <div class="form-text">
                     @lang('Paste KML data from Google Maps here.')
                 </div>
-                @error('boundary_geojson')
+                @error('boundary_kml')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
