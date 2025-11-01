@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Area;
-use App\Support\KmlCenterCalculator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -46,14 +45,10 @@ class AreaFactory extends Factory
 </kml>
 KML;
 
-        $center = KmlCenterCalculator::calculate($boundary);
-
         return [
             'number' => $this->sequence++,
             'name' => fake()->city(),
             'boundary_kml' => $boundary,
-            'center_lat' => $center['lat'] ?? null,
-            'center_lng' => $center['lng'] ?? null,
         ];
     }
 }

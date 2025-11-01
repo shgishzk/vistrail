@@ -13,14 +13,7 @@ class Area extends Model
         'number',
         'name',
         'boundary_kml',
-        'center_lat',
-        'center_lng',
         'memo',
-    ];
-
-    protected $casts = [
-        'center_lat' => 'float',
-        'center_lng' => 'float',
     ];
 
     /**
