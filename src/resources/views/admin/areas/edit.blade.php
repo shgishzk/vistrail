@@ -29,6 +29,12 @@
             </div>
             
             <div class="mb-3">
+                <label for="boundary_kml_upload" class="form-label">@lang('Upload KML')</label>
+                <input type="file" class="form-control" id="boundary_kml_upload" accept=".kml">
+                <div class="form-text">@lang('Select a .kml file to load into the editor.')</div>
+            </div>
+
+            <div class="mb-3">
                 <label for="boundary_kml" class="form-label">@lang('Boundary KML')</label>
                 <textarea class="form-control @error('boundary_kml') is-invalid @enderror" id="boundary_kml" name="boundary_kml" rows="8" required>{{ old('boundary_kml', $area->boundary_kml) }}</textarea>
                 <div class="form-text">
@@ -51,6 +57,7 @@
                 <script>
                     async function initBoundaryKmlMap() {
                         const textarea = document.getElementById('boundary_kml');
+                        const fileInput = document.getElementById('boundary_kml_upload');
                         const mapElement = document.getElementById('boundary-map');
                         const errorElement = document.getElementById('boundary-map-error');
 
@@ -307,6 +314,36 @@
                         };
 
                         textarea.addEventListener('input', renderKml);
+                        if (fileInput) {
+                            fileInput.addEventListener('change', (event) => {
+                                const file = event.target.files?.[0];
+                                if (!file) {
+                                    return;
+                                }
+
+                                if (!file.name.toLowerCase().endsWith('.kml')) {
+                                    if (errorElement) {
+                                        errorElement.textContent = @json(__('Only .kml files can be uploaded.'));
+                                        errorElement.classList.remove('d-none');
+                                    }
+                                    event.target.value = '';
+                                    return;
+                                }
+
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    textarea.value = e.target?.result || '';
+                                    renderKml();
+                                };
+                                reader.onerror = () => {
+                                    if (errorElement) {
+                                        errorElement.textContent = @json(__('Failed to read the selected file.'));
+                                        errorElement.classList.remove('d-none');
+                                    }
+                                };
+                                reader.readAsText(file);
+                            });
+                        }
                         renderKml();
                     }
                 </script>
