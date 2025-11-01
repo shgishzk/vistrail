@@ -39,6 +39,11 @@
 
             <li class="nav-title">@lang('Account Management')</li>
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.admins*') ? 'active' : '' }}" href="{{ route('admin.admins') }}">
+                    <i class="nav-icon cil-people"></i> @lang('Admins')
+                </a>
+            </li>
+            <li class="nav-item">
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
                     <button type="submit" class="nav-link border-0 bg-transparent text-start w-100">

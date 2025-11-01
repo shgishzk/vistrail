@@ -49,5 +49,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('visits/{visit}/edit', [\App\Http\Controllers\Admin\VisitsController::class, 'edit'])->name('visits.edit');
         Route::put('visits/{visit}', [\App\Http\Controllers\Admin\VisitsController::class, 'update'])->name('visits.update');
         Route::delete('visits/{visit}', [\App\Http\Controllers\Admin\VisitsController::class, 'destroy'])->name('visits.destroy');
+
+        Route::get('admins', [\App\Http\Controllers\Admin\AdminsController::class, 'index'])->name('admins');
+        Route::get('admins/create', [\App\Http\Controllers\Admin\AdminsController::class, 'create'])->name('admins.create');
+        Route::post('admins', [\App\Http\Controllers\Admin\AdminsController::class, 'store'])->name('admins.store');
+        Route::get('admins/{admin}/edit', [\App\Http\Controllers\Admin\AdminsController::class, 'edit'])->name('admins.edit');
+        Route::put('admins/{admin}', [\App\Http\Controllers\Admin\AdminsController::class, 'update'])->name('admins.update');
+        Route::delete('admins/{admin}', [\App\Http\Controllers\Admin\AdminsController::class, 'destroy'])->name('admins.destroy');
     });
 });
