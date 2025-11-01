@@ -41,5 +41,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('areas/{area}/edit', [\App\Http\Controllers\Admin\AreasController::class, 'edit'])->name('areas.edit');
         Route::put('areas/{area}', [\App\Http\Controllers\Admin\AreasController::class, 'update'])->name('areas.update');
         Route::delete('areas/{area}', [\App\Http\Controllers\Admin\AreasController::class, 'destroy'])->name('areas.destroy');
+
+        Route::get('visits', [\App\Http\Controllers\Admin\VisitsController::class, 'index'])->name('visits');
+        Route::get('visits/create', [\App\Http\Controllers\Admin\VisitsController::class, 'create'])->name('visits.create');
+        Route::post('visits', [\App\Http\Controllers\Admin\VisitsController::class, 'store'])->name('visits.store');
+        Route::get('visits/{visit}/edit', [\App\Http\Controllers\Admin\VisitsController::class, 'edit'])->name('visits.edit');
+        Route::put('visits/{visit}', [\App\Http\Controllers\Admin\VisitsController::class, 'update'])->name('visits.update');
+        Route::delete('visits/{visit}', [\App\Http\Controllers\Admin\VisitsController::class, 'destroy'])->name('visits.destroy');
     });
 });

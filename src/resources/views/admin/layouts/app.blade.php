@@ -32,7 +32,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/visits">
+                <a class="nav-link {{ request()->routeIs('admin.visits*') ? 'active' : '' }}" href="{{ route('admin.visits') }}">
                     <i class="nav-icon cil-briefcase"></i> @lang('Visits')
                 </a>
             </li>
