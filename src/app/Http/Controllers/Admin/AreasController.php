@@ -63,7 +63,7 @@ class AreasController extends Controller
         $updateAreaService = new \App\Services\Area\UpdateAreaService();
         $updateAreaService->execute($area, $validated);
         
-        return redirect()->route('admin.areas')
+        return redirect()->route('admin.areas.edit', $area)
             ->with('success', __('Area updated successfully.'));
     }
 

@@ -22,7 +22,7 @@
             <thead>
                 <tr>
                     <th>@lang('Number')</th>
-                    <th>@lang('Name')</th>
+                    <th>@lang('Area Name')</th>
                     <th>@lang('Memo')</th>
                     <th>@lang('Created At')</th>
                     <th>@lang('Actions')</th>
@@ -32,7 +32,11 @@
                 @foreach($areas as $area)
                 <tr>
                     <td>{{ $area->number }}</td>
-                    <td>{{ $area->name }}</td>
+                    <td>
+                        <a href="{{ route('admin.areas.edit', $area) }}">
+                            {{ $area->name }}
+                        </a>
+                    </td>
                     <td>{{ Str::limit($area->memo, 50) }}</td>
                     <td>{{ $area->created_at->format('Y-m-d H:i') }}</td>
                     <td>

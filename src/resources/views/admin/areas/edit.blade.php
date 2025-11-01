@@ -4,10 +4,20 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <strong>@lang('Edit Area')</strong>
+        <a href="{{ route('admin.areas') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="cil-arrow-left"></i> @lang('Back to Areas')
+        </a>
     </div>
     <div class="card-body">
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <form action="{{ route('admin.areas.update', $area) }}" method="POST">
             @csrf
             @method('PUT')
