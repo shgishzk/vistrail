@@ -29,6 +29,18 @@ For development, you can use the following command to seed the database with tes
 $ make seed
 ```
 
+Access the following URLs to verify that the application is running:
+
+### User Screen
+http://localhost:11111/
+- Test User ID: `user@example.com`
+- Test Password: `Vistrail123!`
+
+### Admin Screen
+http://localhost:11111/admin/login
+- Admin User ID: `admin@example.com`
+- Admin Password: `VistrailAdmin123!`
+
 ## ✅ Testing
 
 Before running test, run the following command to ensure all dependencies are installed:

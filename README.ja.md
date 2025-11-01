@@ -27,6 +27,21 @@ $ make install
 $ make seed
 ```
 
+以下のURLへアクセスして、アプリケーションが動作していることを確認してください。
+
+### ユーザ画面
+
+http://localhost:11111/
+
+- テストユーザID: `user@example.com`
+- テストパスワード: `Vistrail123!`
+
+### 管理画面
+http://localhost:11111/admin/login
+
+- 管理者ユーザID: `admin@example.com`
+- 管理者パスワード: `VistrailAdmin123!`
+
 ## ✅ テストの実行
 
 テストを実行する前に、以下のコマンドで依存関係をインストールします。
