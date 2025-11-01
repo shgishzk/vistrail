@@ -8,3 +8,10 @@
     will-change:auto;
     transition:padding .15s;
 }
+
+.btn + .btn,
+.btn + form .btn,
+form .btn + .btn,
+form .btn + form .btn {
+    margin-inline-start: 0.4rem;
+}

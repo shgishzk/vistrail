@@ -51,10 +51,10 @@
                     <td>{{ Str::limit($visit->memo, 50) }}</td>
                     <td>{{ $visit->created_at->format('Y-m-d H:i') }}</td>
                     <td>
-                        <a href="{{ route('admin.visits.edit', $visit) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.visits.edit', $visit) }}" class="btn btn-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $visit->id }}">
+                        <button type="button" class="btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $visit->id }}">
                             <i class="cil-trash"></i>
                         </button>
 

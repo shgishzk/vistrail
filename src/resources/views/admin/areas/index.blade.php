@@ -36,13 +36,13 @@
                     <td>{{ Str::limit($area->memo, 50) }}</td>
                     <td>{{ $area->created_at->format('Y-m-d H:i') }}</td>
                     <td>
-                        <a href="{{ route('admin.areas.visits', $area) }}" class="btn btn-sm btn-outline-primary" title="@lang('View Visits')">
+                        <a href="{{ route('admin.areas.visits', $area) }}" class="btn btn-outline-primary" title="@lang('View Visits')">
                             <i class="cil-briefcase"></i>
                         </a>
-                        <a href="{{ route('admin.areas.edit', $area) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.areas.edit', $area) }}" class="btn btn-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $area->id }}">
+                        <button type="button" class="btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $area->id }}">
                             <i class="cil-trash"></i>
                         </button>
                         
