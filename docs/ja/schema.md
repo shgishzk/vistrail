@@ -8,6 +8,7 @@
 | --- | --- | --- | --- | --- | --- |
 | id | unsignedBigInteger | NO | PK | auto increment | ユーザーID |
 | name | string(255) | NO |  |  | 氏名 |
+| name_kana | string(255) | YES |  |  | 氏名かな |
 | email | string(255) | NO | UNIQUE |  | メールアドレス |
 | email_verified_at | timestamp | YES |  |  | メールアドレス検証日時 |
 | password | string(255) | NO |  |  | ハッシュ化済みパスワード |
