@@ -19,7 +19,8 @@ class VisitsController extends Controller
     public function index(): View
     {
         $visits = Visit::with(['user', 'area'])
-            ->orderByDesc('start_date')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(15);
 
         return view('admin.visits.index', compact('visits'));

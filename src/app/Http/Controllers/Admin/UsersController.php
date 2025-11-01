@@ -18,7 +18,9 @@ class UsersController extends Controller
      */
     public function index(): View
     {
-        $users = User::paginate(15);
+        $users = User::orderByRaw('COALESCE(name_kana, name)')
+            ->orderBy('name')
+            ->paginate(15);
         
         return view('admin.users.index', compact('users'));
     }
