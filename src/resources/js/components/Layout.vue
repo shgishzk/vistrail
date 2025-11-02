@@ -32,17 +32,18 @@
           id="mobile-menu"
         >
           <ul class="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
-            <li>
-              <a href="#" class="block py-2 pr-4 pl-3 text-white rounded bg-indigo-600 lg:bg-transparent lg:text-indigo-600 lg:p-0">ホーム</a>
-            </li>
-            <li>
-              <a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-indigo-600 lg:p-0">メニュー1</a>
-            </li>
-            <li>
-              <a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-indigo-600 lg:p-0">メニュー2</a>
-            </li>
-            <li>
-              <a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-indigo-600 lg:p-0">メニュー3</a>
+            <li v-for="item in navigation" :key="item.href" class="lg:border-0">
+              <a
+                :href="item.href"
+                :class="[
+                  'block py-2 pr-4 pl-3 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:p-0',
+                  isActive(item.href)
+                    ? 'text-white rounded bg-indigo-600 lg:bg-transparent lg:text-indigo-600'
+                    : 'text-gray-700'
+                ]"
+              >
+                {{ item.name }}
+              </a>
             </li>
           </ul>
         </div>
@@ -70,6 +71,12 @@ export default {
   setup() {
     const user = ref(null);
     const isMobileMenuOpen = ref(false);
+    const navigation = [
+      { name: '区域', href: '/areas' },
+      { name: 'マンション', href: '/buildings' },
+      { name: 'グループ', href: '/groups' },
+    ];
+    const currentPath = ref(window.location.pathname || '/');
     
     const fetchUser = async () => {
       try {
@@ -82,6 +89,10 @@ export default {
     
     const toggleMobileMenu = () => {
       isMobileMenuOpen.value = !isMobileMenuOpen.value;
+    };
+    
+    const isActive = (href) => {
+      return currentPath.value === href || currentPath.value.startsWith(`${href}/`);
     };
     
     const logout = async () => {
@@ -101,7 +112,9 @@ export default {
       user,
       isMobileMenuOpen,
       toggleMobileMenu,
-      logout
+      logout,
+      navigation,
+      isActive
     };
   }
 };
