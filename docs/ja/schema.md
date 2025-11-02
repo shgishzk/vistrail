@@ -160,6 +160,32 @@
 | created_at | timestamp | YES |  |  | 作成日時 |
 | updated_at | timestamp | YES |  |  | 更新日時 |
 
+## buildings
+
+| カラム | 型 | NULL | キー | 既定値 | 説明 |
+| --- | --- | --- | --- | --- | --- |
+| id | unsignedBigInteger | NO | PK | auto increment | 建物ID |
+| name | string(200) | NO |  |  | 建物名称 |
+| self_lock_type | unsignedInteger | NO |  |  | 自己ロック種別 |
+| is_public | unsignedTinyInteger | NO |  | 0 | 公開フラグ |
+| lat | decimal(10, 7) | NO |  |  | 緯度 |
+| lng | decimal(10, 7) | NO |  |  | 経度 |
+| url | string(255) | NO |  |  | 元URL |
+| memo | text | YES |  |  | メモ |
+| created_at | timestamp | YES |  |  | 作成日時 |
+| updated_at | timestamp | YES |  |  | 更新日時 |
+
+## rooms
+
+| カラム | 型 | NULL | キー | 既定値 | 説明 |
+| --- | --- | --- | --- | --- | --- |
+| id | unsignedBigInteger | NO | PK | auto increment | 部屋ID |
+| building_id | unsignedBigInteger | NO | FK |  | 建物ID |
+| number | string(10) | NO |  |  | 部屋番号 |
+| status | string(32) | NO |  |  | ステータス |
+| created_at | timestamp | YES |  |  | 作成日時 |
+| updated_at | timestamp | YES |  |  | 更新日時 |
+
 ---
 
 最終更新日時: 2025-11-01

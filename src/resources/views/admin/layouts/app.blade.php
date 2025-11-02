@@ -37,6 +37,18 @@
                 </a>
             </li>
 
+            <li class="nav-title">@lang('Building Management')</li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.buildings*') ? 'active' : '' }}" href="{{ route('admin.buildings') }}">
+                    <i class="nav-icon cil-home"></i> @lang('Buildings')
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.rooms*') ? 'active' : '' }}" href="{{ route('admin.rooms') }}">
+                    <i class="nav-icon cil-list"></i> @lang('Rooms')
+                </a>
+            </li>
+
             <li class="nav-title">@lang('Account Management')</li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.admins*') ? 'active' : '' }}" href="{{ route('admin.admins') }}">

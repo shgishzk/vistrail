@@ -50,6 +50,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('visits/{visit}', [\App\Http\Controllers\Admin\VisitsController::class, 'update'])->name('visits.update');
         Route::delete('visits/{visit}', [\App\Http\Controllers\Admin\VisitsController::class, 'destroy'])->name('visits.destroy');
 
+        Route::get('buildings', [\App\Http\Controllers\Admin\BuildingsController::class, 'index'])->name('buildings');
+        Route::get('buildings/create', [\App\Http\Controllers\Admin\BuildingsController::class, 'create'])->name('buildings.create');
+        Route::post('buildings', [\App\Http\Controllers\Admin\BuildingsController::class, 'store'])->name('buildings.store');
+        Route::get('buildings/{building}/edit', [\App\Http\Controllers\Admin\BuildingsController::class, 'edit'])->name('buildings.edit');
+        Route::put('buildings/{building}', [\App\Http\Controllers\Admin\BuildingsController::class, 'update'])->name('buildings.update');
+        Route::delete('buildings/{building}', [\App\Http\Controllers\Admin\BuildingsController::class, 'destroy'])->name('buildings.destroy');
+        Route::get('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingsController::class, 'rooms'])->name('buildings.rooms');
+        Route::put('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'update'])->name('buildings.rooms.update');
+
+        Route::get('rooms', [\App\Http\Controllers\Admin\RoomsController::class, 'index'])->name('rooms');
+        Route::get('rooms/create', [\App\Http\Controllers\Admin\RoomsController::class, 'create'])->name('rooms.create');
+        Route::post('rooms', [\App\Http\Controllers\Admin\RoomsController::class, 'store'])->name('rooms.store');
+        Route::get('rooms/{room}/edit', [\App\Http\Controllers\Admin\RoomsController::class, 'edit'])->name('rooms.edit');
+        Route::put('rooms/{room}', [\App\Http\Controllers\Admin\RoomsController::class, 'update'])->name('rooms.update');
+        Route::delete('rooms/{room}', [\App\Http\Controllers\Admin\RoomsController::class, 'destroy'])->name('rooms.destroy');
+
         Route::get('admins', [\App\Http\Controllers\Admin\AdminsController::class, 'index'])->name('admins');
         Route::get('admins/create', [\App\Http\Controllers\Admin\AdminsController::class, 'create'])->name('admins.create');
         Route::post('admins', [\App\Http\Controllers\Admin\AdminsController::class, 'store'])->name('admins.store');
