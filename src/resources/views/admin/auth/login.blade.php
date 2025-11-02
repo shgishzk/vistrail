@@ -13,7 +13,7 @@
                 <div class="card-group">
                     <div class="card p-4">
                         <div class="card-body">
-                            <h1>@lang('Admin Login')</h1>
+                            <h3>@lang('Admin Login')</h3>
                             <p class="text-medium-emphasis">@lang('Sign In to your account')</p>
                             
                             <form method="POST" action="{{ route('admin.login') }}">

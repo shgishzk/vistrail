@@ -46,6 +46,8 @@ export default {
 
     onMounted(() => {
       checkAuth();
+      // Preline: Add code that reinitializes the components every time when app is mounted
+      // setTimeout(() => window.HSStaticMethods.autoInit(), 100);
     });
 
     return {
