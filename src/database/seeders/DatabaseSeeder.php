@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Admin;
 use App\Models\Area;
 use App\Models\Building;
+use App\Models\Group;
 use App\Models\Room;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -33,6 +34,7 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->count(10)->create();
         Area::factory()->count(10)->create();
+        Group::factory()->count(4)->create();
         Building::factory()
             ->count(100)
             ->has(Room::factory()->count(20))

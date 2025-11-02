@@ -61,6 +61,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'store'])->name('buildings.rooms.store');
         Route::put('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'update'])->name('buildings.rooms.update');
 
+        Route::get('groups', [\App\Http\Controllers\Admin\GroupsController::class, 'index'])->name('groups');
+        Route::get('groups/create', [\App\Http\Controllers\Admin\GroupsController::class, 'create'])->name('groups.create');
+        Route::post('groups', [\App\Http\Controllers\Admin\GroupsController::class, 'store'])->name('groups.store');
+        Route::get('groups/{group}/edit', [\App\Http\Controllers\Admin\GroupsController::class, 'edit'])->name('groups.edit');
+        Route::put('groups/{group}', [\App\Http\Controllers\Admin\GroupsController::class, 'update'])->name('groups.update');
+        Route::delete('groups/{group}', [\App\Http\Controllers\Admin\GroupsController::class, 'destroy'])->name('groups.destroy');
+
         Route::get('rooms', [\App\Http\Controllers\Admin\RoomsController::class, 'index'])->name('rooms');
         Route::get('rooms/create', [\App\Http\Controllers\Admin\RoomsController::class, 'create'])->name('rooms.create');
         Route::post('rooms', [\App\Http\Controllers\Admin\RoomsController::class, 'store'])->name('rooms.store');

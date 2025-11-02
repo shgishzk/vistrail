@@ -40,7 +40,12 @@
             <li class="nav-title">@lang('Building Management')</li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.buildings*') ? 'active' : '' }}" href="{{ route('admin.buildings') }}">
-                    <i class="nav-icon cil-home"></i> @lang('Buildings')
+                    <i class="nav-icon cil-building"></i> @lang('Buildings')
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.groups*') ? 'active' : '' }}" href="{{ route('admin.groups') }}">
+                    <i class="nav-icon cil-layers"></i> @lang('Groups')
                 </a>
             </li>
             <li class="nav-item">

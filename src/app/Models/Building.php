@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SelfLockType;
+use App\Models\Group;
 use App\Models\Room;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,11 @@ class Building extends Model
     public function rooms()
     {
         return $this->hasMany(Room::class);
+    }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class)->withTimestamps();
     }
 
     public function badgeClass(): string
