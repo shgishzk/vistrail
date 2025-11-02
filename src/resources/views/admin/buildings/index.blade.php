@@ -32,23 +32,23 @@
                 @foreach($buildings as $building)
                 <tr>
                     <td>{{ $building->name }}</td>
-                    <td>{{ \App\Enums\SelfLockType::labels()[$building->self_lock_type->value] ?? $building->self_lock_type->value }}</td>
                     <td>
-                        @if($building->is_public)
-                            <span class="badge bg-success">@lang('Public')</span>
-                        @else
-                            <span class="badge bg-secondary">@lang('Private')</span>
-                        @endif
+                        <span class="badge {{ $building->badgeClass() }}">{{ $building->selfLockLabel() }}</span>
+                    <td>
+                        <span class="badge {{ $building->publicClass() }}">{{ $building->publicLabel() }}</span>
                     </td>
-                    <td><a href="{{ $building->url }}" target="_blank" rel="noopener">{{ \Illuminate\Support\Str::limit($building->url, 40) }}</a></td>
                     <td>
-                        <a href="{{ route('admin.buildings.rooms', $building) }}" class="btn btn-sm btn-outline-primary" title="@lang('View Rooms')">
+                        @if ($building->url)
+                        <a href="{{ $building->url }}" target="_blank" rel="noopener"><span class="btn btn-sm btn-outline">@lang('See at external site') <i class="cil-external-link"></i></span></a></td>
+                        @endif
+                    <td>
+                        <a href="{{ route('admin.buildings.rooms', $building) }}" class="btn btn btn-outline-primary" title="@lang('View Rooms')">
                             <i class="cil-list"></i>
                         </a>
-                        <a href="{{ route('admin.buildings.edit', $building) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.buildings.edit', $building) }}" class="btn btn btn-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $building->id }}">
+                        <button type="button" class="btn btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $building->id }}">
                             <i class="cil-trash"></i>
                         </button>
 

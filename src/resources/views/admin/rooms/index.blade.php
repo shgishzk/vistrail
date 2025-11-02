@@ -34,10 +34,10 @@
                     <td>{{ $room->number }}</td>
                     <td>{{ \App\Enums\RoomStatus::labels()[$room->status->value] ?? $room->status->value }}</td>
                     <td>
-                        <a href="{{ route('admin.rooms.edit', $room) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.rooms.edit', $room) }}" class="btn btn btn-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $room->id }}">
+                        <button type="button" class="btn btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $room->id }}">
                             <i class="cil-trash"></i>
                         </button>
 

@@ -142,5 +142,6 @@
     "Failed to parse KML. Please check the format or try again.": "KMLの解析に失敗しました。形式を確認するか再度お試しください。",
     "Valid KML updates will be shown on the map automatically.": "有効なKMLを入力すると地図が自動で更新されます。",
     "Only .kml files can be uploaded.": ".kml ファイルのみアップロードできます。",
-    "Failed to read the selected file.": "選択されたファイルの読み込みに失敗しました。"
+    "Failed to read the selected file.": "選択されたファイルの読み込みに失敗しました。",
+    "See at external site": "外部サイトで表示"
 }

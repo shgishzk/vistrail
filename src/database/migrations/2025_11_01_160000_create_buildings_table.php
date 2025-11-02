@@ -15,7 +15,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('is_public')->comment('Public Flag');
             $table->decimal('lat', 10, 7)->comment('Latitude');
             $table->decimal('lng', 10, 7)->comment('Longitude');
-            $table->string('url')->comment('Source URL');
+            $table->string('url')->nullable()->comment('Source URL');
             $table->text('memo')->nullable()->comment('Memo');
             $table->timestamps();
         });

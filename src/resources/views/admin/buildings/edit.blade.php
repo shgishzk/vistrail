@@ -25,7 +25,7 @@
 
             <div class="mb-3">
                 <label for="url" class="form-label">@lang('URL')</label>
-                <input type="url" class="form-control @error('url') is-invalid @enderror" id="url" name="url" value="{{ old('url', $building->url) }}" required>
+                <input type="url" class="form-control @error('url') is-invalid @enderror" id="url" name="url" value="{{ old('url', $building->url) }}">
                 @error('url')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

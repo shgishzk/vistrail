@@ -17,7 +17,7 @@ class UpdateBuildingRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:200',
-            'url' => 'required|url|max:255',
+            'url' => 'nullable|url|max:255',
             'self_lock_type' => ['required', Rule::in(array_map(fn ($case) => $case->value, SelfLockType::cases()))],
             'lat' => 'required|numeric',
             'lng' => 'required|numeric',

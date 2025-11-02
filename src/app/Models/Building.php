@@ -32,4 +32,24 @@ class Building extends Model
     {
         return $this->hasMany(Room::class);
     }
+
+    public function badgeClass(): string
+    {
+        return $this->self_lock_type === \App\Enums\SelfLockType::HAS_LOCK ? 'bg-warning' : 'bg-success';
+    }
+
+    public function selfLockLabel(): string
+    {
+        return \App\Enums\SelfLockType::labels()[$this->self_lock_type->value] ?? $this->self_lock_type->value;
+    }
+
+    public function publicClass(): string
+    {
+        return $this->is_public ? 'bg-info' : 'bg-secondary';
+    }
+
+    public function publicLabel(): string
+    {
+        return $this->is_public ? __('Public') : __('Private');
+    }
 }
