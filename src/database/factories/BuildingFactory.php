@@ -21,8 +21,9 @@ class BuildingFactory extends Factory
             'url' => fake()->unique()->url(),
             'name' => fake()->company(),
             'self_lock_type' => $selfLock->value,
-            'lat' => fake()->latitude(),
-            'lng' => fake()->longitude(),
+            // lat and lng around Kyoto, Japan.
+            'lat' => fake()->randomFloat(6, 34.950000, 35.100000),
+            'lng' => fake()->randomFloat(6, 135.650000, 135.850000),
             'is_public' => fake()->boolean() ? 1 : 0,
             'memo' => fake()->optional()->sentence(),
         ];

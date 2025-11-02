@@ -36,6 +36,9 @@
                         </span>
                     </td>
                     <td>
+                        <a href="{{ route('admin.groups.buildings.edit', $group) }}" class="btn btn-sm btn-outline-primary" title="@lang('Manage Buildings')">
+                            <i class="cil-building"></i>
+                        </a>
                         <a href="{{ route('admin.groups.edit', $group) }}" class="btn btn-sm btn-primary">
                             <i class="cil-pencil"></i>
                         </a>

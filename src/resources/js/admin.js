@@ -7,6 +7,11 @@ import * as coreui from '@coreui/coreui';
 // Import CoreUI icons
 import '@coreui/icons/css/all.min.css';
 
+// expose CoreUI for inline scripts that rely on it
+if (typeof window !== 'undefined') {
+  window.coreui = coreui;
+}
+
 // Initialize CoreUI components
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize sidebar

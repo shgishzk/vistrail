@@ -67,6 +67,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('groups/{group}/edit', [\App\Http\Controllers\Admin\GroupsController::class, 'edit'])->name('groups.edit');
         Route::put('groups/{group}', [\App\Http\Controllers\Admin\GroupsController::class, 'update'])->name('groups.update');
         Route::delete('groups/{group}', [\App\Http\Controllers\Admin\GroupsController::class, 'destroy'])->name('groups.destroy');
+        Route::get('groups/{group}/buildings', [\App\Http\Controllers\Admin\GroupBuildingsController::class, 'edit'])->name('groups.buildings.edit');
+        Route::put('groups/{group}/buildings', [\App\Http\Controllers\Admin\GroupBuildingsController::class, 'update'])->name('groups.buildings.update');
 
         Route::get('rooms', [\App\Http\Controllers\Admin\RoomsController::class, 'index'])->name('rooms');
         Route::get('rooms/create', [\App\Http\Controllers\Admin\RoomsController::class, 'create'])->name('rooms.create');
