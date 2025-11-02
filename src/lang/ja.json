@@ -43,6 +43,7 @@
     "You can register up to :count rooms at once.": "一度に最大 :count 件の部屋を登録できます。",
     "Bulk register": "一括登録",
     "Total rooms: :count": "合計部屋数：:count",
+    "All": "すべて",
     "Select building": "建物を選択",
     "Status": "ステータス",
     "Admin Dashboard": "管理画面ダッシュボード",

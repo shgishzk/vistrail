@@ -11,15 +11,39 @@ use App\Services\Building\StoreBuildingService;
 use App\Services\Building\UpdateBuildingService;
 use App\Services\Building\DeleteBuildingService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BuildingsController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $buildings = Building::orderBy('name')->paginate(15);
+        $filters = $request->only(['name', 'self_lock_type', 'is_public']);
 
-        return view('admin.buildings.index', compact('buildings'));
+        $query = Building::query();
+
+        if (!empty($filters['name'])) {
+            $query->where('name', 'like', '%' . $filters['name'] . '%');
+        }
+
+        if (array_key_exists('self_lock_type', $filters) && $filters['self_lock_type'] !== null && $filters['self_lock_type'] !== '') {
+            $validSelfLockTypes = array_map(fn (SelfLockType $type) => $type->value, SelfLockType::cases());
+            if (in_array($filters['self_lock_type'], $validSelfLockTypes, true)) {
+                $query->where('self_lock_type', $filters['self_lock_type']);
+            }
+        }
+
+        if (array_key_exists('is_public', $filters) && $filters['is_public'] !== null && $filters['is_public'] !== '') {
+            if (in_array((string) $filters['is_public'], ['0', '1'], true)) {
+                $query->where('is_public', $filters['is_public'] === '1');
+            }
+        }
+
+        $buildings = $query->orderBy('name')->paginate(15)->appends($request->query());
+        $selfLockOptions = SelfLockType::cases();
+        $selfLockLabels = SelfLockType::labels();
+
+        return view('admin.buildings.index', compact('buildings', 'filters', 'selfLockOptions', 'selfLockLabels'));
     }
 
     public function create(): View

@@ -18,6 +18,38 @@
             </div>
         @endif
 
+        <form action="{{ route('admin.buildings') }}" method="GET" class="card card-body mb-4 border-0 shadow-sm">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="name" class="form-label">@lang('Building Name')</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ $filters['name'] ?? '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="self_lock_type" class="form-label">@lang('Self Lock Type')</label>
+                    <select class="form-select" id="self_lock_type" name="self_lock_type">
+                        <option value="">@lang('All')</option>
+                        @foreach($selfLockOptions as $option)
+                            <option value="{{ $option->value }}" {{ ($filters['self_lock_type'] ?? '') === $option->value ? 'selected' : '' }}>
+                                {{ $selfLockLabels[$option->value] ?? $option->value }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="is_public" class="form-label">@lang('Public')</label>
+                    <select class="form-select" id="is_public" name="is_public">
+                        <option value="">@lang('All')</option>
+                        <option value="1" {{ ($filters['is_public'] ?? '') === '1' ? 'selected' : '' }}>@lang('Public')</option>
+                        <option value="0" {{ ($filters['is_public'] ?? '') === '0' ? 'selected' : '' }}>@lang('Private')</option>
+                    </select>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a href="{{ route('admin.buildings') }}" class="btn btn-outline-secondary">@lang('Reset')</a>
+                <button type="submit" class="btn btn-primary">@lang('Search')</button>
+            </div>
+        </form>
+
         <table class="table table-responsive-sm table-striped">
             <thead>
                 <tr>
@@ -34,13 +66,17 @@
                     <td>{{ $building->name }}</td>
                     <td>
                         <span class="badge {{ $building->badgeClass() }}">{{ $building->selfLockLabel() }}</span>
+                    </td>
                     <td>
                         <span class="badge {{ $building->publicClass() }}">{{ $building->publicLabel() }}</span>
                     </td>
                     <td>
                         @if ($building->url)
-                        <a href="{{ $building->url }}" target="_blank" rel="noopener"><span class="btn btn-sm btn-outline">@lang('See at external site') <i class="cil-external-link"></i></span></a></td>
+                            <a href="{{ $building->url }}" target="_blank" rel="noopener">
+                                <span class="btn btn-sm btn-outline">@lang('See at external site') <i class="cil-external-link"></i></span>
+                            </a>
                         @endif
+                    </td>
                     <td>
                         <a href="{{ route('admin.buildings.rooms', $building) }}" class="btn btn btn-outline-primary" title="@lang('View Rooms')">
                             <i class="cil-list"></i>
