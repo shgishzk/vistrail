@@ -44,18 +44,18 @@ return [
         'marker_styles' => [
             'has_lock' => [
                 'background' => env('GOOGLE_MARKER_HAS_LOCK_BACKGROUND', '#FFC107'),
-                'borderColor' => env('GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR', '#FFA000'),
-                'glyphColor' => env('GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR', '#FFA000'),
+                'borderColor' => env('GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR', '#FF8F00'),
+                'glyphColor' => env('GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR', '#FF8F00'),
             ],
             'no_lock' => [
                 'background' => env('GOOGLE_MARKER_NO_LOCK_BACKGROUND', '#4CAF50'),
-                'borderColor' => env('GOOGLE_MARKER_NO_LOCK_BORDER_COLOR', '#2E7D32'),
-                'glyphColor' => env('GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR', '#2E7D32'),
+                'borderColor' => env('GOOGLE_MARKER_NO_LOCK_BORDER_COLOR', '#388E3C'),
+                'glyphColor' => env('GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR', '#388E3C'),
             ],
             'default' => [
-                'background' => env('GOOGLE_MARKER_DEFAULT_BACKGROUND', '#DD0000'),
-                'borderColor' => env('GOOGLE_MARKER_DEFAULT_BORDER_COLOR', '#FF0000'),
-                'glyphColor' => env('GOOGLE_MARKER_DEFAULT_GLYPH_COLOR', '#FF0000'),
+                'background' => env('GOOGLE_MARKER_DEFAULT_BACKGROUND', '#607D8B'),
+                'borderColor' => env('GOOGLE_MARKER_DEFAULT_BORDER_COLOR', '#455A64'),
+                'glyphColor' => env('GOOGLE_MARKER_DEFAULT_GLYPH_COLOR', '#000000'),
             ],
         ],
     ],

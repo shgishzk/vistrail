@@ -345,9 +345,9 @@
             const rowsContainer = document.getElementById('group-building-rows');
             const markerStyles = @json(google_marker_styles());
             const fallbackMarkerStyle = {
-                background: (markerStyles.default && markerStyles.default.background) || '#DD0000',
-                borderColor: (markerStyles.default && markerStyles.default.borderColor) || '#FF0000',
-                glyphColor: (markerStyles.default && markerStyles.default.glyphColor) || '#FF0000',
+                background: (markerStyles.default && markerStyles.default.background) || '#607D8B',
+                borderColor: (markerStyles.default && markerStyles.default.borderColor) || '#455A64',
+                glyphColor: (markerStyles.default && markerStyles.default.glyphColor) || '#455A64',
             };
             let pendingCenterBuildingId = null;
             let markerLibElements = null;
