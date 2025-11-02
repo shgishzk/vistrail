@@ -5,26 +5,29 @@
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <a
+      <RouterLink
         v-for="item in menuItems"
-        :key="item.href"
-        :href="item.href"
+        :key="item.to"
+        :to="item.to"
         class="flex items-center justify-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
       >
         {{ item.label }}
-      </a>
+      </RouterLink>
     </div>
   </div>
 </template>
 
 <script>
+import { RouterLink } from 'vue-router';
+
 export default {
   name: 'MainMenu',
+  components: { RouterLink },
   setup() {
     const menuItems = [
-      { label: '区域', href: '/areas' },
-      { label: 'マンション', href: '/buildings' },
-      { label: 'グループ', href: '/groups' },
+      { label: '区域', to: '/areas' },
+      { label: 'マンション', to: '/buildings' },
+      { label: 'グループ', to: '/groups' },
     ];
 
     return { menuItems };

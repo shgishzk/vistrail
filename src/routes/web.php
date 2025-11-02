@@ -13,6 +13,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/api/user', [UserAuthController::class, 'user']);
 });
 
+Route::get('/{spa}', [UserAuthController::class, 'showHome'])
+    ->where('spa', 'areas|buildings|groups');
+
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('/pins', [PinController::class, 'index']);
 //     Route::post('/pins', [PinController::class, 'store']);

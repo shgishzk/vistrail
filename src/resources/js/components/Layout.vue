@@ -26,24 +26,22 @@
             </svg>
           </button>
         </div>
-        <div 
-          :class="isMobileMenuOpen ? 'block' : 'hidden'" 
-          class="justify-between items-center w-full lg:flex lg:w-auto lg:order-1" 
+        <div
+          :class="isMobileMenuOpen ? 'block' : 'hidden'"
+          class="justify-between items-center w-full lg:flex lg:w-auto lg:order-1"
           id="mobile-menu"
         >
           <ul class="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
-            <li v-for="item in navigation" :key="item.href" class="lg:border-0">
-              <a
-                :href="item.href"
-                :class="[
-                  'block py-2 pr-4 pl-3 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:p-0',
-                  isActive(item.href)
-                    ? 'text-white rounded bg-indigo-600 lg:bg-transparent lg:text-indigo-600'
-                    : 'text-gray-700'
-                ]"
+            <li v-for="item in navigation" :key="item.to">
+              <RouterLink
+                :to="item.to"
+                class="block py-2 pr-4 pl-3 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:p-0"
+                :class="isActive(item.to)
+                  ? 'text-white rounded bg-indigo-600 lg:bg-transparent lg:text-indigo-600'
+                  : 'text-gray-700'"
               >
                 {{ item.name }}
-              </a>
+              </RouterLink>
             </li>
           </ul>
         </div>
@@ -56,27 +54,29 @@
           <h2 class="text-2xl font-semibold text-gray-900">ようこそ、{{ user.name }}さん</h2>
         </div>
         
-        <slot></slot>
+        <router-view />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
+import { RouterLink, useRoute } from 'vue-router';
 
 export default {
   name: 'Layout',
+  components: { RouterLink },
   setup() {
     const user = ref(null);
     const isMobileMenuOpen = ref(false);
     const navigation = [
-      { name: '区域', href: '/areas' },
-      { name: 'マンション', href: '/buildings' },
-      { name: 'グループ', href: '/groups' },
+      { name: '区域', to: '/areas' },
+      { name: 'マンション', to: '/buildings' },
+      { name: 'グループ', to: '/groups' },
     ];
-    const currentPath = ref(window.location.pathname || '/');
+    const route = useRoute();
     
     const fetchUser = async () => {
       try {
@@ -91,9 +91,11 @@ export default {
       isMobileMenuOpen.value = !isMobileMenuOpen.value;
     };
     
-    const isActive = (href) => {
-      return currentPath.value === href || currentPath.value.startsWith(`${href}/`);
-    };
+    const isActive = (path) => route.path === path || route.path.startsWith(`${path}/`);
+    
+    watch(() => route.path, () => {
+      isMobileMenuOpen.value = false;
+    });
     
     const logout = async () => {
       try {
