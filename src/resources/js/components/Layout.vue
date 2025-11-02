@@ -7,12 +7,6 @@
         </a>
         <div class="flex items-center lg:order-2">
           <button 
-            @click="logout" 
-            class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 lg:px-5 lg:py-2.5 mr-2 focus:outline-none"
-          >
-            ログアウト
-          </button>
-          <button 
             @click="toggleMobileMenu" 
             type="button" 
             class="inline-flex items-center p-2 ml-1 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
@@ -32,13 +26,23 @@
           id="mobile-menu"
         >
           <ul class="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
-            <li v-for="item in navigation" :key="item.to">
+            <li v-for="item in navigation" :key="item.name">
+              <button
+                v-if="item.type === 'action'"
+                type="button"
+                @click="handleNavigation(item)"
+                class="block w-full py-2 pr-4 pl-3 text-left border-b border-gray-100 hover:bg-gray-50 lg:border-0 lg:hover:bg-transparent lg:p-0 text-gray-700"
+              >
+                {{ item.name }}
+              </button>
               <RouterLink
+                v-else
                 :to="item.to"
                 class="block py-2 pr-4 pl-3 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:p-0"
-                :class="isActive(item.to)
+                :class="isActive(item)
                   ? 'text-white rounded bg-indigo-600 lg:bg-transparent lg:text-indigo-600'
                   : 'text-gray-700'"
+                @click="handleNavigation(item)"
               >
                 {{ item.name }}
               </RouterLink>
@@ -72,9 +76,10 @@ export default {
     const user = ref(null);
     const isMobileMenuOpen = ref(false);
     const navigation = [
-      { name: '区域', to: '/areas' },
-      { name: 'マンション', to: '/buildings' },
-      { name: 'グループ', to: '/groups' },
+      { name: '区域', to: '/areas', type: 'route' },
+      { name: 'マンション', to: '/buildings', type: 'route' },
+      { name: 'グループ', to: '/groups', type: 'route' },
+      { name: 'ログアウト', to: '/logout', type: 'action' },
     ];
     const route = useRoute();
     
@@ -91,12 +96,23 @@ export default {
       isMobileMenuOpen.value = !isMobileMenuOpen.value;
     };
     
-    const isActive = (path) => route.path === path || route.path.startsWith(`${path}/`);
+    const isActive = (item) => {
+      if (item.type === 'action') {
+        return false;
+      }
+      return route.path === item.to || route.path.startsWith(`${item.to}/`);
+    };
     
     watch(() => route.path, () => {
       isMobileMenuOpen.value = false;
     });
     
+    const handleNavigation = async (item) => {
+      if (item.type === 'action' && item.to === '/logout') {
+        await logout();
+      }
+    };
+
     const logout = async () => {
       try {
         await axios.post('/logout');
@@ -116,7 +132,8 @@ export default {
       toggleMobileMenu,
       logout,
       navigation,
-      isActive
+      isActive,
+      handleNavigation
     };
   }
 };
