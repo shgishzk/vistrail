@@ -14,4 +14,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sidebarElement) {
     new coreui.Sidebar(sidebarElement);
   }
+
 });

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAreaRequest;
 use App\Http\Requests\Admin\UpdateAreaRequest;
 use App\Models\Area;
+use App\Services\Area\FilterAreaService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AreasController extends Controller
@@ -14,11 +16,12 @@ class AreasController extends Controller
     /**
      * Display a listing of the areas.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $areas = Area::paginate(15);
-        
-        return view('admin.areas.index', compact('areas'));
+        $filterService = new FilterAreaService();
+        [$areas, $filters, $suggestUsers, $suggestSelectedDisplay] = $filterService->execute($request);
+
+        return view('admin.areas.index', compact('areas', 'filters', 'suggestUsers', 'suggestSelectedDisplay'));
     }
 
     /**
@@ -77,5 +80,23 @@ class AreasController extends Controller
         
         return redirect()->route('admin.areas')
             ->with('success', __('Area deleted successfully.'));
+    }
+
+    private function getLatestVisitorSuggestions(): array
+    {
+        return \App\Models\User::orderBy('name')
+            ->get(['id', 'name', 'name_kana', 'email'])
+            ->map(function ($user) {
+                $parts = [$user->name];
+                if (!empty($user->name_kana)) {
+                    $parts[] = $user->name_kana;
+                }
+
+                return [
+                    'id' => $user->id,
+                    'display' => implode(' / ', $parts) . ' (' . $user->email . ')',
+                ];
+            })
+            ->toArray();
     }
 }
