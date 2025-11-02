@@ -57,6 +57,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('buildings/{building}', [\App\Http\Controllers\Admin\BuildingsController::class, 'update'])->name('buildings.update');
         Route::delete('buildings/{building}', [\App\Http\Controllers\Admin\BuildingsController::class, 'destroy'])->name('buildings.destroy');
         Route::get('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingsController::class, 'rooms'])->name('buildings.rooms');
+        Route::get('buildings/{building}/rooms/create', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'create'])->name('buildings.rooms.create');
+        Route::post('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'store'])->name('buildings.rooms.store');
         Route::put('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'update'])->name('buildings.rooms.update');
 
         Route::get('rooms', [\App\Http\Controllers\Admin\RoomsController::class, 'index'])->name('rooms');

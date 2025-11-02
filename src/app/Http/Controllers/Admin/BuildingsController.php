@@ -67,9 +67,11 @@ class BuildingsController extends Controller
 
     public function rooms(Building $building): View
     {
-        $rooms = $building->rooms()->paginate(100);
+        $roomsQuery = $building->rooms();
+        $totalRooms = (clone $roomsQuery)->count();
+        $rooms = $roomsQuery->paginate(100);
         $statusOptions = \App\Enums\RoomStatus::cases();
 
-        return view('admin.buildings.rooms', compact('building', 'rooms', 'statusOptions'));
+        return view('admin.buildings.rooms', compact('building', 'rooms', 'statusOptions', 'totalRooms'));
     }
 }

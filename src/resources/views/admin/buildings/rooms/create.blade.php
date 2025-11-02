@@ -1,69 +1,59 @@
 @extends('admin.layouts.app')
 
-@section('title', __('Rooms in :building', ['building' => $building->name]))
+@section('title', __('Add rooms to :building', ['building' => $building->name]))
 
 @section('content')
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <strong>@lang('Rooms in :building', ['building' => $building->name])</strong>
+        <strong>@lang('Add rooms to :building', ['building' => $building->name])</strong>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.buildings.rooms.create', $building) }}" class="btn btn-primary btn-sm">
-                <i class="cil-plus"></i> @lang('Add multiple rooms')
+            <a href="{{ route('admin.buildings.rooms', $building) }}" class="btn btn-outline-secondary btn-sm">
+                <i class="cil-arrow-left"></i> @lang('Back to room list')
             </a>
             <a href="{{ route('admin.buildings.edit', $building) }}" class="btn btn-outline-primary btn-sm">
                 <i class="cil-arrow-left"></i> {{ __('Back to :building', ['building' => $building->name]) }}
             </a>
-            <a href="{{ route('admin.buildings') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="cil-arrow-left"></i> @lang('Back to Buildings')
-            </a>
         </div>
     </div>
     <div class="card-body">
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if ($errors->any())
+        @if ($errors->has('rooms'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @lang('Validation failed. Please check the inputs highlighted below.')
+                {{ $errors->first('rooms') }}
                 <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
-        <div class="alert alert-info" role="alert">
-            @lang('Total rooms: :count', ['count' => number_format($totalRooms)])
-        </div>
-
-        <form action="{{ route('admin.buildings.rooms.update', $building) }}" method="POST">
+        <form action="{{ route('admin.buildings.rooms.store', $building) }}" method="POST">
             @csrf
-            @method('PUT')
+
+            <p class="text-muted mb-3">
+                @lang('You can register up to :count rooms at once.', ['count' => $maxRows])
+            </p>
 
             <table class="table table-responsive-sm table-striped">
                 <thead>
                     <tr>
+                        <th style="width: 5%;">#</th>
                         <th>@lang('Room Number')</th>
                         <th>@lang('Status')</th>
-                        <th>@lang('Created At')</th>
-                        <th>@lang('Updated At')</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($rooms as $room)
+                    @for ($index = 0; $index < $maxRows; $index++)
                         @php
-                            $numberField = "rooms.{$room->id}.number";
-                            $statusField = "rooms.{$room->id}.status";
-                            $numberValue = old($numberField, $room->number);
-                            $statusValue = old($statusField, $room->status->value);
+                            $numberField = "rooms.$index.number";
+                            $statusField = "rooms.$index.status";
+                            $numberValue = old($numberField, '');
+                            $statusValue = old($statusField, \App\Enums\RoomStatus::UNVISITED->value);
                         @endphp
                         <tr>
+                            <td>{{ $index + 1 }}</td>
                             <td>
                                 <input
                                     type="text"
-                                    name="rooms[{{ $room->id }}][number]"
+                                    name="rooms[{{ $index }}][number]"
                                     value="{{ $numberValue }}"
+                                    tabindex="{{ $index + 1 }}"
                                     class="form-control {{ $errors->has($numberField) ? 'is-invalid' : '' }}"
                                 >
                                 @if($errors->has($numberField))
@@ -72,7 +62,7 @@
                             </td>
                             <td>
                                 <select
-                                    name="rooms[{{ $room->id }}][status]"
+                                    name="rooms[{{ $index }}][status]"
                                     class="form-select {{ $errors->has($statusField) ? 'is-invalid' : '' }}"
                                 >
                                     @foreach($statusOptions as $status)
@@ -85,18 +75,17 @@
                                     <div class="invalid-feedback">{{ $errors->first($statusField) }}</div>
                                 @endif
                             </td>
-                            <td>{{ $room->created_at->format('Y-m-d H:i') }}</td>
-                            <td>{{ $room->updated_at->format('Y-m-d H:i') }}</td>
                         </tr>
-                    @endforeach
+                    @endfor
                 </tbody>
             </table>
 
-            <div class="d-flex justify-content-between align-items-center mt-4">
-                {{ $rooms->links() }}
-                <a href="{{ route('admin.buildings.edit', $building) }}" class="btn btn-outline-secondary">@lang('Cancel')</a>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ route('admin.buildings.rooms', $building) }}" class="btn btn-outline-secondary">
+                    @lang('Cancel')
+                </a>
                 <button type="submit" class="btn btn-primary">
-                    @lang('Save')
+                    @lang('Bulk register')
                 </button>
             </div>
         </form>
