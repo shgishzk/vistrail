@@ -347,6 +347,7 @@
             const fallbackMarkerStyle = {
                 background: (markerStyles.default && markerStyles.default.background) || '#DD0000',
                 borderColor: (markerStyles.default && markerStyles.default.borderColor) || '#FF0000',
+                glyphColor: (markerStyles.default && markerStyles.default.glyphColor) || '#FF0000',
             };
             let pendingCenterBuildingId = null;
             let markerLibElements = null;
@@ -364,6 +365,7 @@
                 return {
                     background: style.background || fallbackMarkerStyle.background,
                     borderColor: style.borderColor || fallbackMarkerStyle.borderColor,
+                    glyphColor: style.glyphColor || fallbackMarkerStyle.glyphColor,
                 };
             }
 
@@ -420,6 +422,7 @@
                             content: new PinElement({
                                 background: style.background,
                                 borderColor: style.borderColor,
+                                glyphColor: style.glyphColor,
                             }).element,
                         });
 
@@ -561,6 +564,7 @@
                         content: new PinElement({
                             background: style.background,
                             borderColor: style.borderColor,
+                            glyphColor: style.glyphColor,
                         }).element,
                     });
 

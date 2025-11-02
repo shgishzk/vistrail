@@ -45,14 +45,17 @@ return [
             'has_lock' => [
                 'background' => env('GOOGLE_MARKER_HAS_LOCK_BACKGROUND', '#FFC107'),
                 'borderColor' => env('GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR', '#FFA000'),
+                'glyphColor' => env('GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR', '#FFA000'),
             ],
             'no_lock' => [
                 'background' => env('GOOGLE_MARKER_NO_LOCK_BACKGROUND', '#4CAF50'),
                 'borderColor' => env('GOOGLE_MARKER_NO_LOCK_BORDER_COLOR', '#2E7D32'),
+                'glyphColor' => env('GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR', '#2E7D32'),
             ],
             'default' => [
                 'background' => env('GOOGLE_MARKER_DEFAULT_BACKGROUND', '#DD0000'),
                 'borderColor' => env('GOOGLE_MARKER_DEFAULT_BORDER_COLOR', '#FF0000'),
+                'glyphColor' => env('GOOGLE_MARKER_DEFAULT_GLYPH_COLOR', '#FF0000'),
             ],
         ],
     ],
