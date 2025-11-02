@@ -110,11 +110,16 @@
                 </table>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-primary" id="add-building-row">
                     <i class="cil-plus"></i> @lang('Add Building Row')
                 </button>
                 <div class="d-flex gap-2">
+                    @if($googleMapsApiKey)
+                        <button type="button" class="btn btn-outline-info" data-coreui-toggle="modal" data-coreui-target="#groupBuildingPreviewModal">
+                            <i class="cil-media-play"></i> @lang('Preview')
+                        </button>
+                    @endif
                     <a href="{{ route('admin.groups') }}" class="btn btn-outline-secondary">@lang('Cancel')</a>
                     <button type="submit" class="btn btn-primary">@lang('Save')</button>
                 </div>
@@ -146,6 +151,7 @@
 
 @if($googleMapsApiKey)
     @include('admin.partials.building-map-modal', ['googleMapsApiKey' => $googleMapsApiKey, 'buildingOptions' => $buildingOptions])
+    @include('admin.groups.partials.preview-map-modal')
 @endif
 @endsection
 
@@ -337,11 +343,45 @@
             const markersById = new Map();
             const modalElement = document.getElementById('groupBuildingMapModal');
             const rowsContainer = document.getElementById('group-building-rows');
-            const markerStyles = {
-                has_lock: { background: '#FFC107', glyphColor: '#212121', borderColor: '#FFA000' },
-                no_lock: { background: '#4CAF50', glyphColor: '#212121', borderColor: '#2E7D32' },
+            const markerStyles = @json(google_marker_styles());
+            const fallbackMarkerStyle = {
+                background: (markerStyles.default && markerStyles.default.background) || '#DD0000',
+                borderColor: (markerStyles.default && markerStyles.default.borderColor) || '#FF0000',
             };
             let pendingCenterBuildingId = null;
+            let markerLibElements = null;
+            let markerLibPromise = null;
+
+            const previewModalElement = document.getElementById('groupBuildingPreviewModal');
+            let previewMapInstance = null;
+            let previewInfoWindow = null;
+            let previewMarkers = [];
+            let pendingPreviewBuildings = [];
+            let previewNeedsRender = false;
+
+            function getMarkerStyle(type) {
+                const style = markerStyles[type] || markerStyles.default || {};
+                return {
+                    background: style.background || fallbackMarkerStyle.background,
+                    borderColor: style.borderColor || fallbackMarkerStyle.borderColor,
+                };
+            }
+
+            function ensureMarkerLibrary() {
+                if (markerLibElements) {
+                    return Promise.resolve(markerLibElements);
+                }
+                if (!markerLibPromise) {
+                    markerLibPromise = google.maps.importLibrary('marker').then((lib) => {
+                        markerLibElements = {
+                            AdvancedMarkerElement: lib.AdvancedMarkerElement,
+                            PinElement: lib.PinElement,
+                        };
+                        return markerLibElements;
+                    });
+                }
+                return markerLibPromise;
+            }
 
             window.initGroupBuildingMap = function initGroupBuildingMap() {
                 const target = document.getElementById('group-building-map');
@@ -355,16 +395,16 @@
                     lng: parseFloat(defaultPosition.lng),
                 };
 
-                const markersLibPromise = google.maps.importLibrary('marker');
                 const mapsLibPromise = google.maps.importLibrary('maps');
 
-                Promise.all([markersLibPromise, mapsLibPromise]).then(([markerLib]) => {
+                Promise.all([ensureMarkerLibrary(), mapsLibPromise]).then(([markerLib]) => {
                     const { AdvancedMarkerElement, PinElement } = markerLib;
 
                     mapInstance = new google.maps.Map(target, {
                         center: initialCenter,
                         zoom: validBuildings.length ? 14 : 11,
                         mapTypeControl: false,
+                        zoomControl: true,
                         mapId: 'group-building-map-id',
                     });
 
@@ -372,14 +412,13 @@
 
                     validBuildings.forEach(building => {
                         const position = { lat: parseFloat(building.lat), lng: parseFloat(building.lng) };
-                        const style = markerStyles[building.self_lock_type] ?? { background: '#607D8B', glyphColor: '#FFFFFF', borderColor: '#455A64' };
+                        const style = getMarkerStyle(building.self_lock_type);
                         const marker = new AdvancedMarkerElement({
                             map: mapInstance,
                             position,
                             title: building.label,
                             content: new PinElement({
                                 background: style.background,
-                                glyphColor: style.glyphColor,
                                 borderColor: style.borderColor,
                             }).element,
                         });
@@ -394,6 +433,12 @@
                     });
                     if (pendingCenterBuildingId) {
                         centerMapOnBuilding(pendingCenterBuildingId);
+                    } else {
+                        resetMapToDefault();
+                    }
+
+                    if (previewNeedsRender) {
+                        renderPreviewMap(pendingPreviewBuildings);
                     }
                 });
             };
@@ -419,14 +464,16 @@
                     infoWindow.setContent(createInfoWindowContent(markerEntry.building));
                     infoWindow.open({ anchor: markerEntry.marker, map: mapInstance });
                 }
+
+                pendingCenterBuildingId = null;
             }
 
-            function createInfoWindowContent(building) {
+            function createInfoWindowContent(building, withAddButton = true) {
                 return `
                     <div class="p-2">
                         <div class="fw-bold mb-1">${building.label}</div>
                         ${building.url ? `<div class="mb-2"><a href="${building.url}" target="_blank" rel="noopener">@lang('See at external site')</a></div>` : ''}
-                        <a href="#" class="btn btn-sm btn-primary js-map-select-building" data-building-id="${building.id}">@lang('Select this building')</a>
+                        ${withAddButton ? `<a href="#" class="btn btn-sm btn-primary js-map-select-building" data-building-id="${building.id}">@lang('Select this building')</a>` : ''}
                     </div>
                 `;
             }
@@ -442,16 +489,92 @@
                     lat: parseFloat(defaultPosition.lat),
                     lng: parseFloat(defaultPosition.lng),
                 };
-                if (pendingCenterBuildingId) {
-                    // Keep zoom level when last-viewed building exists.
-                    mapInstance.setZoom(16);
-                } else {
-                    // Reset to default position and zoom level.
-                    mapInstance.setCenter(position);
-                    mapInstance.setZoom(15);
-                }
-                
+                mapInstance.setCenter(position);
+                mapInstance.setZoom(11);
                 pendingCenterBuildingId = null;
+            }
+
+            function renderPreviewMap(buildings) {
+                if (typeof google === 'undefined' || !google.maps) {
+                    previewNeedsRender = true;
+                    pendingPreviewBuildings = buildings;
+                    return;
+                }
+
+                if (!markerLibElements) {
+                    ensureMarkerLibrary().then(() => renderPreviewMap(buildings));
+                    return;
+                }
+
+                const { AdvancedMarkerElement, PinElement } = markerLibElements;
+
+                if (!previewMapInstance) {
+                    const target = document.getElementById('group-preview-map');
+                    if (!target) {
+                        return;
+                    }
+                    previewMapInstance = new google.maps.Map(target, {
+                        center: {
+                            lat: parseFloat(defaultPosition.lat),
+                            lng: parseFloat(defaultPosition.lng),
+                        },
+                        zoom: 11,
+                        mapTypeControl: false,
+                        zoomControl: true,
+                        mapId: 'group-preview-map-id',
+                    });
+                    previewInfoWindow = new google.maps.InfoWindow();
+                }
+
+                previewMarkers.forEach(marker => {
+                    marker.map = null;
+                });
+                previewMarkers = [];
+
+                if (!buildings.length) {
+                    if (previewInfoWindow) {
+                        previewInfoWindow.close();
+                    }
+                    previewMapInstance.setCenter({
+                        lat: parseFloat(defaultPosition.lat),
+                        lng: parseFloat(defaultPosition.lng),
+                    });
+                    previewMapInstance.setZoom(11);
+                    return;
+                }
+
+                const firstBuilding = buildings[0];
+                const initialCenter = {
+                    lat: parseFloat(firstBuilding.lat),
+                    lng: parseFloat(firstBuilding.lng),
+                };
+                previewMapInstance.setCenter(initialCenter);
+                previewMapInstance.setZoom(14);
+
+                buildings.forEach(building => {
+                    const position = { lat: parseFloat(building.lat), lng: parseFloat(building.lng) };
+                    const style = getMarkerStyle(building.self_lock_type);
+                    const marker = new AdvancedMarkerElement({
+                        map: previewMapInstance,
+                        position,
+                        title: building.label,
+                        content: new PinElement({
+                            background: style.background,
+                            borderColor: style.borderColor,
+                        }).element,
+                    });
+
+                    marker.addListener('click', () => {
+                        if (!previewInfoWindow) {
+                            previewInfoWindow = new google.maps.InfoWindow();
+                        }
+                        const content = createInfoWindowContent(building, false);
+                        previewInfoWindow.setContent(content);
+                        previewInfoWindow.open({ anchor: marker, map: previewMapInstance });
+                    });
+
+                    previewMarkers.push(marker);
+                });
             }
 
             if (modalElement) {
@@ -481,6 +604,36 @@
                     if (typeof google !== 'undefined' && google.maps) {
                         initGroupBuildingMap();
                         window.setTimeout(() => google.maps.event.trigger(mapInstance, 'resize'), 50);
+                    }
+                });
+            }
+
+            if (previewModalElement) {
+                previewModalElement.addEventListener('show.coreui.modal', () => {
+                    const selectedIds = Array.from(document.querySelectorAll('.js-building-id'))
+                        .map(input => input.value)
+                        .filter(Boolean);
+                    const uniqueIds = Array.from(new Set(selectedIds));
+                    pendingPreviewBuildings = uniqueIds
+                        .map(id => buildingOptions.find(option => String(option.id) === String(id)))
+                        .filter(building => building && building.lat !== null && building.lng !== null);
+                    previewNeedsRender = true;
+                });
+
+                previewModalElement.addEventListener('shown.coreui.modal', () => {
+                    if (previewNeedsRender) {
+                        previewNeedsRender = false;
+                        renderPreviewMap(pendingPreviewBuildings);
+                    }
+
+                    if (typeof google !== 'undefined' && google.maps && previewMapInstance) {
+                        window.setTimeout(() => google.maps.event.trigger(previewMapInstance, 'resize'), 50);
+                    }
+                });
+
+                previewModalElement.addEventListener('hidden.coreui.modal', () => {
+                    if (previewInfoWindow) {
+                        previewInfoWindow.close();
                     }
                 });
             }

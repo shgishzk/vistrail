@@ -9,3 +9,10 @@ if (! function_exists('google_default_position')) {
         ];
     }
 }
+
+if (! function_exists('google_marker_styles')) {
+    function google_marker_styles(): array
+    {
+        return config('services.google.marker_styles');
+    }
+}
