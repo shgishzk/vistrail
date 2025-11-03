@@ -46,7 +46,7 @@
             transform: translateY(24px);
             white-space: nowrap;
             max-width: 260px;
-            opacity: 0.7;
+            opacity: 0.75;
         }
         .marker-label__title {
             font-weight: 600;
