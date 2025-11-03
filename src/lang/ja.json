@@ -115,6 +115,7 @@
     "Password": "パスワード",
     "Password must be 6-20 characters and include uppercase, lowercase, and numbers.": "6〜20文字で大文字・小文字・数字をすべて含めてください。",
     "Paste KML data from Google Maps here.": "Googleマップから取得したKMLデータを貼り付けてください。",
+    "Print Area": "区域を印刷",
     "Remember Me": "ログイン状態を保持する",
     "Sign In to your account": "アカウントにサインイン",
     "Start Date": "開始日",
@@ -166,5 +167,6 @@
     "Valid KML updates will be shown on the map automatically.": "有効なKMLを入力すると地図が自動で更新されます。",
     "Only .kml files can be uploaded.": ".kml ファイルのみアップロードできます。",
     "Failed to read the selected file.": "選択されたファイルの読み込みに失敗しました。",
-    "See at external site": "外部サイトで表示"
+    "See at external site": "外部サイトで表示",
+    "Print": "印刷"
 }

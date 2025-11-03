@@ -6,9 +6,14 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <strong>@lang('Edit Area')</strong>
-        <a href="{{ route('admin.areas') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="cil-arrow-left"></i> @lang('Back to Areas')
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.areas') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="cil-arrow-left"></i> @lang('Back to Areas')
+            </a>
+            <a href="{{ route('admin.areas.print', $area) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                <i class="cil-print"></i> @lang('Print Area')
+            </a>
+        </div>
     </div>
     <div class="card-body">
         @if (session('success'))

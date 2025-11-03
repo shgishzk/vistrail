@@ -45,6 +45,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('areas/{area}', [\App\Http\Controllers\Admin\AreasController::class, 'update'])->name('areas.update');
         Route::delete('areas/{area}', [\App\Http\Controllers\Admin\AreasController::class, 'destroy'])->name('areas.destroy');
         Route::get('areas/{area}/visits', [\App\Http\Controllers\Admin\AreaVisitsController::class, 'index'])->name('areas.visits');
+        Route::get('areas/{area}/print', [\App\Http\Controllers\Admin\AreasController::class, 'print'])->name('areas.print');
 
         Route::get('visits', [\App\Http\Controllers\Admin\VisitsController::class, 'index'])->name('visits');
         Route::get('visits/create', [\App\Http\Controllers\Admin\VisitsController::class, 'create'])->name('visits.create');

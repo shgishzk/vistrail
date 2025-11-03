@@ -88,6 +88,9 @@
                         <a href="{{ route('admin.areas.visits', $area) }}" class="btn btn-outline-primary" title="@lang('View Visits')">
                             <i class="cil-briefcase"></i>
                         </a>
+                        <a href="{{ route('admin.areas.print', $area) }}" target="_blank" class="btn btn-outline-secondary" title="@lang('Print')">
+                            <i class="cil-print"></i>
+                        </a>
                         <a href="{{ route('admin.areas.edit', $area) }}" class="btn btn-primary">
                             <i class="cil-pencil"></i>
                         </a>

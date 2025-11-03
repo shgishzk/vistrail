@@ -82,6 +82,18 @@ class AreasController extends Controller
             ->with('success', __('Area deleted successfully.'));
     }
 
+    public function print(Area $area): View
+    {
+        $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = config('services.google.default_position');
+
+        return view('admin.areas.print', [
+            'area' => $area,
+            'googleMapsApiKey' => $googleMapsApiKey,
+            'defaultPosition' => $defaultPosition,
+        ]);
+    }
+
     private function getLatestVisitorSuggestions(): array
     {
         return \App\Models\User::orderBy('name')
