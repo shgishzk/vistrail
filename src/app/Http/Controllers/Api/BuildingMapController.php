@@ -15,13 +15,15 @@ class BuildingMapController extends Controller
         $lat = (float) $request->input('lat', $defaultPosition['lat'] ?? 0);
         $lng = (float) $request->input('lng', $defaultPosition['lng'] ?? 0);
 
-        // Half side of the square in kilometers (0.5km in each direction to form 1km square)
-        $halfSideKm = 0.5;
-        $kmPerDegreeLat = 111.32;
+        // Half side of the square in kilometres (±0.8km gives a 1.6km window)
+        $halfSideKm = 0.8;
+        $latRad = deg2rad($lat);
+        // 1 degree of latitude approximates this many kilometres (WGS84)
+        $kmPerDegreeLat = 110.574;
         $degLat = $halfSideKm / $kmPerDegreeLat;
-        $cosLat = cos(deg2rad($lat));
-        $cosLat = abs($cosLat) < 1e-6 ? 1e-6 : $cosLat;
-        $degLng = $halfSideKm / ($kmPerDegreeLat * $cosLat);
+        $cosLat = cos($latRad);
+        $kmPerDegreeLng = 111.320 * max(abs($cosLat), 1e-6);
+        $degLng = $halfSideKm / $kmPerDegreeLng;
 
         $buildings = Building::query()
             ->select(['id', 'name', 'lat', 'lng', 'self_lock_type', 'url'])
