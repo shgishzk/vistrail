@@ -46,7 +46,7 @@
             transform: translateY(24px);
             white-space: nowrap;
             max-width: 260px;
-            opacity: 0.75;
+            opacity: 0.7;
         }
         .marker-label__title {
             font-weight: 600;
@@ -77,94 +77,30 @@
         <div id="map"></div>
     </div>
 
+    <script src="{{ asset('js/kml-parser.js') }}"></script>
     <script>
         const areaKml = @json($area->boundary_kml);
         const defaultPosition = @json($defaultPosition);
-
-        function parseKmlCoordinates(kmlString) {
-            if (!kmlString) {
-                return [];
-            }
-            try {
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(kmlString, 'application/xml');
-                const coordinateNodes = xml.getElementsByTagName('coordinates');
-                const paths = [];
-
-                Array.from(coordinateNodes).forEach(node => {
-                    const text = (node.textContent || '').trim();
-                    if (!text) {
-                        return;
-                    }
-                    const coords = text.split(/\s+/).map(pair => {
-                        const [lng, lat] = pair.split(',').map(num => parseFloat(num));
-                        if (Number.isFinite(lat) && Number.isFinite(lng)) {
-                            return { lat, lng };
-                        }
-                        return null;
-                    }).filter(Boolean);
-                    if (coords.length) {
-                        paths.push(coords);
-                    }
-                });
-
-                return paths;
-            } catch (error) {
-                console.error('Failed to parse KML', error);
-                return [];
-            }
-        }
-
-        function parseKmlPoints(kmlString) {
-            if (!kmlString) {
-                return [];
-            }
-
-            try {
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(kmlString, 'application/xml');
-                const placemarks = Array.from(xml.getElementsByTagName('Placemark'));
-                const points = [];
-
-                placemarks.forEach((placemark) => {
-                    const pointNode = placemark.getElementsByTagName('Point')[0];
-                    if (!pointNode) {
-                        return;
-                    }
-
-                    const coordinateNode = pointNode.getElementsByTagName('coordinates')[0];
-                    if (!coordinateNode || !coordinateNode.textContent) {
-                        return;
-                    }
-
-                    const [lngRaw, latRaw] = coordinateNode.textContent.trim().split(',').map(Number);
-                    if (!Number.isFinite(latRaw) || !Number.isFinite(lngRaw)) {
-                        return;
-                    }
-
-                    const name = placemark.getElementsByTagName('name')[0]?.textContent?.trim() || '';
-                    const description = placemark.getElementsByTagName('description')[0]?.textContent?.trim() || '';
-
-                    points.push({
-                        lat: latRaw,
-                        lng: lngRaw,
-                        name,
-                        description,
-                    });
-                });
-
-                return points;
-            } catch (error) {
-                console.error('Failed to parse KML points', error);
-                return [];
-            }
-        }
 
         async function initMap() {
             const initialCenter = {
                 lat: Number(defaultPosition?.lat) || 35.0238868,
                 lng: Number(defaultPosition?.lng) || 135.760201,
             };
+
+            const kmlUtils = window.kmlParser;
+            if (!kmlUtils) {
+                console.error('kmlParser utilities are not loaded.');
+                return;
+            }
+
+            const {
+                parseDocument,
+                parsePolygons,
+                parsePoints,
+                parseStyles,
+                parseKmlColor,
+            } = kmlUtils;
 
             const map = new google.maps.Map(document.getElementById('map'), {
                 center: initialCenter,
@@ -173,29 +109,67 @@
                 mapId: 'area-print-map'
             });
 
-            const paths = parseKmlCoordinates(areaKml);
-            const points = parseKmlPoints(areaKml);
             const bounds = new google.maps.LatLngBounds();
+            let polygons = [];
+            let points = [];
+            let styles = {};
 
-            if (paths.length) {
+            if (areaKml && areaKml.trim()) {
+                const xml = parseDocument(areaKml);
+                if (xml && !xml.querySelector('parsererror')) {
+                    styles = parseStyles(xml);
+                    polygons = parsePolygons(xml);
+                    points = parsePoints(xml);
+                } else {
+                    console.error('Failed to parse KML for print view.');
+                }
+            }
+
+            const resolveStyle = (styleUrl) => {
+                if (!styleUrl) {
+                    return {};
+                }
+                return styles[styleUrl] || styles[styleUrl.replace(/^#/, '')] || {};
+            };
+
+            polygons.forEach((polygonDatum) => {
+                if (!Array.isArray(polygonDatum.coordinates) || polygonDatum.coordinates.length < 3) {
+                    return;
+                }
+
+                polygonDatum.coordinates.forEach((coordinate) => bounds.extend(coordinate));
+
+                const style = resolveStyle(polygonDatum.styleUrl);
+                const strokeEnabled = style.polyOutline !== '0';
+                const fillEnabled = style.polyFill !== '0';
+                const stroke = parseKmlColor(style.lineColor, '#8e24aa', strokeEnabled ? 1 : 0);
+                const fill = parseKmlColor(style.polyColor, '#ba68c8', fillEnabled ? 0.3 : 0);
+                const strokeWeight = Number.parseFloat(style.lineWidth);
+
                 const polygon = new google.maps.Polygon({
-                    paths: paths[0],
-                    strokeColor: '#8e24aa',
-                    strokeOpacity: 1,
-                    strokeWeight: 2,
-                    fillColor: '#ba68c8',
-                    fillOpacity: 0.25,
+                    paths: polygonDatum.coordinates,
+                    strokeColor: stroke.color,
+                    strokeOpacity: stroke.opacity,
+                    strokeWeight: Number.isFinite(strokeWeight) ? strokeWeight : 2,
+                    fillColor: fill.color,
+                    fillOpacity: fill.opacity,
                 });
 
                 polygon.setMap(map);
+            });
 
-                paths[0].forEach(point => bounds.extend(point));
+            if (!bounds.isEmpty() && bounds.getNorthEast().equals(bounds.getSouthWest())) {
+                map.setCenter(bounds.getCenter());
             }
 
             if (points.length) {
                 const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
 
-                points.forEach(point => {
+                points.forEach((point) => {
+                    if (!Number.isFinite(point.lat) || !Number.isFinite(point.lng)) {
+                        return;
+                    }
+
                     const container = document.createElement('div');
                     container.className = 'marker-label';
 
