@@ -1,5 +1,7 @@
 @extends('admin.layouts.app')
 
+@section('title', __('Users'))
+
 @section('content')
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -34,10 +36,10 @@
                     <td>{{ $user->email }}</td>
                     <td>{{ $user->created_at->format('Y-m-d H:i') }}</td>
                     <td>
-                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $user->id }}">
+                        <button type="button" class="btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $user->id }}">
                             <i class="cil-trash"></i>
                         </button>
                         

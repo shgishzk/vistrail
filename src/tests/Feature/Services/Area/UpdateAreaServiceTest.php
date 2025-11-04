@@ -19,7 +19,7 @@ class UpdateAreaServiceTest extends TestCase
         $area = Area::factory()->create([
             'number' => 'A123',
             'name' => 'Original Area',
-            'boundary_geojson' => '{"type":"Polygon","coordinates":[[[139.7671,35.6812],[139.7681,35.6802],[139.7661,35.6792],[139.7671,35.6812]]]}',
+            'boundary_kml' => $this->sampleKml(),
             'memo' => 'Original memo',
         ]);
         
@@ -28,7 +28,7 @@ class UpdateAreaServiceTest extends TestCase
         $areaData = [
             'number' => 'B456',
             'name' => 'Updated Area',
-            'boundary_geojson' => '{"type":"Polygon","coordinates":[[[139.7671,35.6812],[139.7681,35.6802],[139.7661,35.6792],[139.7671,35.6812]]]}',
+            'boundary_kml' => $this->sampleKml(),
             'memo' => 'Updated memo',
         ];
         
@@ -58,7 +58,7 @@ class UpdateAreaServiceTest extends TestCase
         $areaData = [
             'number' => 'C789',
             'name' => 'New Name',
-            'boundary_geojson' => '{"type":"Polygon","coordinates":[[[139.7671,35.6812],[139.7681,35.6802],[139.7661,35.6792],[139.7671,35.6812]]]}',
+            'boundary_kml' => $this->sampleKml(),
             'memo' => 'New memo',
         ];
         
@@ -83,7 +83,7 @@ class UpdateAreaServiceTest extends TestCase
         $area = Area::factory()->create([
             'number' => 'D123',
             'name' => 'Original Name',
-            'boundary_geojson' => '{"type":"Polygon","coordinates":[[[139.7671,35.6812],[139.7681,35.6802],[139.7661,35.6792],[139.7671,35.6812]]]}',
+            'boundary_kml' => $this->sampleKml(),
             'memo' => 'Original memo',
         ]);
         
@@ -92,7 +92,7 @@ class UpdateAreaServiceTest extends TestCase
         $areaData = [
             'number' => 'D123', // Same number
             'name' => 'Updated Name',
-            'boundary_geojson' => '{"type":"Polygon","coordinates":[[[139.7671,35.6812],[139.7681,35.6802],[139.7661,35.6792],[139.7671,35.6812]]]}',
+            'boundary_kml' => $this->sampleKml(),
             'memo' => 'Original memo', // Same memo
         ];
         
@@ -107,5 +107,25 @@ class UpdateAreaServiceTest extends TestCase
             'name' => 'Updated Name',
             'memo' => 'Original memo',
         ]);
+    }
+
+    private function sampleKml(): string
+    {
+        return <<<KML
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Placemark>
+    <Polygon>
+      <outerBoundaryIs>
+        <LinearRing>
+          <coordinates>
+            139.7671,35.6812,0 139.7681,35.6802,0 139.7661,35.6792,0 139.7671,35.6812,0
+          </coordinates>
+        </LinearRing>
+      </outerBoundaryIs>
+    </Polygon>
+  </Placemark>
+</kml>
+KML;
     }
 }

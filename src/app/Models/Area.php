@@ -12,7 +12,7 @@ class Area extends Model
     protected $fillable = [
         'number',
         'name',
-        'boundary_geojson',
+        'boundary_kml',
         'memo',
     ];
 
@@ -27,5 +27,10 @@ class Area extends Model
     public function visits()
     {
         return $this->hasMany(Visit::class);
+    }
+
+    public function latestVisit()
+    {
+        return $this->hasOne(Visit::class)->latestOfMany('start_date');
     }
 }

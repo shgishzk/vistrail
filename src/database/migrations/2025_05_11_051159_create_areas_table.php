@@ -12,7 +12,7 @@ class CreateAreasTable extends Migration
             $table->id()->comment('Area ID');
             $table->string('number')->comment('Area Number');
             $table->string('name')->nullable()->comment('Area Name');
-            $table->longText('boundary_geojson')->comment('Boundary GeoJSON');
+            $table->longText('boundary_kml')->comment('Boundary KML');
             $table->text('memo')->nullable()->comment('Memo');
             $table->timestamps();
         });

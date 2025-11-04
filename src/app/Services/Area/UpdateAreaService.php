@@ -12,7 +12,7 @@ class UpdateAreaService
     public function execute(Area $area, array $data): Area
     {
         $area->update($data);
-        
+
         return $area;
     }
 }

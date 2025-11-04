@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Vistrail Admin')</title>
+    <title>@yield('title', __('Admin Dashboard')) | {{ config('app.name') }}</title>
     @vite(['resources/js/admin.js', 'resources/css/admin.css'])
 </head>
 <body class="d-flex bg-light">
     <div class="sidebar sidebar-lg sidebar-dark sidebar-fixed sidebar-self-hiding-md border-end px-xl-4 docs-sidebar elevation-0" id="sidebar">
         <div class="sidebar-header border-bottom">
-            <div class="sidebar-brand">Vistrail Admin</div>
+            <div class="sidebar-brand">@lang('Online Territory') @lang('Admin')</div>
         </div>
         <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="">
             <li class="nav-item">
@@ -18,26 +18,48 @@
                 </a>
             </li>
 
-            <li class="nav-title">@lang('Users')</li>
+            <li class="nav-title">@lang('Users Management')</li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}" href="{{ route('admin.users') }}">
                     <i class="nav-icon cil-user"></i> @lang('Users')
                 </a>
             </li>
 
-            <li class="nav-title">@lang('Territory')</li>
+            <li class="nav-title">@lang('Territory Management')</li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.areas*') ? 'active' : '' }}" href="{{ route('admin.areas') }}">
                     <i class="nav-icon cil-folder-open"></i> @lang('Areas')
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/visits">
+                <a class="nav-link {{ request()->routeIs('admin.visits*') ? 'active' : '' }}" href="{{ route('admin.visits') }}">
                     <i class="nav-icon cil-briefcase"></i> @lang('Visits')
                 </a>
             </li>
 
-            <li class="nav-title">@lang('Account')</li>
+            <li class="nav-title">@lang('Building Management')</li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.buildings*') ? 'active' : '' }}" href="{{ route('admin.buildings') }}">
+                    <i class="nav-icon cil-building"></i> @lang('Buildings')
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.groups*') ? 'active' : '' }}" href="{{ route('admin.groups') }}">
+                    <i class="nav-icon cil-layers"></i> @lang('Groups')
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.rooms*') ? 'active' : '' }}" href="{{ route('admin.rooms') }}">
+                    <i class="nav-icon cil-list"></i> @lang('Rooms')
+                </a>
+            </li>
+
+            <li class="nav-title">@lang('Account Management')</li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.admins*') ? 'active' : '' }}" href="{{ route('admin.admins') }}">
+                    <i class="nav-icon cil-people"></i> @lang('Admins')
+                </a>
+            </li>
             <li class="nav-item">
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
@@ -65,5 +87,6 @@
             </div>
         </div>
     </div>
+    @stack('scripts')
 </body>
 </html>

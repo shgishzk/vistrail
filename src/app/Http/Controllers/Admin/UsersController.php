@@ -18,7 +18,9 @@ class UsersController extends Controller
      */
     public function index(): View
     {
-        $users = User::paginate(15);
+        $users = User::orderByRaw('COALESCE(name_kana, name)')
+            ->orderBy('name')
+            ->paginate(15);
         
         return view('admin.users.index', compact('users'));
     }
@@ -42,7 +44,7 @@ class UsersController extends Controller
         $storeUserService->execute($validated);
         
         return redirect()->route('admin.users')
-            ->with('success', 'ユーザーが正常に作成されました。');
+            ->with('success', __('User created successfully.'));
     }
     
     /**
@@ -64,7 +66,7 @@ class UsersController extends Controller
         $updateUserService->execute($user, $validated);
         
         return redirect()->route('admin.users')
-            ->with('success', 'ユーザーが正常に更新されました。');
+            ->with('success', __('User updated successfully.'));
     }
 
     /**
@@ -76,6 +78,6 @@ class UsersController extends Controller
         $deleteUserService->execute($user);
         
         return redirect()->route('admin.users')
-            ->with('success', 'ユーザーが正常に削除されました。');
+            ->with('success', __('User deleted successfully.'));
     }
 }

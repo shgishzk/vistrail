@@ -13,6 +13,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/api/user', [UserAuthController::class, 'user']);
 });
 
+Route::get('/{spa}', [UserAuthController::class, 'showHome'])
+    ->where('spa', 'areas|buildings|groups');
+
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('/pins', [PinController::class, 'index']);
 //     Route::post('/pins', [PinController::class, 'store']);
@@ -41,5 +44,48 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('areas/{area}/edit', [\App\Http\Controllers\Admin\AreasController::class, 'edit'])->name('areas.edit');
         Route::put('areas/{area}', [\App\Http\Controllers\Admin\AreasController::class, 'update'])->name('areas.update');
         Route::delete('areas/{area}', [\App\Http\Controllers\Admin\AreasController::class, 'destroy'])->name('areas.destroy');
+        Route::get('areas/{area}/visits', [\App\Http\Controllers\Admin\AreaVisitsController::class, 'index'])->name('areas.visits');
+        Route::get('areas/{area}/print', [\App\Http\Controllers\Admin\AreasController::class, 'print'])->name('areas.print');
+
+        Route::get('visits', [\App\Http\Controllers\Admin\VisitsController::class, 'index'])->name('visits');
+        Route::get('visits/create', [\App\Http\Controllers\Admin\VisitsController::class, 'create'])->name('visits.create');
+        Route::post('visits', [\App\Http\Controllers\Admin\VisitsController::class, 'store'])->name('visits.store');
+        Route::get('visits/{visit}/edit', [\App\Http\Controllers\Admin\VisitsController::class, 'edit'])->name('visits.edit');
+        Route::put('visits/{visit}', [\App\Http\Controllers\Admin\VisitsController::class, 'update'])->name('visits.update');
+        Route::delete('visits/{visit}', [\App\Http\Controllers\Admin\VisitsController::class, 'destroy'])->name('visits.destroy');
+
+        Route::get('buildings', [\App\Http\Controllers\Admin\BuildingsController::class, 'index'])->name('buildings');
+        Route::get('buildings/create', [\App\Http\Controllers\Admin\BuildingsController::class, 'create'])->name('buildings.create');
+        Route::post('buildings', [\App\Http\Controllers\Admin\BuildingsController::class, 'store'])->name('buildings.store');
+        Route::get('buildings/{building}/edit', [\App\Http\Controllers\Admin\BuildingsController::class, 'edit'])->name('buildings.edit');
+        Route::put('buildings/{building}', [\App\Http\Controllers\Admin\BuildingsController::class, 'update'])->name('buildings.update');
+        Route::delete('buildings/{building}', [\App\Http\Controllers\Admin\BuildingsController::class, 'destroy'])->name('buildings.destroy');
+        Route::get('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingsController::class, 'rooms'])->name('buildings.rooms');
+        Route::get('buildings/{building}/rooms/create', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'create'])->name('buildings.rooms.create');
+        Route::post('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'store'])->name('buildings.rooms.store');
+        Route::put('buildings/{building}/rooms', [\App\Http\Controllers\Admin\BuildingRoomsController::class, 'update'])->name('buildings.rooms.update');
+
+        Route::get('groups', [\App\Http\Controllers\Admin\GroupsController::class, 'index'])->name('groups');
+        Route::get('groups/create', [\App\Http\Controllers\Admin\GroupsController::class, 'create'])->name('groups.create');
+        Route::post('groups', [\App\Http\Controllers\Admin\GroupsController::class, 'store'])->name('groups.store');
+        Route::get('groups/{group}/edit', [\App\Http\Controllers\Admin\GroupsController::class, 'edit'])->name('groups.edit');
+        Route::put('groups/{group}', [\App\Http\Controllers\Admin\GroupsController::class, 'update'])->name('groups.update');
+        Route::delete('groups/{group}', [\App\Http\Controllers\Admin\GroupsController::class, 'destroy'])->name('groups.destroy');
+        Route::get('groups/{group}/buildings', [\App\Http\Controllers\Admin\GroupBuildingsController::class, 'edit'])->name('groups.buildings.edit');
+        Route::put('groups/{group}/buildings', [\App\Http\Controllers\Admin\GroupBuildingsController::class, 'update'])->name('groups.buildings.update');
+
+        Route::get('rooms', [\App\Http\Controllers\Admin\RoomsController::class, 'index'])->name('rooms');
+        Route::get('rooms/create', [\App\Http\Controllers\Admin\RoomsController::class, 'create'])->name('rooms.create');
+        Route::post('rooms', [\App\Http\Controllers\Admin\RoomsController::class, 'store'])->name('rooms.store');
+        Route::get('rooms/{room}/edit', [\App\Http\Controllers\Admin\RoomsController::class, 'edit'])->name('rooms.edit');
+        Route::put('rooms/{room}', [\App\Http\Controllers\Admin\RoomsController::class, 'update'])->name('rooms.update');
+        Route::delete('rooms/{room}', [\App\Http\Controllers\Admin\RoomsController::class, 'destroy'])->name('rooms.destroy');
+
+        Route::get('admins', [\App\Http\Controllers\Admin\AdminsController::class, 'index'])->name('admins');
+        Route::get('admins/create', [\App\Http\Controllers\Admin\AdminsController::class, 'create'])->name('admins.create');
+        Route::post('admins', [\App\Http\Controllers\Admin\AdminsController::class, 'store'])->name('admins.store');
+        Route::get('admins/{admin}/edit', [\App\Http\Controllers\Admin\AdminsController::class, 'edit'])->name('admins.edit');
+        Route::put('admins/{admin}', [\App\Http\Controllers\Admin\AdminsController::class, 'update'])->name('admins.update');
+        Route::delete('admins/{admin}', [\App\Http\Controllers\Admin\AdminsController::class, 'destroy'])->name('admins.destroy');
     });
 });

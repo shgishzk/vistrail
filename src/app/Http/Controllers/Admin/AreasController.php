@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAreaRequest;
 use App\Http\Requests\Admin\UpdateAreaRequest;
 use App\Models\Area;
+use App\Services\Area\FilterAreaService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AreasController extends Controller
@@ -14,11 +16,12 @@ class AreasController extends Controller
     /**
      * Display a listing of the areas.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $areas = Area::paginate(15);
-        
-        return view('admin.areas.index', compact('areas'));
+        $filterService = new FilterAreaService();
+        [$areas, $filters, $suggestUsers, $suggestSelectedDisplay] = $filterService->execute($request);
+
+        return view('admin.areas.index', compact('areas', 'filters', 'suggestUsers', 'suggestSelectedDisplay'));
     }
 
     /**
@@ -40,7 +43,7 @@ class AreasController extends Controller
         $storeAreaService->execute($validated);
         
         return redirect()->route('admin.areas')
-            ->with('success', 'エリアが正常に作成されました。');
+            ->with('success', __('Area created successfully.'));
     }
     
     /**
@@ -48,7 +51,9 @@ class AreasController extends Controller
      */
     public function edit(Area $area): View
     {
-        return view('admin.areas.edit', compact('area'));
+        $googleMapsApiKey = config('services.google.maps_api_key');
+
+        return view('admin.areas.edit', compact('area', 'googleMapsApiKey'));
     }
 
     /**
@@ -61,8 +66,8 @@ class AreasController extends Controller
         $updateAreaService = new \App\Services\Area\UpdateAreaService();
         $updateAreaService->execute($area, $validated);
         
-        return redirect()->route('admin.areas')
-            ->with('success', 'エリアが正常に更新されました。');
+        return redirect()->route('admin.areas.edit', $area)
+            ->with('success', __('Area updated successfully.'));
     }
 
     /**
@@ -74,6 +79,36 @@ class AreasController extends Controller
         $deleteAreaService->execute($area);
         
         return redirect()->route('admin.areas')
-            ->with('success', 'エリアが正常に削除されました。');
+            ->with('success', __('Area deleted successfully.'));
+    }
+
+    public function print(Area $area): View
+    {
+        $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = config('services.google.default_position');
+
+        return view('admin.areas.print', [
+            'area' => $area,
+            'googleMapsApiKey' => $googleMapsApiKey,
+            'defaultPosition' => $defaultPosition,
+        ]);
+    }
+
+    private function getLatestVisitorSuggestions(): array
+    {
+        return \App\Models\User::orderBy('name')
+            ->get(['id', 'name', 'name_kana', 'email'])
+            ->map(function ($user) {
+                $parts = [$user->name];
+                if (!empty($user->name_kana)) {
+                    $parts[] = $user->name_kana;
+                }
+
+                return [
+                    'id' => $user->id,
+                    'display' => implode(' / ', $parts) . ' (' . $user->email . ')',
+                ];
+            })
+            ->toArray();
     }
 }
