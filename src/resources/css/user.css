@@ -15,3 +15,7 @@
 
 /* Third-party plugins */
 @plugin "@tailwindcss/forms";
+
+.avatar-logo {
+    @apply h-9 w-9 rounded-full object-cover;
+}
