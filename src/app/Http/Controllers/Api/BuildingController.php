@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Building;
 use Illuminate\Http\Request;
 
-class BuildingMapController extends Controller
+class BuildingController extends Controller
 {
     public function __invoke(Request $request)
     {
@@ -15,8 +15,8 @@ class BuildingMapController extends Controller
         $lat = (float) $request->input('lat', $defaultPosition['lat'] ?? 0);
         $lng = (float) $request->input('lng', $defaultPosition['lng'] ?? 0);
 
-        // Half side of the square in kilometres (±0.8km gives a 1.6km window)
-        $halfSideKm = 0.8;
+        // Half side of the square in kilometres (±1.5km gives a 3km window)
+        $halfSideKm = 1.5;
         $latRad = deg2rad($lat);
         // 1 degree of latitude approximates this many kilometres (WGS84)
         $kmPerDegreeLat = 110.574;
@@ -46,12 +46,6 @@ class BuildingMapController extends Controller
 
         return response()->json([
             'buildings' => $buildings,
-            'default_position' => [
-                'lat' => (float) ($defaultPosition['lat'] ?? 0),
-                'lng' => (float) ($defaultPosition['lng'] ?? 0),
-            ],
-            'marker_styles' => config('services.google.marker_styles'),
-            'maps_api_key' => config('services.google.maps_api_key'),
         ]);
     }
 }

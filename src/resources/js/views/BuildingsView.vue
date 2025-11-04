@@ -39,6 +39,15 @@ export default {
       glyphColor: '#455A64',
     };
 
+    const applyMarkerStyles = (styles = {}) => {
+      markerStyles = styles || {};
+      fallbackMarkerStyle = {
+        background: markerStyles.default?.background || '#607D8B',
+        borderColor: markerStyles.default?.borderColor || '#455A64',
+        glyphColor: markerStyles.default?.glyphColor || markerStyles.default?.borderColor || '#455A64',
+      };
+    };
+
     const clearMarkers = () => {
       markers.forEach(marker => {
         marker.map = null;
@@ -114,17 +123,10 @@ export default {
         }
         abortController = new AbortController();
 
-        const { data } = await axios.get('/api/buildings/map', {
+        const { data } = await axios.get('/api/buildings', {
           params: { lat, lng },
           signal: abortController.signal,
         });
-
-        markerStyles = data.marker_styles || {};
-        fallbackMarkerStyle = {
-          background: markerStyles.default?.background || '#607D8B',
-          borderColor: markerStyles.default?.borderColor || '#455A64',
-          glyphColor: markerStyles.default?.glyphColor || markerStyles.default?.borderColor || '#455A64',
-        };
 
         error.value = null;
         renderMarkers(data.buildings || []);
@@ -169,25 +171,20 @@ export default {
 
     const initialiseMap = async () => {
       try {
-        const { data } = await axios.get('/api/buildings/map');
+        const { data: config } = await axios.get('/api/map/config');
 
-        markerStyles = data.marker_styles || {};
-        fallbackMarkerStyle = {
-          background: markerStyles.default?.background || '#607D8B',
-          borderColor: markerStyles.default?.borderColor || '#455A64',
-          glyphColor: markerStyles.default?.glyphColor || markerStyles.default?.borderColor || '#455A64',
-        };
+        applyMarkerStyles(config.marker_styles);
 
         const defaultPosition = {
-          lat: Number(data.default_position?.lat) || 35.0238868,
-          lng: Number(data.default_position?.lng) || 135.760201,
+          lat: Number(config.default_position?.lat) || 35.0238868,
+          lng: Number(config.default_position?.lng) || 135.760201,
         };
 
-        if (!data.maps_api_key) {
+        if (!config.maps_api_key) {
           throw new Error('Google Maps APIキーが設定されていません。');
         }
 
-        await loadGoogleMaps(data.maps_api_key);
+        await loadGoogleMaps(config.maps_api_key);
         await google.maps.importLibrary('maps');
         markerLibrary = await google.maps.importLibrary('marker');
 
@@ -199,7 +196,7 @@ export default {
           mapId: 'buildings-map',
         });
 
-        renderMarkers(data.buildings || []);
+        await fetchBuildings(defaultPosition.lat, defaultPosition.lng);
         lastFetchCenter = { ...defaultPosition };
 
         google.maps.event.addListener(mapInstance, 'idle', scheduleFetch);
