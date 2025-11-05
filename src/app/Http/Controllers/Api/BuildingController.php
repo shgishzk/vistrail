@@ -153,6 +153,30 @@ class BuildingController extends Controller
         ]);
     }
 
+    public function touchRoom(Building $building, Room $room)
+    {
+        abort_unless($building->is_public && $room->building_id === $building->id, 404);
+
+        $room->touch();
+        $room->refresh();
+
+        $statusValue = $room->status instanceof RoomStatus
+            ? $room->status->value
+            : (string) $room->status;
+
+        $alert = $building->roomAlert($room);
+
+        return response()->json([
+            'room' => [
+                'id' => $room->id,
+                'status' => $statusValue,
+                'status_label' => RoomStatus::labels()[$statusValue] ?? $statusValue,
+                'updated_at' => optional($room->updated_at)->toDateTimeString(),
+                'alert' => $alert,
+            ],
+        ]);
+    }
+
     public function search(Request $request)
     {
         $validated = $request->validate([

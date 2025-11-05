@@ -138,9 +138,20 @@
                           type="button"
                           class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none"
                           @click="onStatusSelect(room, value)"
+                          data-hs-dropdown-close
                         >
                           <span>{{ label }}</span>
                           <Check v-if="room.status === value" class="h-4 w-4 text-indigo-500" />
+                        </button>
+                        <div class="my-1 border-t border-slate-100"></div>
+                        <button
+                          type="button"
+                          class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none"
+                          @click="touchRoomTimestamp(room)"
+                          data-hs-dropdown-close
+                        >
+                          <RefreshCcw class="h-4 w-4 text-slate-400" />
+                          <span>日時のみ更新</span>
                         </button>
                       </div>
                     </div>
@@ -168,7 +179,7 @@ import { onMounted, ref, nextTick, computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import axios from 'axios';
 import { toast } from '../utils/toast';
-import { AlertCircle, AlertTriangle, ChevronDown, Check, Loader2 } from 'lucide-vue-next';
+import { AlertCircle, AlertTriangle, ChevronDown, Check, Loader2, RefreshCcw } from 'lucide-vue-next';
 
 export default {
   name: 'BuildingDetailView',
@@ -179,6 +190,7 @@ export default {
     ChevronDown,
     Check,
     Loader2,
+    RefreshCcw,
   },
   setup() {
     const route = useRoute();
@@ -321,6 +333,37 @@ export default {
       handleStatusChange(room, value);
     };
 
+    const touchRoomTimestamp = async (room) => {
+      if (room.updating) {
+        return;
+      }
+
+      const originalAlert = room.alert;
+      const originalUpdatedAt = room.updated_at;
+      room.updating = true;
+
+      try {
+        const { data } = await axios.patch(`/api/buildings/${route.params.id}/rooms/${room.id}/touch`);
+        updateRoomInState({
+          id: room.id,
+          status: data.room.status,
+          status_label: data.room.status_label,
+          updated_at: data.room.updated_at,
+          alert: data.room.alert,
+        });
+        await nextTick();
+        window.HSStaticMethods?.autoInit?.(['tooltip', 'dropdown']);
+        toast.success('最終更新日時を更新しました。');
+      } catch (err) {
+        console.error(err);
+        room.alert = originalAlert;
+        room.updated_at = originalUpdatedAt;
+        toast.error('最終更新日時の更新に失敗しました。');
+      } finally {
+        room.updating = false;
+      }
+    };
+
     return {
       building,
       loading,
@@ -335,6 +378,7 @@ export default {
       isAutoLock,
       statusLabel,
       onStatusSelect,
+      touchRoomTimestamp,
     };
   },
 };

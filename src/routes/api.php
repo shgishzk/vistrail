@@ -12,5 +12,6 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->g
     Route::get('/buildings/search', [BuildingController::class, 'search']);
     Route::get('/buildings/{building}', [BuildingController::class, 'show']);
     Route::patch('/buildings/{building}/rooms/{room}', [BuildingController::class, 'updateRoomStatus']);
+    Route::patch('/buildings/{building}/rooms/{room}/touch', [BuildingController::class, 'touchRoom']);
     Route::get('/news', NewsController::class);
 });
