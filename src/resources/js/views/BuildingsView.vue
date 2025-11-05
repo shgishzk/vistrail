@@ -225,7 +225,7 @@ export default {
         error.value = null;
         mapInstance = new google.maps.Map(mapContainer.value, {
           center: defaultPosition,
-          zoom: 14,
+          zoom: 15,
           zoomControl: true,
           mapId: 'buildings-map',
         });
