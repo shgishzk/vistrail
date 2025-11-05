@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
         Area::factory()->count(10)->create();
         Group::factory()->count(4)->create();
         Building::factory()
-            ->count(100)
+            ->count(500)
             ->has(Room::factory()->count(20))
             ->create();
 

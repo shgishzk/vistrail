@@ -24,7 +24,7 @@ class BuildingFactory extends Factory
             // lat and lng around Kyoto, Japan.
             'lat' => fake()->randomFloat(6, 34.950000, 35.100000),
             'lng' => fake()->randomFloat(6, 135.650000, 135.850000),
-            'is_public' => fake()->boolean() ? 1 : 0,
+            'is_public' => 1,
             'memo' => fake()->optional()->sentence(),
         ];
     }

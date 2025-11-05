@@ -31,6 +31,7 @@ class BuildingController extends Controller
             ->whereNotNull('lng')
             ->whereBetween('lat', [$lat - $degLat, $lat + $degLat])
             ->whereBetween('lng', [$lng - $degLng, $lng + $degLng])
+            ->where('is_public', true)
             ->orderBy('name')
             ->get()
             ->map(function (Building $building) {
