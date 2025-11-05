@@ -6,6 +6,7 @@ use App\Models\Admin;
 use App\Models\Area;
 use App\Models\Building;
 use App\Models\Group;
+use App\Models\News;
 use App\Models\Room;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -39,5 +40,7 @@ class DatabaseSeeder extends Seeder
             ->count(100)
             ->has(Room::factory()->count(20))
             ->create();
+
+        News::factory()->count(15)->create();
     }
 }

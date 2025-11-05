@@ -36,13 +36,13 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{{ route('admin.groups.buildings.edit', $group) }}" class="btn btn-sm btn-outline-primary" title="@lang('Manage Buildings')">
+                        <a href="{{ route('admin.groups.buildings.edit', $group) }}" class="btn btn btn-outline-primary" title="@lang('Manage Buildings')">
                             <i class="cil-building"></i>
                         </a>
-                        <a href="{{ route('admin.groups.edit', $group) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.groups.edit', $group) }}" class="btn btn btn-outline-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $group->id }}">
+                        <button type="button" class="btn btn btn-outline-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $group->id }}">
                             <i class="cil-trash"></i>
                         </button>
 
@@ -61,7 +61,7 @@
                                         <form action="{{ route('admin.groups.destroy', $group) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">@lang('Delete')</button>
+                                            <button type="submit" class="btn btn-outline-danger">@lang('Delete')</button>
                                         </form>
                                     </div>
                                 </div>

@@ -36,10 +36,10 @@
                     <td>{{ $admin->email }}</td>
                     <td>{{ $admin->created_at->format('Y-m-d H:i') }}</td>
                     <td>
-                        <a href="{{ route('admin.admins.edit', $admin) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.admins.edit', $admin) }}" class="btn btn btn-outline-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $admin->id }}">
+                        <button type="button" class="btn btn btn-outline-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $admin->id }}">
                             <i class="cil-trash"></i>
                         </button>
 
@@ -58,7 +58,7 @@
                                         <form action="{{ route('admin.admins.destroy', $admin) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">@lang('Delete')</button>
+                                            <button type="submit" class="btn btn-outline-danger">@lang('Delete')</button>
                                         </form>
                                     </div>
                                 </div>

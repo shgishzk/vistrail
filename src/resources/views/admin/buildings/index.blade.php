@@ -81,10 +81,10 @@
                         <a href="{{ route('admin.buildings.rooms', $building) }}" class="btn btn btn-outline-primary" title="@lang('View Rooms')">
                             <i class="cil-list"></i>
                         </a>
-                        <a href="{{ route('admin.buildings.edit', $building) }}" class="btn btn btn-primary">
+                        <a href="{{ route('admin.buildings.edit', $building) }}" class="btn btn btn-outline-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $building->id }}">
+                        <button type="button" class="btn btn btn-outline-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $building->id }}">
                             <i class="cil-trash"></i>
                         </button>
 
@@ -103,7 +103,7 @@
                                         <form action="{{ route('admin.buildings.destroy', $building) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">@lang('Delete')</button>
+                                            <button type="submit" class="btn btn-outline-danger">@lang('Delete')</button>
                                         </form>
                                     </div>
                                 </div>

@@ -54,6 +54,13 @@
                 </a>
             </li>
 
+            <li class="nav-title">@lang('Communication')</li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.news*') ? 'active' : '' }}" href="{{ route('admin.news') }}">
+                    <i class="nav-icon cil-newspaper"></i> @lang('News')
+                </a>
+            </li>
+
             <li class="nav-title">@lang('Account Management')</li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.admins*') ? 'active' : '' }}" href="{{ route('admin.admins') }}">

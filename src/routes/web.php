@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Auth\UserAuthController;
 
 Route::get('/', [UserAuthController::class, 'showHome'])->name('home');
@@ -87,5 +88,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('admins/{admin}/edit', [\App\Http\Controllers\Admin\AdminsController::class, 'edit'])->name('admins.edit');
         Route::put('admins/{admin}', [\App\Http\Controllers\Admin\AdminsController::class, 'update'])->name('admins.update');
         Route::delete('admins/{admin}', [\App\Http\Controllers\Admin\AdminsController::class, 'destroy'])->name('admins.destroy');
+
+        Route::get('news', [NewsController::class, 'index'])->name('news');
+        Route::get('news/create', [NewsController::class, 'create'])->name('news.create');
+        Route::post('news', [NewsController::class, 'store'])->name('news.store');
+        Route::get('news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
+        Route::put('news/{news}', [NewsController::class, 'update'])->name('news.update');
+        Route::delete('news/{news}', [NewsController::class, 'destroy'])->name('news.destroy');
     });
 });
