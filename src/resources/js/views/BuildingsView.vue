@@ -397,16 +397,18 @@ export default {
         await google.maps.importLibrary('maps');
         markerLibrary = await google.maps.importLibrary('marker');
 
+        const centerPosition = await resolveInitialPosition(defaultPosition);
+
         error.value = null;
         mapInstance = new google.maps.Map(mapContainer.value, {
-          center: defaultPosition,
+          center: centerPosition,
           zoom: 17,
           zoomControl: true,
           mapId: 'buildings-map',
         });
 
-        await fetchBuildings(defaultPosition.lat, defaultPosition.lng);
-        lastFetchCenter = { ...defaultPosition };
+        await fetchBuildings(centerPosition.lat, centerPosition.lng);
+        lastFetchCenter = { ...centerPosition };
 
         google.maps.event.addListener(mapInstance, 'idle', scheduleFetch);
       } catch (err) {
@@ -415,6 +417,40 @@ export default {
       } finally {
         isLoading.value = false;
       }
+    };
+
+    const resolveInitialPosition = (fallbackPosition) => {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          resolve(fallbackPosition);
+          return;
+        }
+
+        const timer = setTimeout(() => {
+          resolve(fallbackPosition);
+        }, 5000);
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            clearTimeout(timer);
+            const { latitude, longitude } = position.coords || {};
+            if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+              resolve({ lat: latitude, lng: longitude });
+            } else {
+              resolve(fallbackPosition);
+            }
+          },
+          () => {
+            clearTimeout(timer);
+            resolve(fallbackPosition);
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 60_000,
+            timeout: 5000,
+          },
+        );
+      });
     };
 
     onMounted(() => {
