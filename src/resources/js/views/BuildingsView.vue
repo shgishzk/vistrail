@@ -64,15 +64,46 @@ export default {
       };
     };
 
+    const escapeHtml = (value = '') => {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    };
+
+    const formatVisitRate = (value) => {
+      if (typeof value !== 'number' || Number.isNaN(value)) {
+        return '―';
+      }
+      return `${value.toFixed(1)}%`;
+    };
+
+    const formatMemo = (value) => {
+      if (!value) {
+        return '―';
+      }
+      return escapeHtml(value).replace(/\n/g, '<br>');
+    };
+
     const createInfoWindowContent = (building) => {
-      const urlSection = building.url
-        ? `<div class="text-sm"><a href="${building.url}" target="_blank" rel="noopener">公式サイトを見る</a></div>`
-        : '';
+      const detailUrl = building.detail_url || `/buildings/${building.id}`;
+      const safeName = escapeHtml(building.name || 'マンション');
+      const lastVisit = building.last_visit_date ? escapeHtml(building.last_visit_date) : '―';
+      const visitRate = formatVisitRate(building.visit_rate);
+      const memo = formatMemo(building.memo);
 
       return `
-        <div class="p-2">
-          <div class="font-semibold">${building.name}</div>
-          ${urlSection}
+        <div class="min-w-[220px] max-w-xs space-y-2">
+          <a href="${detailUrl}" class="block text-base font-semibold text-indigo-600 hover:text-indigo-500 hover:underline" target="_self">
+            ${safeName}
+          </a>
+          <div class="space-y-1 text-sm text-slate-600">
+            <div><span class="font-medium text-slate-700">最終訪問日:</span> ${lastVisit}</div>
+            <div><span class="font-medium text-slate-700">訪問率:</span> ${visitRate}</div>
+            <div><span class="font-medium text-slate-700">メモ:</span> ${memo}</div>
+          </div>
         </div>
       `;
     };

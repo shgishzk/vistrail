@@ -8,6 +8,7 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->group(function () {
     Route::get('/map/config', MapConfigController::class);
-    Route::get('/buildings', BuildingController::class);
+    Route::get('/buildings', [BuildingController::class, 'index']);
+    Route::get('/buildings/{building}', [BuildingController::class, 'show']);
     Route::get('/news', NewsController::class);
 });
