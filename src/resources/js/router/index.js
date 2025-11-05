@@ -49,13 +49,14 @@ const router = createRouter({
 
 const defaultTitle = (typeof document !== 'undefined' && document.title) ? document.title : 'オンライン区域';
 
-router.afterEach((to) => {
+router.afterEach((to, from, failure) => {
   const prefix = import.meta.env.VITE_APP_BRAND_PREFIX || '';
   const brand = prefix ? `${prefix}オンライン区域` : 'オンライン区域';
   const pageTitle = titleMap[to.name] || defaultTitle;
   if (typeof document !== 'undefined') {
     document.title = `${pageTitle} - ${brand}`;
   }
+  if (!failure) setTimeout(() => window.HSStaticMethods.autoInit(), 100);
 });
 
 export default router;

@@ -75,6 +75,7 @@
             <thead class="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
               <tr>
                 <th class="px-6 py-3">部屋番号</th>
+                <th class="px-6 py-3">注意</th>
                 <th class="px-6 py-3">ステータス</th>
                 <th class="px-6 py-3">最終更新日時</th>
               </tr>
@@ -82,6 +83,30 @@
             <tbody class="divide-y divide-slate-200 bg-white">
               <tr v-for="room in building?.rooms ?? []" :key="room.id">
                 <td class="px-6 py-3 font-medium text-slate-900">{{ room.number }}</td>
+                <td class="px-6 py-3">
+                  <div class="flex items-center">
+                    <template v-if="room.alert">
+                      <div class="hs-tooltip inline-flex [--placement:top]">
+                        <button
+                          type="button"
+                          class="hs-tooltip-toggle inline-flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          :class="alertButtonClass(room.alert)"
+                          :aria-label="room.alert.message"
+                        >
+                          <AlertCircle v-if="room.alert.icon === 'alert-circle'" class="h-4 w-4" />
+                          <AlertTriangle v-else-if="room.alert.icon === 'alert-triangle'" class="h-4 w-4" />
+                        </button>
+                        <div
+                          class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible hidden w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 opacity-0 shadow-xl transition-[opacity,transform] duration-200"
+                          role="tooltip"
+                        >
+                          {{ room.alert.message }}
+                        </div>
+                      </div>
+                    </template>
+                    <span v-else class="text-slate-400">―</span>
+                  </div>
+                </td>
                 <td class="px-6 py-3">
                   <template v-if="room.selectable">
                     <select
@@ -114,15 +139,18 @@
 </template>
 
 <script>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, nextTick } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import axios from 'axios';
 import { toast } from '../utils/toast';
+import { AlertCircle, AlertTriangle } from 'lucide-vue-next';
 
 export default {
   name: 'BuildingDetailView',
   components: {
     RouterLink,
+    AlertCircle,
+    AlertTriangle,
   },
   setup() {
     const route = useRoute();
@@ -146,6 +174,8 @@ export default {
         };
         statuses.value = data.statuses || {};
         selectableStatuses.value = data.selectable_statuses || {};
+        await nextTick();
+        window.HSStaticMethods?.autoInit?.('tooltip');
       } catch (err) {
         console.error(err);
         error.value = 'マンション情報の取得に失敗しました。';
@@ -197,6 +227,7 @@ export default {
 
     const handleStatusChange = async (room, newStatus) => {
       const originalStatus = room.status;
+      const originalAlert = room.alert;
       room.status = newStatus;
       room.updating = true;
 
@@ -210,12 +241,15 @@ export default {
           status: data.room.status,
           status_label: data.room.status_label,
           updated_at: data.room.updated_at,
+          alert: data.room.alert,
         });
-
+        await nextTick();
+        window.HSStaticMethods?.autoInit?.('tooltip');
         toast.success('ステータスを更新しました。');
       } catch (err) {
         console.error(err);
         room.status = originalStatus;
+        room.alert = originalAlert;
         toast.error('ステータスの更新に失敗しました。');
       } finally {
         room.updating = false;
@@ -226,6 +260,22 @@ export default {
       fetchBuilding();
     });
 
+    const alertButtonClass = (alert) => {
+      if (!alert) {
+        return 'bg-slate-100 text-slate-500';
+      }
+
+      if (alert.type === 'danger') {
+        return 'bg-red-50 text-red-500 hover:bg-red-100';
+      }
+
+      if (alert.type === 'warning') {
+        return 'bg-amber-50 text-amber-600 hover:bg-amber-100';
+      }
+
+      return 'bg-slate-100 text-slate-500';
+    };
+
     return {
       building,
       loading,
@@ -235,6 +285,7 @@ export default {
       statuses,
       selectableStatuses,
       handleStatusChange,
+      alertButtonClass,
     };
   },
 };

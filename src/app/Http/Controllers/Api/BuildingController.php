@@ -107,6 +107,8 @@ class BuildingController extends Controller
         $statusLabels = RoomStatus::labels();
         $selectableStatusLabels = Building::selectableStatuses();
 
+        $now = Carbon::now();
+
         return response()->json([
             'building' => [
                 'id' => $building->id,
@@ -119,10 +121,11 @@ class BuildingController extends Controller
                 'visit_rate_year' => $visitRate,
                 'total_rooms' => $totalRooms,
                 'recent_rooms_count' => $recentRooms,
-                'rooms' => $building->rooms->map(function ($room) use ($statusLabels, $selectableStatusLabels) {
+                'rooms' => $building->rooms->map(function ($room) use ($statusLabels, $selectableStatusLabels, $building, $now) {
                     $statusValue = $room->status instanceof RoomStatus
                         ? $room->status->value
                         : (string) $room->status;
+                    $alert = $building->roomAlert($room, $now);
 
                     return [
                         'id' => $room->id,
@@ -131,6 +134,7 @@ class BuildingController extends Controller
                         'status_label' => $statusLabels[$statusValue] ?? $statusValue,
                         'selectable' => isset($selectableStatusLabels[$statusValue]),
                         'updated_at' => optional($room->updated_at)->toDateTimeString(),
+                        'alert' => $alert,
                     ];
                 }),
             ],
@@ -157,12 +161,15 @@ class BuildingController extends Controller
             ? $room->status->value
             : (string) $room->status;
 
+        $alert = $building->roomAlert($room);
+
         return response()->json([
             'room' => [
                 'id' => $room->id,
                 'status' => $statusValue,
                 'status_label' => RoomStatus::labels()[$statusValue] ?? $statusValue,
                 'updated_at' => optional($room->updated_at)->toDateTimeString(),
+                'alert' => $alert,
             ],
         ]);
     }

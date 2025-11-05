@@ -200,5 +200,7 @@
     "Last Visit Date": "最終訪問日",
     "Visit Rate (1 year)": "1年間の訪問率",
     "Registered Rooms": "登録部屋数",
-    "Visited within 1 year": "1年以内に訪問した部屋"
+    "Visited within 1 year": "1年以内に訪問した部屋",
+    "Visited within :days days. Please follow up accordingly.": ":days日以内に会えたか、投函済みです。",
+    "Marked as not at home within :days days.": ":days日以内に訪問しましたが不在でした。"
 }

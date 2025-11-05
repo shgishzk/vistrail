@@ -120,4 +120,43 @@ class Building extends Model
 
         return $labels;
     }
+
+    public function roomAlert(Room $room, ?Carbon $reference = null): ?array
+    {
+        $reference = $reference ?? Carbon::now();
+        $updatedAt = $room->updated_at ? Carbon::parse($room->updated_at) : null;
+        if (!$updatedAt) {
+            return null;
+        }
+
+        $statusValue = $room->status instanceof RoomStatus
+            ? $room->status->value
+            : (string) $room->status;
+
+        $visitedWithinDays = (int) config('buildings.alerts.visited_within_days', 90);
+        if ($visitedWithinDays > 0
+            && in_array($statusValue, [RoomStatus::AT_HOME->value, RoomStatus::POSTED->value], true)
+            && $updatedAt->greaterThanOrEqualTo($reference->copy()->subDays($visitedWithinDays))
+        ) {
+            return [
+                'type' => 'danger',
+                'icon' => 'alert-circle',
+                'message' => __('Visited within :days days. Please follow up accordingly.', ['days' => $visitedWithinDays]),
+            ];
+        }
+
+        $notAtHomeWithinDays = (int) config('buildings.alerts.not_at_home_within_days', 7);
+        if ($notAtHomeWithinDays > 0
+            && $statusValue === RoomStatus::NOT_AT_HOME->value
+            && $updatedAt->greaterThanOrEqualTo($reference->copy()->subDays($notAtHomeWithinDays))
+        ) {
+            return [
+                'type' => 'warning',
+                'icon' => 'alert-triangle',
+                'message' => __('Marked as not at home within :days days.', ['days' => $notAtHomeWithinDays]),
+            ];
+        }
+
+        return null;
+    }
 }
