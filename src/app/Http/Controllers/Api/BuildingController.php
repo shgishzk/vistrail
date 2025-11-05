@@ -121,6 +121,7 @@ class BuildingController extends Controller
                 'visit_rate_year' => $visitRate,
                 'total_rooms' => $totalRooms,
                 'recent_rooms_count' => $recentRooms,
+                'self_lock_type' => $building->self_lock_type?->value,
                 'rooms' => $building->rooms->map(function ($room) use ($statusLabels, $selectableStatusLabels, $building, $now) {
                     $statusValue = $room->status instanceof RoomStatus
                         ? $room->status->value

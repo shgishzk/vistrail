@@ -10,9 +10,17 @@
     <div class="rounded-3xl bg-gradient-to-r from-indigo-500 via-indigo-400 to-purple-500 px-6 py-10 text-white shadow-xl">
       <div class="space-y-3">
         <p class="text-xs uppercase tracking-[0.35em] text-indigo-100">Building Detail</p>
-        <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">
-          {{ building?.name || 'マンション詳細' }}
-        </h1>
+        <div class="flex flex-wrap items-center gap-3">
+          <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">
+            {{ building?.name || 'マンション詳細' }}
+          </h1>
+          <span
+            v-if="isAutoLock"
+            class="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur"
+          >
+            オートロック
+          </span>
+        </div>
         <p v-if="building?.memo" class="max-w-2xl text-sm leading-relaxed text-indigo-50/90">
           {{ building.memo }}
         </p>
@@ -138,7 +146,7 @@
 </template>
 
 <script>
-import { onMounted, ref, nextTick } from 'vue';
+import { onMounted, ref, nextTick, computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import axios from 'axios';
 import { toast } from '../utils/toast';
@@ -282,6 +290,8 @@ export default {
 
     const alertIcon = (icon) => iconMap[icon] || AlertCircle;
 
+    const isAutoLock = computed(() => building.value?.self_lock_type === 'has_lock');
+
     return {
       building,
       loading,
@@ -293,6 +303,7 @@ export default {
       handleStatusChange,
       alertButtonClass,
       alertIcon,
+      isAutoLock,
     };
   },
 };
