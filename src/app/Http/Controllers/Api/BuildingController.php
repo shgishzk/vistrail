@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\RoomStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Building;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -132,6 +133,34 @@ class BuildingController extends Controller
                 }),
             ],
             'statuses' => $statusLabels,
+        ]);
+    }
+
+    public function updateRoomStatus(Request $request, Building $building, Room $room)
+    {
+        abort_unless($building->is_public && $room->building_id === $building->id, 404);
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:' . implode(',', array_keys(RoomStatus::labels())),
+        ]);
+
+        $room->update([
+            'status' => $validated['status'],
+        ]);
+
+        $room->refresh();
+
+        $statusValue = $room->status instanceof RoomStatus
+            ? $room->status->value
+            : (string) $room->status;
+
+        return response()->json([
+            'room' => [
+                'id' => $room->id,
+                'status' => $statusValue,
+                'status_label' => RoomStatus::labels()[$statusValue] ?? $statusValue,
+                'updated_at' => optional($room->updated_at)->toDateTimeString(),
+            ],
         ]);
     }
 }

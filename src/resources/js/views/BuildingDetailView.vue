@@ -79,7 +79,8 @@
                   <select
                     class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     :value="room.status"
-                    disabled
+                    @change="(event) => handleStatusChange(room, event.target.value)"
+                    :disabled="room.updating"
                   >
                     <option v-for="(label, value) in statuses" :key="value" :value="value">
                       {{ label }}
@@ -102,6 +103,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { toast } from '../utils/toast';
 
 export default {
   name: 'BuildingDetailView',
@@ -117,7 +119,13 @@ export default {
       error.value = '';
       try {
         const { data } = await axios.get(`/api/buildings/${route.params.id}`);
-        building.value = data.building;
+        building.value = {
+          ...data.building,
+          rooms: (data.building.rooms || []).map((room) => ({
+            ...room,
+            updating: false,
+          })),
+        };
         statuses.value = data.statuses || {};
       } catch (err) {
         console.error(err);
@@ -151,6 +159,49 @@ export default {
       }
     };
 
+    const updateRoomInState = (updatedRoom) => {
+      if (!building.value?.rooms) {
+        return;
+      }
+
+      building.value.rooms = building.value.rooms.map((room) =>
+        room.id === updatedRoom.id
+          ? {
+              ...room,
+              ...updatedRoom,
+              updating: false,
+            }
+          : room
+      );
+    };
+
+    const handleStatusChange = async (room, newStatus) => {
+      const originalStatus = room.status;
+      room.status = newStatus;
+      room.updating = true;
+
+      try {
+        const { data } = await axios.patch(`/api/buildings/${route.params.id}/rooms/${room.id}`, {
+          status: newStatus,
+        });
+
+        updateRoomInState({
+          id: room.id,
+          status: data.room.status,
+          status_label: data.room.status_label,
+          updated_at: data.room.updated_at,
+        });
+
+        toast.success('ステータスを更新しました。');
+      } catch (err) {
+        console.error(err);
+        room.status = originalStatus;
+        toast.error('ステータスの更新に失敗しました。');
+      } finally {
+        room.updating = false;
+      }
+    };
+
     onMounted(() => {
       fetchBuilding();
     });
@@ -162,6 +213,7 @@ export default {
       formatVisitRate,
       formatDateTime,
       statuses,
+      handleStatusChange,
     };
   },
 };
