@@ -196,5 +196,9 @@
     "Only .kml files can be uploaded.": ".kml ファイルのみアップロードできます。",
     "Failed to read the selected file.": "選択されたファイルの読み込みに失敗しました。",
     "See at external site": "外部サイトで表示",
-    "Print": "印刷"
+    "Print": "印刷",
+    "Last Visit Date": "最終訪問日",
+    "Visit Rate (1 year)": "1年間の訪問率",
+    "Registered Rooms": "登録部屋数",
+    "Visited within 1 year": "1年以内に訪問した部屋"
 }

@@ -1,5 +1,12 @@
 <template>
   <div class="mx-auto max-w-4xl space-y-6">
+    <RouterLink
+      to="/buildings"
+      class="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500"
+    >
+      ← マンションマップへ戻る
+    </RouterLink>
+
     <div class="rounded-3xl bg-gradient-to-r from-indigo-500 via-indigo-400 to-purple-500 px-6 py-10 text-white shadow-xl">
       <div class="space-y-3">
         <p class="text-xs uppercase tracking-[0.35em] text-indigo-100">Building Detail</p>
@@ -76,16 +83,23 @@
               <tr v-for="room in building?.rooms ?? []" :key="room.id">
                 <td class="px-6 py-3 font-medium text-slate-900">{{ room.number }}</td>
                 <td class="px-6 py-3">
-                  <select
-                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    :value="room.status"
-                    @change="(event) => handleStatusChange(room, event.target.value)"
-                    :disabled="room.updating"
-                  >
-                    <option v-for="(label, value) in statuses" :key="value" :value="value">
-                      {{ label }}
-                    </option>
-                  </select>
+                  <template v-if="room.selectable">
+                    <select
+                      class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-slate-50"
+                      :value="room.status"
+                      @change="(event) => handleStatusChange(room, event.target.value)"
+                      :disabled="room.updating"
+                    >
+                      <option v-for="(label, value) in selectableStatuses" :key="value" :value="value">
+                        {{ label }}
+                      </option>
+                    </select>
+                  </template>
+                  <template v-else>
+                    <span class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">
+                      {{ statuses[room.status] || room.status }}
+                    </span>
+                  </template>
                 </td>
                 <td class="px-6 py-3 text-slate-600">
                   {{ room.updated_at ? formatDateTime(room.updated_at) : '―' }}
@@ -101,18 +115,22 @@
 
 <script>
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
 import axios from 'axios';
 import { toast } from '../utils/toast';
 
 export default {
   name: 'BuildingDetailView',
+  components: {
+    RouterLink,
+  },
   setup() {
     const route = useRoute();
     const loading = ref(true);
     const error = ref('');
     const building = ref(null);
     const statuses = ref({});
+    const selectableStatuses = ref({});
 
     const fetchBuilding = async () => {
       loading.value = true;
@@ -127,6 +145,7 @@ export default {
           })),
         };
         statuses.value = data.statuses || {};
+        selectableStatuses.value = data.selectable_statuses || {};
       } catch (err) {
         console.error(err);
         error.value = 'マンション情報の取得に失敗しました。';
@@ -169,9 +188,10 @@ export default {
           ? {
               ...room,
               ...updatedRoom,
+              status_label: updatedRoom.status_label ?? room.status_label,
               updating: false,
             }
-          : room
+          : room,
       );
     };
 
@@ -213,6 +233,7 @@ export default {
       formatVisitRate,
       formatDateTime,
       statuses,
+      selectableStatuses,
       handleStatusChange,
     };
   },

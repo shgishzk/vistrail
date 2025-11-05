@@ -105,6 +105,7 @@ class BuildingController extends Controller
         $visitRate = $building->visitRateSince($oneYearAgo, $roomsCollection);
 
         $statusLabels = RoomStatus::labels();
+        $selectableStatusLabels = Building::selectableStatuses();
 
         return response()->json([
             'building' => [
@@ -118,7 +119,7 @@ class BuildingController extends Controller
                 'visit_rate_year' => $visitRate,
                 'total_rooms' => $totalRooms,
                 'recent_rooms_count' => $recentRooms,
-                'rooms' => $building->rooms->map(function ($room) use ($statusLabels) {
+                'rooms' => $building->rooms->map(function ($room) use ($statusLabels, $selectableStatusLabels) {
                     $statusValue = $room->status instanceof RoomStatus
                         ? $room->status->value
                         : (string) $room->status;
@@ -128,11 +129,13 @@ class BuildingController extends Controller
                         'number' => $room->number,
                         'status' => $statusValue,
                         'status_label' => $statusLabels[$statusValue] ?? $statusValue,
+                        'selectable' => isset($selectableStatusLabels[$statusValue]),
                         'updated_at' => optional($room->updated_at)->toDateTimeString(),
                     ];
                 }),
             ],
             'statuses' => $statusLabels,
+            'selectable_statuses' => $selectableStatusLabels,
         ]);
     }
 
@@ -141,7 +144,7 @@ class BuildingController extends Controller
         abort_unless($building->is_public && $room->building_id === $building->id, 404);
 
         $validated = $request->validate([
-            'status' => 'required|string|in:' . implode(',', array_keys(RoomStatus::labels())),
+            'status' => 'required|string|in:' . implode(',', array_keys(Building::selectableStatuses())),
         ]);
 
         $room->update([

@@ -111,4 +111,13 @@ class Building extends Model
 
         return $this->rooms()->get();
     }
+
+    public static function selectableStatuses(): array
+    {
+        $labels = RoomStatus::labels();
+
+        unset($labels[RoomStatus::DO_NOT_CALL->value], $labels[RoomStatus::WITNESS->value]);
+
+        return $labels;
+    }
 }
