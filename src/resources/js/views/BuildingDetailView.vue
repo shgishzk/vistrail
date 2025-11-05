@@ -116,16 +116,34 @@
                 </td>
                 <td class="px-6 py-3">
                   <template v-if="room.selectable">
-                    <select
-                      class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-slate-50"
-                      :value="room.status"
-                      @change="(event) => handleStatusChange(room, event.target.value)"
-                      :disabled="room.updating"
-                    >
-                      <option v-for="(label, value) in selectableStatuses" :key="value" :value="value">
-                        {{ label }}
-                      </option>
-                    </select>
+                    <div class="hs-dropdown relative inline-flex [--strategy:fixed]">
+                      <button
+                        :id="`room-status-toggle-${room.id}`"
+                        type="button"
+                        :disabled="room.updating"
+                        class="hs-dropdown-toggle inline-flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+                        :data-hs-dropdown-toggle="`#room-status-menu-${room.id}`"
+                      >
+                        <span>{{ statusLabel(room.status) }}</span>
+                        <Loader2 v-if="room.updating" class="h-4 w-4 animate-spin text-indigo-500" />
+                        <ChevronDown v-else class="h-4 w-4 text-slate-400" />
+                      </button>
+                      <div
+                        :id="`room-status-menu-${room.id}`"
+                        class="hs-dropdown-menu hidden z-10 mt-2 min-w-[12rem] rounded-xl border border-slate-200 bg-white p-1 text-sm shadow-lg"
+                      >
+                        <button
+                          v-for="(label, value) in selectableStatuses"
+                          :key="value"
+                          type="button"
+                          class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none"
+                          @click="onStatusSelect(room, value)"
+                        >
+                          <span>{{ label }}</span>
+                          <Check v-if="room.status === value" class="h-4 w-4 text-indigo-500" />
+                        </button>
+                      </div>
+                    </div>
                   </template>
                   <template v-else>
                     <span class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">
@@ -150,7 +168,7 @@ import { onMounted, ref, nextTick, computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import axios from 'axios';
 import { toast } from '../utils/toast';
-import { AlertCircle, AlertTriangle } from 'lucide-vue-next';
+import { AlertCircle, AlertTriangle, ChevronDown, Check, Loader2 } from 'lucide-vue-next';
 
 export default {
   name: 'BuildingDetailView',
@@ -158,6 +176,9 @@ export default {
     RouterLink,
     AlertCircle,
     AlertTriangle,
+    ChevronDown,
+    Check,
+    Loader2,
   },
   setup() {
     const route = useRoute();
@@ -182,7 +203,7 @@ export default {
         statuses.value = data.statuses || {};
         selectableStatuses.value = data.selectable_statuses || {};
         await nextTick();
-        window.HSStaticMethods?.autoInit?.('tooltip');
+        window.HSStaticMethods?.autoInit?.(['tooltip', 'dropdown']);
       } catch (err) {
         console.error(err);
         error.value = 'マンション情報の取得に失敗しました。';
@@ -251,7 +272,7 @@ export default {
           alert: data.room.alert,
         });
         await nextTick();
-        window.HSStaticMethods?.autoInit?.('tooltip');
+        window.HSStaticMethods?.autoInit?.(['tooltip', 'dropdown']);
         toast.success('ステータスを更新しました。');
       } catch (err) {
         console.error(err);
@@ -291,6 +312,14 @@ export default {
     const alertIcon = (icon) => iconMap[icon] || AlertCircle;
 
     const isAutoLock = computed(() => building.value?.self_lock_type === 'has_lock');
+    const statusLabel = (status) => selectableStatuses.value[status] || statuses.value[status] || status;
+
+    const onStatusSelect = (room, value) => {
+      if (room.updating || room.status === value) {
+        return;
+      }
+      handleStatusChange(room, value);
+    };
 
     return {
       building,
@@ -304,6 +333,8 @@ export default {
       alertButtonClass,
       alertIcon,
       isAutoLock,
+      statusLabel,
+      onStatusSelect,
     };
   },
 };
