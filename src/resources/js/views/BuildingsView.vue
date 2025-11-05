@@ -349,6 +349,13 @@ export default {
         return;
       }
 
+      if (mapContainer.value) {
+        mapContainer.value.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+
       const lat = Number(building.lat);
       const lng = Number(building.lng);
 
