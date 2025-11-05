@@ -17,6 +17,7 @@ class MapConfigController extends Controller
             ],
             'marker_styles' => config('services.google.marker_styles'),
             'maps_api_key' => config('services.google.maps_api_key'),
+            'map_radius_km' => (float) config('buildings.map.half_side_km', 1.0),
         ]);
     }
 }

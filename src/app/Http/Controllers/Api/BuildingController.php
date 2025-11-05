@@ -21,7 +21,7 @@ class BuildingController extends Controller
         $lat = (float) $request->input('lat', $defaultPosition['lat'] ?? 0);
         $lng = (float) $request->input('lng', $defaultPosition['lng'] ?? 0);
 
-        $halfSideKm = 1.5;
+        $halfSideKm = max((float) config('buildings.map.half_side_km', 1.0), 0.1);
         $latRad = deg2rad($lat);
         $kmPerDegreeLat = 110.574;
         $degLat = $halfSideKm / $kmPerDegreeLat;

@@ -112,7 +112,7 @@
         <div class="rounded-2xl border border-indigo-200 bg-indigo-50/70 px-6 py-6 text-sm text-indigo-900 shadow-sm backdrop-blur">
           <h3 class="text-base font-semibold">ヒント</h3>
           <p class="mt-2 leading-relaxed">
-            Google マップを利用したマンションマップでは、中心位置から半径1.5km以内のピンが表示されます。地図をゆっくり移動して周辺情報を確認しましょう。
+            Google マップを利用したマンションマップでは、中心位置から半径{{ mapRadiusKmText }}km以内のピンが表示されます。地図をゆっくり移動して周辺情報を確認しましょう。
           </p>
           <RouterLink
             to="/buildings"
@@ -148,6 +148,11 @@ export default {
       items: [],
       error: '',
     });
+
+    const mapRadiusRaw = Number.parseFloat(import.meta.env.VITE_BUILDING_MAP_HALF_SIDE_KM ?? '1.0');
+    const mapRadiusKmText = Number.isFinite(mapRadiusRaw)
+      ? (Number.isInteger(mapRadiusRaw) ? mapRadiusRaw.toFixed(0) : mapRadiusRaw.toFixed(1))
+      : '1.0';
 
     const brandLabel = computed(() => {
       const prefix = import.meta.env.VITE_APP_BRAND_PREFIX || '';
@@ -211,6 +216,7 @@ export default {
       brandLabel,
       newsState,
       newsItems,
+      mapRadiusKmText,
     };
   },
 };

@@ -137,7 +137,10 @@ export default {
 
         marker.addListener('click', () => {
           if (!infoWindow) {
-            infoWindow = new google.maps.InfoWindow();
+            infoWindow = new google.maps.InfoWindow({
+              disableAutoPan: true,
+              shouldFocus: false,
+            });
           }
           infoWindow.setContent(createInfoWindowContent(building));
           infoWindow.open({ anchor: marker, map: mapInstance });
