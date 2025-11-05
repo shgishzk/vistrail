@@ -27,6 +27,16 @@
               </div>
             </div>
             <button
+              v-if="showReloadButton && !shouldShowDesktop"
+              type="button"
+              :disabled="reloadInProgress"
+              class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+              @click="reloadPage"
+            >
+              <RefreshCcw :class="['h-4 w-4', { 'animate-spin': reloadInProgress }]" />
+              <span>再読み込み</span>
+            </button>
+            <button
               type="button"
               class="inline-flex items-center justify-center rounded-lg border border-gray-200 p-2 text-gray-600 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 md:hidden"
               @click="toggleMobileNav"
@@ -99,6 +109,16 @@
                 </div>
               </div>
               <button
+                v-if="showReloadButton && shouldShowDesktop"
+                type="button"
+                :disabled="reloadInProgress"
+                class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                @click="reloadPage"
+              >
+                <RefreshCcw :class="['h-4 w-4', { 'animate-spin': reloadInProgress }]" />
+                <span>再読み込み</span>
+              </button>
+              <button
                 v-for="item in actionItems"
                 :key="item.name"
                 type="button"
@@ -130,11 +150,11 @@
 import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from 'vue';
 import axios from 'axios';
 import { RouterLink, useRoute } from 'vue-router';
-import { FolderOpen, Building, Layers, LogOut } from 'lucide-vue-next';
+import { FolderOpen, Building, Layers, LogOut, RefreshCcw } from 'lucide-vue-next';
 
 export default {
   name: 'Layout',
-  components: { RouterLink },
+  components: { RouterLink, RefreshCcw },
   setup() {
     const user = ref(null);
     const isMobileNavOpen = ref(false);
@@ -166,6 +186,8 @@ export default {
     });
     const shouldShowDesktop = computed(() => isDesktop.value);
     const shouldShowNav = computed(() => isDesktop.value || isMobileNavOpen.value);
+    const showReloadButton = computed(() => route.path.startsWith('/buildings'));
+    const reloadInProgress = ref(false);
     
     const fetchUser = async () => {
       try {
@@ -207,6 +229,16 @@ export default {
       if (!isDesktop.value) {
         closeMobileNav();
       }
+    };
+
+    const reloadPage = () => {
+      if (reloadInProgress.value) {
+        return;
+      }
+      reloadInProgress.value = true;
+      setTimeout(() => {
+        window.location.reload();
+      }, 150);
     };
 
     const logout = async () => {
@@ -265,6 +297,9 @@ export default {
       brandLabel,
       shouldShowNav,
       shouldShowDesktop,
+      reloadInProgress,
+      showReloadButton,
+      reloadPage,
     };
   }
 };
