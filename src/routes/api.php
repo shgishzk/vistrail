@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\BuildingController;
+use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\MapConfigController;
 use App\Http\Controllers\Api\NewsController;
 use Illuminate\Support\Facades\Route;
@@ -14,4 +15,6 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->g
     Route::patch('/buildings/{building}/rooms/{room}', [BuildingController::class, 'updateRoomStatus']);
     Route::patch('/buildings/{building}/rooms/{room}/touch', [BuildingController::class, 'touchRoom']);
     Route::get('/news', NewsController::class);
+    Route::get('/groups', [GroupController::class, 'index']);
+    Route::get('/groups/buildings', [GroupController::class, 'buildings']);
 });

@@ -122,7 +122,9 @@
                         type="button"
                         :disabled="room.updating"
                         class="hs-dropdown-toggle inline-flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
-                        :data-hs-dropdown-toggle="`#room-status-menu-${room.id}`"
+                        :data-hs-dropdown="`#room-status-menu-${room.id}`"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
                       >
                         <span>{{ statusLabel(room.status) }}</span>
                         <Loader2 v-if="room.updating" class="h-4 w-4 animate-spin text-indigo-500" />
@@ -131,6 +133,8 @@
                       <div
                         :id="`room-status-menu-${room.id}`"
                         class="hs-dropdown-menu hidden z-10 mt-2 min-w-[12rem] rounded-xl border border-slate-200 bg-white p-1 text-sm shadow-lg"
+                        role="menu"
+                        :aria-labelledby="`room-status-toggle-${room.id}`"
                       >
                         <button
                           v-for="(label, value) in selectableStatuses"
