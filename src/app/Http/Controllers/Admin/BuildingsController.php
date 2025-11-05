@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\RoomStatus;
 use App\Enums\SelfLockType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreBuildingRequest;
@@ -13,6 +14,7 @@ use App\Services\Building\DeleteBuildingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Carbon;
 
 class BuildingsController extends Controller
 {
@@ -91,11 +93,23 @@ class BuildingsController extends Controller
 
     public function rooms(Building $building): View
     {
-        $roomsQuery = $building->rooms();
+        $roomsQuery = $building->rooms()->orderBy('number');
         $totalRooms = (clone $roomsQuery)->count();
         $rooms = $roomsQuery->paginate(100);
-        $statusOptions = \App\Enums\RoomStatus::cases();
+        $statusOptions = RoomStatus::cases();
 
-        return view('admin.buildings.rooms', compact('building', 'rooms', 'statusOptions', 'totalRooms'));
+        $oneYearAgo = Carbon::now()->subYear();
+        $roomsCollection = (clone $roomsQuery)->get();
+        $recentRoomsCount = $building->countVisitedRoomsSince($oneYearAgo, $roomsCollection);
+        $lastVisitDateRaw = $roomsCollection->max('updated_at');
+
+        $summary = [
+            'last_visit_date' => $lastVisitDateRaw ? Carbon::parse($lastVisitDateRaw)->format('Y-m-d') : null,
+            'visit_rate_year' => $building->visitRateSince($oneYearAgo, $roomsCollection),
+            'total_rooms' => $totalRooms,
+            'recent_rooms_count' => $recentRoomsCount,
+        ];
+
+        return view('admin.buildings.rooms', compact('building', 'rooms', 'statusOptions', 'totalRooms', 'summary'));
     }
 }
