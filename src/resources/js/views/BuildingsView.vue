@@ -10,11 +10,27 @@
       </svg>
     </div>
     <div v-show="!isLoading" ref="mapContainer" class="h-[600px] w-full rounded-lg shadow" />
+    <div v-show="!isLoading" class="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+      <div class="flex items-center gap-2">
+        <span
+          class="inline-flex h-3 w-3 rounded-full border border-current"
+          :style="{ backgroundColor: legendStyles.hasLock.background, borderColor: legendStyles.hasLock.borderColor }"
+        ></span>
+        <span>オートロックのマンション</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span
+          class="inline-flex h-3 w-3 rounded-full border border-current"
+          :style="{ backgroundColor: legendStyles.noLock.background, borderColor: legendStyles.noLock.borderColor }"
+        ></span>
+        <span>出入り可能なマンション</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import axios from 'axios';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
 
@@ -38,6 +54,16 @@ export default {
       borderColor: '#455A64',
       glyphColor: '#455A64',
     };
+    const legendStyles = reactive({
+      hasLock: {
+        background: fallbackMarkerStyle.background,
+        borderColor: fallbackMarkerStyle.borderColor,
+      },
+      noLock: {
+        background: fallbackMarkerStyle.background,
+        borderColor: fallbackMarkerStyle.borderColor,
+      },
+    });
 
     const applyMarkerStyles = (styles = {}) => {
       markerStyles = styles || {};
@@ -46,6 +72,14 @@ export default {
         borderColor: markerStyles.default?.borderColor || '#455A64',
         glyphColor: markerStyles.default?.glyphColor || markerStyles.default?.borderColor || '#455A64',
       };
+      Object.assign(legendStyles.hasLock, {
+        background: markerStyles.has_lock?.background || fallbackMarkerStyle.background,
+        borderColor: markerStyles.has_lock?.borderColor || fallbackMarkerStyle.borderColor,
+      });
+      Object.assign(legendStyles.noLock, {
+        background: markerStyles.no_lock?.background || fallbackMarkerStyle.background,
+        borderColor: markerStyles.no_lock?.borderColor || fallbackMarkerStyle.borderColor,
+      });
     };
 
     const clearMarkers = () => {
@@ -225,7 +259,7 @@ export default {
         error.value = null;
         mapInstance = new google.maps.Map(mapContainer.value, {
           center: defaultPosition,
-          zoom: 15,
+          zoom: 17,
           zoomControl: true,
           mapId: 'buildings-map',
         });
@@ -264,6 +298,7 @@ export default {
       mapContainer,
       isLoading,
       error,
+      legendStyles,
     };
   },
 };
