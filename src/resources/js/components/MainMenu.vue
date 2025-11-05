@@ -103,7 +103,7 @@
         <div class="rounded-2xl border border-indigo-200 bg-indigo-50/70 px-6 py-6 text-sm text-indigo-900 shadow-sm backdrop-blur">
           <h3 class="text-base font-semibold">ヒント</h3>
           <p class="mt-2 leading-relaxed">
-            Google マップを利用したマンションマップでは、中心位置から半径{{ mapRadiusKmText }}km以内のピンが表示されます。地図をゆっくり移動して周辺情報を確認しましょう。
+            {{ currentHint }}
           </p>
           <RouterLink
             to="/buildings"
@@ -121,7 +121,7 @@
 <script>
 import { RouterLink } from 'vue-router';
 import axios from 'axios';
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { FolderOpen, Building, Layers, Compass, ArrowRight, ChevronRight } from 'lucide-vue-next';
 
 export default {
@@ -144,6 +144,12 @@ export default {
     const mapRadiusKmText = Number.isFinite(mapRadiusRaw)
       ? (Number.isInteger(mapRadiusRaw) ? mapRadiusRaw.toFixed(0) : mapRadiusRaw.toFixed(1))
       : '1.0';
+
+    const hintMessages = [
+      `Google マップを利用したマンションマップでは、中心位置から半径${mapRadiusKmText}km以内のピンが表示されます。地図をゆっくり移動して、現在位置に近いマンションを確認しましょう。`,
+      'マンション詳細の「1年間の訪問率」は、過去1年以内に訪問済み（未訪問以外）として更新された部屋の割合です。訪問後の記録更新をお忘れなく。',
+    ];
+    const currentHint = ref(hintMessages[Math.floor(Math.random() * hintMessages.length)]);
 
     const brandLabel = computed(() => {
       const prefix = import.meta.env.VITE_APP_BRAND_PREFIX || '';
@@ -208,6 +214,7 @@ export default {
       newsState,
       newsItems,
       mapRadiusKmText,
+      currentHint,
     };
   },
 };
