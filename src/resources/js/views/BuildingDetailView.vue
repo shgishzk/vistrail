@@ -93,8 +93,7 @@
                           :class="alertButtonClass(room.alert)"
                           :aria-label="room.alert.message"
                         >
-                          <AlertCircle v-if="room.alert.icon === 'alert-circle'" class="h-4 w-4" />
-                          <AlertTriangle v-else-if="room.alert.icon === 'alert-triangle'" class="h-4 w-4" />
+                          <component :is="alertIcon(room.alert.icon)" class="h-4 w-4" />
                         </button>
                         <div
                           class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible hidden w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 opacity-0 shadow-xl transition-[opacity,transform] duration-200"
@@ -276,6 +275,13 @@ export default {
       return 'bg-slate-100 text-slate-500';
     };
 
+    const iconMap = {
+      'alert-circle': AlertCircle,
+      'alert-triangle': AlertTriangle,
+    };
+
+    const alertIcon = (icon) => iconMap[icon] || AlertCircle;
+
     return {
       building,
       loading,
@@ -286,6 +292,7 @@ export default {
       selectableStatuses,
       handleStatusChange,
       alertButtonClass,
+      alertIcon,
     };
   },
 };
