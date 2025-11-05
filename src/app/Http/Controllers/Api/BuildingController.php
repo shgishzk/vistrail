@@ -49,29 +49,7 @@ class BuildingController extends Controller
             ->withMax('rooms', 'updated_at')
             ->orderBy('name')
             ->get()
-            ->map(function (Building $building) {
-                $totalRooms = (int) $building->rooms_count;
-                $recentRooms = (int) ($building->recent_rooms_count ?? 0);
-                $visitRate = $totalRooms > 0 ? round(($recentRooms / $totalRooms) * 100, 1) : 0.0;
-
-                $lastVisitDate = null;
-                if ($building->rooms_max_updated_at) {
-                    $lastVisitDate = Carbon::parse($building->rooms_max_updated_at)->toDateString();
-                }
-
-                return [
-                    'id' => $building->id,
-                    'name' => $building->name,
-                    'lat' => (float) $building->lat,
-                    'lng' => (float) $building->lng,
-                    'self_lock_type' => $building->self_lock_type?->value,
-                    'url' => $building->url,
-                    'memo' => $building->memo,
-                    'last_visit_date' => $lastVisitDate,
-                    'visit_rate' => $visitRate,
-                    'detail_url' => url("/buildings/{$building->id}"),
-                ];
-            })
+            ->map(fn (Building $building) => $this->formatBuildingSummary($building))
             ->values();
 
         return response()->json([
@@ -173,5 +151,68 @@ class BuildingController extends Controller
                 'alert' => $alert,
             ],
         ]);
+    }
+
+    public function search(Request $request)
+    {
+        $validated = $request->validate([
+            'q' => ['required', 'string', 'min:1', 'max:255'],
+            'limit' => ['nullable', 'integer', 'min:1', 'max:20'],
+        ]);
+
+        $query = $validated['q'];
+        $limit = (int) ($validated['limit'] ?? 10);
+
+        $sixMonthsAgo = Carbon::now()->subMonths(6);
+
+        $buildings = Building::query()
+            ->select(['id', 'name', 'lat', 'lng', 'self_lock_type', 'url', 'memo'])
+            ->whereNotNull('lat')
+            ->whereNotNull('lng')
+            ->where('is_public', true)
+            ->where('name', 'like', '%' . $query . '%')
+            ->withCount([
+                'rooms',
+                'rooms as recent_rooms_count' => function ($query) use ($sixMonthsAgo) {
+                    $query
+                        ->where('status', '!=', RoomStatus::UNVISITED->value)
+                        ->where('updated_at', '>=', $sixMonthsAgo);
+                },
+            ])
+            ->withMax('rooms', 'updated_at')
+            ->orderBy('name')
+            ->limit($limit)
+            ->get()
+            ->map(fn (Building $building) => $this->formatBuildingSummary($building))
+            ->values();
+
+        return response()->json([
+            'buildings' => $buildings,
+        ]);
+    }
+
+    protected function formatBuildingSummary(Building $building): array
+    {
+        $totalRooms = (int) $building->rooms_count;
+        $recentRooms = (int) ($building->recent_rooms_count ?? 0);
+        $visitRate = $totalRooms > 0 ? round(($recentRooms / $totalRooms) * 100, 1) : 0.0;
+
+        $lastVisitDate = null;
+        if ($building->rooms_max_updated_at) {
+            $lastVisitDate = Carbon::parse($building->rooms_max_updated_at)->toDateString();
+        }
+
+        return [
+            'id' => $building->id,
+            'name' => $building->name,
+            'lat' => (float) $building->lat,
+            'lng' => (float) $building->lng,
+            'self_lock_type' => $building->self_lock_type?->value,
+            'url' => $building->url,
+            'memo' => $building->memo,
+            'last_visit_date' => $lastVisitDate,
+            'visit_rate' => $visitRate,
+            'detail_url' => url("/buildings/{$building->id}"),
+        ];
     }
 }
