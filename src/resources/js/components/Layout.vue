@@ -72,12 +72,19 @@
               <li v-for="item in routeItems" :key="item.name">
                 <RouterLink
                   :to="item.to"
-                  class="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-medium transition"
+                  class="inline-flex items-center gap-3 rounded-lg px-3 py-2 font-medium transition"
                   :class="isActive(item)
                     ? 'bg-indigo-50 text-indigo-600 shadow-sm ring-1 ring-inset ring-indigo-600/20'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
                 >
-                  {{ item.name }}
+                  <span class="inline-flex items-center gap-2">
+                    <component
+                      v-if="item.icon"
+                      :is="item.icon"
+                      class="h-4 w-4"
+                    />
+                    <span>{{ item.name }}</span>
+                  </span>
                 </RouterLink>
               </li>
             </ul>
@@ -98,7 +105,12 @@
                 class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 @click="handleNavigation(item)"
               >
-                {{ item.name }}
+                <component
+                  v-if="item.icon"
+                  :is="item.icon"
+                  class="h-4 w-4"
+                />
+                <span>{{ item.name }}</span>
               </button>
             </div>
           </nav>
@@ -118,6 +130,7 @@
 import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from 'vue';
 import axios from 'axios';
 import { RouterLink, useRoute } from 'vue-router';
+import { FolderOpen, Building, Layers, LogOut } from 'lucide-vue-next';
 
 export default {
   name: 'Layout',
@@ -127,10 +140,10 @@ export default {
     const isMobileNavOpen = ref(false);
     const isDesktop = ref(false);
     const navigation = [
-      { name: '区域', to: '/areas', type: 'route' },
-      { name: 'マンション', to: '/buildings', type: 'route' },
-      { name: 'グループ', to: '/groups', type: 'route' },
-      { name: 'ログアウト', to: '/logout', type: 'action' },
+      { name: '区域', to: '/areas', type: 'route', icon: FolderOpen },
+      { name: 'マンション', to: '/buildings', type: 'route', icon: Building },
+      { name: 'グループ', to: '/groups', type: 'route', icon: Layers },
+      { name: 'ログアウト', to: '/logout', type: 'action', icon: LogOut },
     ];
     const route = useRoute();
     const routeItems = computed(() => navigation.filter(item => item.type === 'route'));

@@ -21,7 +21,7 @@
             class="inline-flex items-center justify-center rounded-full bg-white/10 px-6 py-3 text-sm font-semibold shadow-lg shadow-black/10 backdrop-blur transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/80 focus:ring-offset-2 focus:ring-offset-indigo-600"
           >
             <span class="mr-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-              <i class="cil-compass text-lg"></i>
+              <Compass class="h-5 w-5" />
             </span>
             すぐにマンションマップへ移動
           </RouterLink>
@@ -37,6 +37,13 @@
               <h2 class="text-lg font-semibold text-slate-900">最新のお知らせ</h2>
               <p class="text-sm text-slate-500">会衆からの最新情報とお知らせです。</p>
             </div>
+            <RouterLink
+              to="/groups"
+              class="inline-flex items-center gap-2 text-sm font-medium text-indigo-50 hover:text-white"
+            >
+              <span>グループ管理へ</span>
+              <ArrowRight class="h-4 w-4" />
+            </RouterLink>
           </div>
           <div class="px-6 py-5">
             <div v-if="newsState.isLoading" class="space-y-3">
@@ -57,8 +64,8 @@
                 >
                   <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <h3 class="text-base font-semibold text-slate-900">
-                        {{ item.title || fallbackTitle }}
+                      <h3 v-if="item.title" class="text-base font-semibold text-slate-900">
+                        {{ item.title }}
                       </h3>
                       <p class="mt-1 text-sm leading-relaxed text-slate-600">
                         {{ item.excerpt }}
@@ -93,11 +100,11 @@
             >
               <span class="inline-flex items-center gap-3">
                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-100">
-                  <i :class="item.icon"></i>
+                  <component :is="item.icon" class="h-4 w-4" />
                 </span>
                 {{ item.label }}
               </span>
-              <i class="cil-chevron-right text-base text-slate-300 transition group-hover:text-indigo-400"></i>
+              <ChevronRight class="h-4 w-4 text-slate-300 transition group-hover:text-indigo-400" />
             </RouterLink>
           </div>
         </div>
@@ -112,7 +119,7 @@
             class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-indigo-700 hover:text-indigo-600"
           >
             <span>マンションマップを開く</span>
-            <i class="cil-arrow-right"></i>
+            <ArrowRight class="h-4 w-4" />
           </RouterLink>
         </div>
       </div>
@@ -124,17 +131,16 @@
 import { RouterLink } from 'vue-router';
 import axios from 'axios';
 import { computed, onMounted, reactive } from 'vue';
-
-const fallbackTitle = '';
+import { FolderOpen, Building, Layers, Compass, ArrowRight, ChevronRight } from 'lucide-vue-next';
 
 export default {
   name: 'MainMenu',
-  components: { RouterLink },
+  components: { RouterLink, FolderOpen, Building, Layers, Compass, ArrowRight, ChevronRight },
   setup() {
     const menuItems = [
-      { label: '区域', to: '/areas', icon: 'cil-map' },
-      { label: 'マンション', to: '/buildings', icon: 'cil-building' },
-      { label: 'グループ', to: '/groups', icon: 'cil-people' },
+      { label: '区域', to: '/areas', icon: FolderOpen },
+      { label: 'マンション', to: '/buildings', icon: Building },
+      { label: 'グループ', to: '/groups', icon: Layers },
     ];
 
     const newsState = reactive({
@@ -205,7 +211,6 @@ export default {
       brandLabel,
       newsState,
       newsItems,
-      fallbackTitle,
     };
   },
 };

@@ -10,6 +10,7 @@
         "@coreui/icons": "^3.0.1",
         "@popperjs/core": "^2.11.8",
         "axios": "^1.8.2",
+        "lucide-vue-next": "^0.469.0",
         "preline": "^3.2.3",
         "sass": "^1.88.0",
         "tailwindcss": "^4.0.0",
