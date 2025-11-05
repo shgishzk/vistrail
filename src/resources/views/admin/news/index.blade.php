@@ -50,13 +50,14 @@
                                 <a href="{{ route('admin.news.edit', $item) }}" class="btn btn-outline-primary">
                                     <i class="cil-pencil"></i>
                                 </a>
-                                <form action="{{ route('admin.news.destroy', $item) }}" method="POST" onsubmit="return confirm(@js(__('Are you sure you want to delete news :title?', ['title' => $item->title ?: __('(No Title)')])))" class="ms-2">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger">
-                                        <i class="cil-trash"></i>
-                                    </button>
-                                </form>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger ms-2"
+                                    data-coreui-toggle="modal"
+                                    data-coreui-target="#deleteNewsModal{{ $item->id }}"
+                                >
+                                    <i class="cil-trash"></i>
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -71,4 +72,28 @@
         {{ $news->links() }}
     </div>
 </div>
+
+@foreach ($news as $item)
+    <div class="modal fade" id="deleteNewsModal{{ $item->id }}" tabindex="-1" aria-labelledby="deleteNewsModalLabel{{ $item->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteNewsModalLabel{{ $item->id }}">@lang('Confirm Delete')</h5>
+                    <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @lang('Are you sure you want to delete news :title?', ['title' => $item->title ?: __('(No Title)')])
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">@lang('Cancel')</button>
+                    <form action="{{ route('admin.news.destroy', $item) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger">@lang('Delete')</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endforeach
 @endsection
