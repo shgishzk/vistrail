@@ -32,18 +32,9 @@
     <section class="grid gap-6 lg:grid-cols-3 lg:gap-8">
       <div class="lg:col-span-2">
         <div class="rounded-2xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur">
-          <div class="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 class="text-lg font-semibold text-slate-900">最新のお知らせ</h2>
-              <p class="text-sm text-slate-500">会衆からの最新情報とお知らせです。</p>
-            </div>
-            <RouterLink
-              to="/groups"
-              class="inline-flex items-center gap-2 text-sm font-medium text-indigo-50 hover:text-white"
-            >
-              <span>グループ管理へ</span>
-              <ArrowRight class="h-4 w-4" />
-            </RouterLink>
+          <div class="border-b border-slate-200 px-6 py-5">
+            <h2 class="text-lg font-semibold text-slate-900">最新のお知らせ</h2>
+            <p class="text-sm text-slate-500">会衆からの最新情報とお知らせです。</p>
           </div>
           <div class="px-6 py-5">
             <div v-if="newsState.isLoading" class="space-y-3">
