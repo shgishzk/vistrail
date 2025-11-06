@@ -16,7 +16,7 @@ class GroupFactory extends Factory
     {
         return [
             // Assign names like "Group A", "Group B"
-            'name' => __('Group') . ' ' . chr(65 + $this->faker->unique()->numberBetween(0, 25)),
+            'name' => chr(65 + $this->faker->unique()->numberBetween(0, 25)),
             'is_public' => $this->faker->boolean(80),
         ];
     }
