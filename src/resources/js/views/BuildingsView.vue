@@ -94,6 +94,7 @@
 import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import axios from 'axios';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
+import { parseKmlPolygonCoordinates } from '../utils/kml';
 
 export default {
   name: 'BuildingsView',
@@ -115,6 +116,7 @@ export default {
       borderColor: '#455A64',
       glyphColor: '#455A64',
     };
+    let territoryPolygon = null;
     const legendStyles = reactive({
       hasLock: {
         background: fallbackMarkerStyle.background,
@@ -148,6 +150,36 @@ export default {
         marker.map = null;
       });
       markers = [];
+    };
+
+    const renderTerritoryBoundary = (kmlString) => {
+      if (territoryPolygon) {
+        territoryPolygon.setMap(null);
+        territoryPolygon = null;
+      }
+
+      if (!mapInstance || typeof window === 'undefined' || !window.google?.maps) {
+        return;
+      }
+
+      const coordinates = parseKmlPolygonCoordinates(kmlString);
+
+      if (!coordinates.length) {
+        return;
+      }
+
+      territoryPolygon = new google.maps.Polygon({
+        paths: coordinates,
+        strokeColor: '#d81b60',
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        fillColor: '#f8bbd0',
+        fillOpacity: 0.15,
+        geodesic: true,
+        clickable: false,
+      });
+
+      territoryPolygon.setMap(mapInstance);
     };
 
     const getMarkerStyle = (type) => {
@@ -414,6 +446,8 @@ export default {
           mapId: 'buildings-map',
         });
 
+        renderTerritoryBoundary(config.assigned_boundary_kml);
+
         await fetchBuildings(centerPosition.lat, centerPosition.lng);
         lastFetchCenter = { ...centerPosition };
 
@@ -475,6 +509,10 @@ export default {
       }
       if (mapInstance && window.google && window.google.maps) {
         google.maps.event.clearInstanceListeners(mapInstance);
+      }
+      if (territoryPolygon) {
+        territoryPolygon.setMap(null);
+        territoryPolygon = null;
       }
     });
 

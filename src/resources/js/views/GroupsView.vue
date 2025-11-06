@@ -99,6 +99,7 @@ import { onBeforeUnmount, onMounted, reactive, ref, computed } from 'vue';
 import axios from 'axios';
 import { ChevronDown, Check } from 'lucide-vue-next';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
+import { parseKmlPolygonCoordinates } from '../utils/kml';
 
 export default {
   name: 'GroupsView',
@@ -134,6 +135,7 @@ export default {
       borderColor: '#455A64',
       glyphColor: '#455A64',
     };
+    let territoryPolygon = null;
     const legendStyles = reactive({
       hasLock: {
         background: fallbackMarkerStyle.background,
@@ -169,6 +171,36 @@ export default {
         marker.map = null;
       });
       markers = [];
+    };
+
+    const renderTerritoryBoundary = (kmlString) => {
+      if (territoryPolygon) {
+        territoryPolygon.setMap(null);
+        territoryPolygon = null;
+      }
+
+      if (!mapInstance || typeof window === 'undefined' || !window.google?.maps) {
+        return;
+      }
+
+      const coordinates = parseKmlPolygonCoordinates(kmlString);
+
+      if (!coordinates.length) {
+        return;
+      }
+
+      territoryPolygon = new google.maps.Polygon({
+        paths: coordinates,
+        strokeColor: '#d81b60',
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        fillColor: '#f8bbd0',
+        fillOpacity: 0.15,
+        geodesic: true,
+        clickable: false,
+      });
+
+      territoryPolygon.setMap(mapInstance);
     };
 
     const getMarkerStyle = (type) => {
@@ -383,6 +415,8 @@ export default {
           zoomControl: true,
           mapId: 'groups-map',
         });
+
+        renderTerritoryBoundary(config.assigned_boundary_kml);
       } catch (err) {
         console.error(err);
         error.value = '地図の初期化に失敗しました。時間をおいて再度お試しください。';
@@ -440,6 +474,10 @@ export default {
       clearMarkers();
       if (mapInstance && window.google && window.google.maps) {
         google.maps.event.clearInstanceListeners(mapInstance);
+      }
+      if (territoryPolygon) {
+        territoryPolygon.setMap(null);
+        territoryPolygon = null;
       }
     });
 

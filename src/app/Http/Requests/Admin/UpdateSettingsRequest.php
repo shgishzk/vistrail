@@ -34,6 +34,7 @@ class UpdateSettingsRequest extends FormRequest
             'settings.GOOGLE_MARKER_NO_LOCK_BACKGROUND' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
             'settings.GOOGLE_MARKER_NO_LOCK_BORDER_COLOR' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
             'settings.GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
+            'settings.GOOGLE_MAPS_ASSIGNED_TERRITORY_BOUNDARY' => ['nullable', 'string'],
         ];
     }
 

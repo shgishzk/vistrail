@@ -69,6 +69,10 @@ class MapConfigController extends Controller
             'marker_styles' => $markerStyles,
             'maps_api_key' => config('services.google.maps_api_key'),
             'map_radius_km' => max((float) $mapRadiusKm, 0.1),
+            'assigned_boundary_kml' => Setting::getValue(
+                Setting::KEY_GOOGLE_MAPS_ASSIGNED_TERRITORY_BOUNDARY,
+                (string) ($defaults[Setting::KEY_GOOGLE_MAPS_ASSIGNED_TERRITORY_BOUNDARY] ?? '')
+            ),
         ]);
     }
 }
