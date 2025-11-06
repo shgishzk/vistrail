@@ -68,10 +68,11 @@ class SettingController extends Controller
                 $payload[$key] = Setting::getFloat($key, (float) $default);
             } elseif (($definition['type'] ?? null) === 'int') {
                 $payload[$key] = Setting::getInt($key, (int) $default);
+            } else {
+                $payload[$key] = Setting::getValue($key, $default ?? '');
             }
         }
 
         return $payload;
     }
 }
-

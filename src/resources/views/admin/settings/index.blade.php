@@ -43,28 +43,42 @@
                                                 $inputType = $inputConfig['type'] ?? 'text';
                                                 unset($inputConfig['type']);
                                                 $value = old('settings.' . $key, $field['value'] ?? '');
-                                            @endphp
-                                            @if ($field)
-                                                <div class="col-md-6 col-xl-4">
-                                                    <div class="mb-3">
-                                                        <label for="{{ $inputId }}" class="form-label fw-semibold">
-                                                            {{ $field['label'] ?? $key }}
-                                                        </label>
-                                                        <input
-                                                            id="{{ $inputId }}"
-                                                            name="settings[{{ $key }}]"
-                                                            type="{{ $inputType }}"
-                                                            value="{{ $value }}"
-                                                            @foreach ($inputConfig as $attr => $attrValue)
-                                                                {{ $attr }}="{{ $attrValue }}"
-                                                            @endforeach
-                                                            class="form-control {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
-                                                        />
-                                                        @if (!empty($field['description']))
-                                                            <small class="text-muted d-block mt-1">
-                                                                {{ $field['description'] }}
-                                                            </small>
-                                                        @endif
+                                                $isColor = $inputType === 'color';
+                                                $inputClasses = $isColor
+                                                    ? 'form-control form-control-color w-100'
+                                                    : 'form-control';
+                                                @endphp
+                                                @if ($field)
+                                                    <div class="col-md-6 col-xl-4">
+                                                        <div class="mb-3">
+                                                            <label for="{{ $inputId }}" class="form-label fw-semibold">
+                                                                {{ $field['label'] ?? $key }}
+                                                            </label>
+                                                            <input
+                                                                id="{{ $inputId }}"
+                                                                name="settings[{{ $key }}]"
+                                                                type="{{ $inputType }}"
+                                                                value="{{ $value }}"
+                                                                class="{{ $inputClasses }} {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
+                                                                @if ($isColor)
+                                                                    data-color-output="#{{ $inputId }}-value"
+                                                                    title="{{ $field['label'] ?? $key }}"
+                                                                @endif
+                                                                @foreach ($inputConfig as $attr => $attrValue)
+                                                                    {{ $attr }}="{{ $attrValue }}"
+                                                                @endforeach
+                                                            />
+                                                            @if ($isColor)
+                                                                <div class="form-text mt-1">
+                                                                    <span class="text-muted">現在値:</span>
+                                                                    <span id="{{ $inputId }}-value" class="ms-1 font-monospace">{{ $value }}</span>
+                                                                </div>
+                                                            @endif
+                                                            @if (!empty($field['description']))
+                                                                <small class="text-muted d-block mt-1">
+                                                                    {{ $field['description'] }}
+                                                                </small>
+                                                            @endif
                                                         @error('settings.' . $key)
                                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                                         @enderror
@@ -88,6 +102,10 @@
                                         $inputType = $inputConfig['type'] ?? 'text';
                                         unset($inputConfig['type']);
                                         $value = old('settings.' . $key, $field['value'] ?? '');
+                                        $isColor = $inputType === 'color';
+                                        $inputClasses = $isColor
+                                            ? 'form-control form-control-color w-100'
+                                            : 'form-control';
                                     @endphp
                                     @if ($field)
                                         <div class="col-md-6 col-xl-4">
@@ -100,11 +118,21 @@
                                                     name="settings[{{ $key }}]"
                                                     type="{{ $inputType }}"
                                                     value="{{ $value }}"
+                                                    class="{{ $inputClasses }} {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
+                                                    @if ($isColor)
+                                                        data-color-output="#{{ $inputId }}-value"
+                                                        title="{{ $field['label'] ?? $key }}"
+                                                    @endif
                                                     @foreach ($inputConfig as $attr => $attrValue)
                                                         {{ $attr }}="{{ $attrValue }}"
                                                     @endforeach
-                                                    class="form-control {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
                                                 />
+                                                @if ($isColor)
+                                                    <div class="form-text mt-1">
+                                                        <span class="text-muted">現在値:</span>
+                                                        <span id="{{ $inputId }}-value" class="ms-1 font-monospace">{{ $value }}</span>
+                                                    </div>
+                                                @endif
                                                 @if (!empty($field['description']))
                                                     <small class="text-muted d-block mt-1">
                                                         {{ $field['description'] }}
@@ -131,3 +159,24 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const colorInputs = document.querySelectorAll('input[type="color"][data-color-output]');
+            colorInputs.forEach((input) => {
+                const targetSelector = input.getAttribute('data-color-output');
+                const target = targetSelector ? document.querySelector(targetSelector) : null;
+                if (!target) {
+                    return;
+                }
+                const updateValue = () => {
+                    target.textContent = input.value;
+                };
+                input.addEventListener('input', updateValue);
+                input.addEventListener('change', updateValue);
+                updateValue();
+            });
+        });
+    </script>
+@endpush

@@ -73,7 +73,12 @@ class SettingsController extends Controller
             return rtrim(rtrim(sprintf('%.7F', (float) $value), '0'), '.');
         }
 
-        return (string) $value;
+        $stringValue = (string) $value;
+        if ($type === 'string' && str_starts_with($stringValue, '#')) {
+            return strtoupper($stringValue);
+        }
+
+        return $stringValue;
     }
 
     /**

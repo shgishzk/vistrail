@@ -28,6 +28,12 @@ class UpdateSettingsRequest extends FormRequest
             'settings.BUILDING_MAP_HALF_SIDE_KM' => ['required', 'numeric', 'min:0.1', 'max:100'],
             'settings.ROOM_VISITED_ALERT_DAYS' => ['required', 'integer', 'min:0', 'max:3650'],
             'settings.ROOM_NOT_AT_HOME_ALERT_DAYS' => ['required', 'integer', 'min:0', 'max:365'],
+            'settings.GOOGLE_MARKER_HAS_LOCK_BACKGROUND' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
+            'settings.GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
+            'settings.GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
+            'settings.GOOGLE_MARKER_NO_LOCK_BACKGROUND' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
+            'settings.GOOGLE_MARKER_NO_LOCK_BORDER_COLOR' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
+            'settings.GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
         ];
     }
 
@@ -39,7 +45,12 @@ class UpdateSettingsRequest extends FormRequest
         $settings = $this->input('settings', []);
         foreach ($settings as $key => $value) {
             if (is_string($value)) {
-                $settings[$key] = trim($value);
+                $trimmed = trim($value);
+                if (preg_match('/^#(?:[0-9a-fA-F]{3}){1,2}$/', $trimmed)) {
+                    $settings[$key] = strtoupper($trimmed);
+                } else {
+                    $settings[$key] = $trimmed;
+                }
             }
         }
 
@@ -48,4 +59,3 @@ class UpdateSettingsRequest extends FormRequest
         ]);
     }
 }
-

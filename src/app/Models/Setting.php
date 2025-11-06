@@ -14,6 +14,12 @@ class Setting extends Model
     public const KEY_BUILDING_MAP_HALF_SIDE_KM = 'BUILDING_MAP_HALF_SIDE_KM';
     public const KEY_ROOM_VISITED_ALERT_DAYS = 'ROOM_VISITED_ALERT_DAYS';
     public const KEY_ROOM_NOT_AT_HOME_ALERT_DAYS = 'ROOM_NOT_AT_HOME_ALERT_DAYS';
+    public const KEY_GOOGLE_MARKER_HAS_LOCK_BACKGROUND = 'GOOGLE_MARKER_HAS_LOCK_BACKGROUND';
+    public const KEY_GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR = 'GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR';
+    public const KEY_GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR = 'GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR';
+    public const KEY_GOOGLE_MARKER_NO_LOCK_BACKGROUND = 'GOOGLE_MARKER_NO_LOCK_BACKGROUND';
+    public const KEY_GOOGLE_MARKER_NO_LOCK_BORDER_COLOR = 'GOOGLE_MARKER_NO_LOCK_BORDER_COLOR';
+    public const KEY_GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR = 'GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR';
 
     /**
      * Cached key/value settings to avoid repeated database queries per request.
@@ -90,6 +96,7 @@ class Setting extends Model
                 'group_label' => 'Google マップ',
                 'group_order' => 1,
                 'section' => 'building_map_range',
+                'section_label' => 'マンションマップ表示範囲',
                 'section_order' => 2,
                 'field_order' => 1,
                 'input' => [
@@ -104,7 +111,7 @@ class Setting extends Model
                 'label' => '訪問済みのアラート日数',
                 'description' => '「在宅」「投函」などに更新された部屋へアラートを表示する期間（日数）を設定します。',
                 'group' => 'building_map',
-                'group_label' => 'マンション',
+                'group_label' => 'マンションマップ',
                 'group_order' => 2,
                 'field_order' => 1,
                 'input' => [
@@ -112,20 +119,116 @@ class Setting extends Model
                     'inputmode' => 'numeric',
                     'placeholder' => '例: 90',
                 ],
-            ],
+        ],
             self::KEY_ROOM_NOT_AT_HOME_ALERT_DAYS => [
                 'type' => 'int',
                 'default' => 7,
                 'label' => '不在のアラート日数',
                 'description' => '「不在」のまま一定期間経過した部屋へアラートを表示する期間（日数）を設定します。',
                 'group' => 'building_map',
-                'group_label' => 'マンション',
+                'group_label' => 'マンションマップ',
                 'group_order' => 2,
                 'field_order' => 2,
                 'input' => [
                     'type' => 'text',
                     'inputmode' => 'numeric',
                     'placeholder' => '例: 7',
+                ],
+            ],
+            self::KEY_GOOGLE_MARKER_HAS_LOCK_BACKGROUND => [
+                'type' => 'string',
+                'default' => '#FFC107',
+                'label' => 'オートロックあり（背景）',
+                'description' => 'オートロックありマンションのマーカー背景色です。',
+                'group' => 'google_maps',
+                'group_label' => 'Google マップ',
+                'group_order' => 1,
+                'section' => 'marker_style_has_lock',
+                'section_label' => 'マーカー（オートロックあり）',
+                'section_order' => 3,
+                'field_order' => 1,
+                'input' => [
+                    'type' => 'color',
+                ],
+            ],
+            self::KEY_GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR => [
+                'type' => 'string',
+                'default' => '#FF8F00',
+                'label' => 'オートロックあり（枠）',
+                'description' => 'オートロックありマンションのマーカー枠線色です。',
+                'group' => 'google_maps',
+                'group_label' => 'Google マップ',
+                'group_order' => 1,
+                'section' => 'marker_style_has_lock',
+                'section_label' => 'マーカー（オートロックあり）',
+                'section_order' => 3,
+                'field_order' => 2,
+                'input' => [
+                    'type' => 'color',
+                ],
+            ],
+            self::KEY_GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR => [
+                'type' => 'string',
+                'default' => '#FF8F00',
+                'label' => 'オートロックあり（アイコン）',
+                'description' => 'オートロックありマンションのマーカー内アイコン色です。',
+                'group' => 'google_maps',
+                'group_label' => 'Google マップ',
+                'group_order' => 1,
+                'section' => 'marker_style_has_lock',
+                'section_label' => 'マーカー（オートロックあり）',
+                'section_order' => 3,
+                'field_order' => 3,
+                'input' => [
+                    'type' => 'color',
+                ],
+            ],
+            self::KEY_GOOGLE_MARKER_NO_LOCK_BACKGROUND => [
+                'type' => 'string',
+                'default' => '#4CAF50',
+                'label' => 'オートロックなし（背景）',
+                'description' => 'オートロックなしマンションのマーカー背景色です。',
+                'group' => 'google_maps',
+                'group_label' => 'Google マップ',
+                'group_order' => 1,
+                'section' => 'marker_style_no_lock',
+                'section_label' => 'マーカー（オートロックなし）',
+                'section_order' => 4,
+                'field_order' => 1,
+                'input' => [
+                    'type' => 'color',
+                ],
+            ],
+            self::KEY_GOOGLE_MARKER_NO_LOCK_BORDER_COLOR => [
+                'type' => 'string',
+                'default' => '#388E3C',
+                'label' => 'オートロックなし（枠）',
+                'description' => 'オートロックなしマンションのマーカー枠線色です。',
+                'group' => 'google_maps',
+                'group_label' => 'Google マップ',
+                'group_order' => 1,
+                'section' => 'marker_style_no_lock',
+                'section_label' => 'マーカー（オートロックなし）',
+                'section_order' => 4,
+                'field_order' => 2,
+                'input' => [
+                    'type' => 'color',
+                ],
+            ],
+            self::KEY_GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR => [
+                'type' => 'string',
+                'default' => '#388E3C',
+                'label' => 'オートロックなし（アイコン）',
+                'description' => 'オートロックなしマンションのマーカー内アイコン色です。',
+                'group' => 'google_maps',
+                'group_label' => 'Google マップ',
+                'group_order' => 1,
+                'section' => 'marker_style_no_lock',
+                'section_label' => 'マーカー（オートロックなし）',
+                'section_order' => 4,
+                'field_order' => 3,
+                'input' => [
+                    'type' => 'color',
                 ],
             ],
         ];
@@ -148,7 +251,11 @@ class Setting extends Model
             } elseif (($definition['type'] ?? null) === 'int') {
                 $defaults[$key] = (int) $envValue;
             } else {
-                $defaults[$key] = $envValue;
+                $stringValue = (string) $envValue;
+                if (($definition['type'] ?? null) === 'string' && str_starts_with($stringValue, '#')) {
+                    $stringValue = strtoupper($stringValue);
+                }
+                $defaults[$key] = $stringValue;
             }
         }
 
