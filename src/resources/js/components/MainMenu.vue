@@ -123,6 +123,7 @@ import { RouterLink } from 'vue-router';
 import axios from 'axios';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { FolderOpen, Building, Layers, Compass, ArrowRight, ChevronRight } from 'lucide-vue-next';
+import { fetchSettings } from '../services/settingsService';
 
 export default {
   name: 'MainMenu',
@@ -140,16 +141,18 @@ export default {
       error: '',
     });
 
-    const mapRadiusRaw = Number.parseFloat(import.meta.env.VITE_BUILDING_MAP_HALF_SIDE_KM ?? '1.0');
-    const mapRadiusKmText = Number.isFinite(mapRadiusRaw)
-      ? (Number.isInteger(mapRadiusRaw) ? mapRadiusRaw.toFixed(0) : mapRadiusRaw.toFixed(1))
-      : '1.0';
-
-    const hintMessages = [
-      `Google マップを利用したマンションマップでは、中心位置から半径${mapRadiusKmText}km以内のピンが表示されます。地図をゆっくり移動して、現在位置に近いマンションを確認しましょう。`,
-      'マンション詳細の「1年間の訪問率」は、過去1年以内に訪問済み（未訪問以外）として更新された部屋の割合です。訪問後の記録更新をお忘れなく。',
+    const mapRadiusKmText = ref('1.0');
+    const hintTemplates = [
+      (radius) => `Google マップを利用したマンションマップでは、中心位置から半径${radius}km以内のピンが表示されます。地図をゆっくり移動して、現在位置に近いマンションを確認しましょう。`,
+      () => 'マンション詳細の「1年間の訪問率」は、過去1年以内に訪問済み（未訪問以外）として更新された部屋の割合です。訪問後の記録更新をお忘れなく。',
     ];
-    const currentHint = ref(hintMessages[Math.floor(Math.random() * hintMessages.length)]);
+    const currentHint = ref('');
+
+    const pickHint = () => {
+      const template = hintTemplates[Math.floor(Math.random() * hintTemplates.length)] || hintTemplates[0];
+      currentHint.value = template(mapRadiusKmText.value);
+    };
+    pickHint();
 
     const brandLabel = computed(() => {
       const prefix = import.meta.env.VITE_APP_BRAND_PREFIX || '';
@@ -175,6 +178,23 @@ export default {
         newsState.items = [];
       } finally {
         newsState.isLoading = false;
+      }
+    };
+
+    const loadSettings = async () => {
+      try {
+        const settings = await fetchSettings();
+        const rawRadius = Number.parseFloat(settings.BUILDING_MAP_HALF_SIDE_KM ?? '1.0');
+        if (Number.isFinite(rawRadius)) {
+          mapRadiusKmText.value = Number.isInteger(rawRadius) ? rawRadius.toFixed(0) : rawRadius.toFixed(1);
+        } else {
+          mapRadiusKmText.value = '1.0';
+        }
+      } catch (error) {
+        console.error('Failed to load settings for main menu:', error);
+        mapRadiusKmText.value = '1.0';
+      } finally {
+        pickHint();
       }
     };
 
@@ -206,6 +226,7 @@ export default {
 
     onMounted(() => {
       loadNews();
+      loadSettings();
     });
 
     return {

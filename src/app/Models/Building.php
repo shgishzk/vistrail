@@ -6,6 +6,7 @@ use App\Enums\RoomStatus;
 use App\Enums\SelfLockType;
 use App\Models\Group;
 use App\Models\Room;
+use App\Models\Setting;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -133,7 +134,11 @@ class Building extends Model
             ? $room->status->value
             : (string) $room->status;
 
-        $visitedWithinDays = (int) config('buildings.alerts.visited_within_days', 90);
+        $defaults = Setting::defaults();
+        $visitedWithinDays = Setting::getInt(
+            Setting::KEY_ROOM_VISITED_ALERT_DAYS,
+            (int) ($defaults[Setting::KEY_ROOM_VISITED_ALERT_DAYS] ?? 90)
+        );
         if ($visitedWithinDays > 0
             && in_array($statusValue, [RoomStatus::AT_HOME->value, RoomStatus::POSTED->value], true)
             && $updatedAt->greaterThanOrEqualTo($reference->copy()->subDays($visitedWithinDays))
@@ -145,7 +150,10 @@ class Building extends Model
             ];
         }
 
-        $notAtHomeWithinDays = (int) config('buildings.alerts.not_at_home_within_days', 7);
+        $notAtHomeWithinDays = Setting::getInt(
+            Setting::KEY_ROOM_NOT_AT_HOME_ALERT_DAYS,
+            (int) ($defaults[Setting::KEY_ROOM_NOT_AT_HOME_ALERT_DAYS] ?? 7)
+        );
         if ($notAtHomeWithinDays > 0
             && $statusValue === RoomStatus::NOT_AT_HOME->value
             && $updatedAt->greaterThanOrEqualTo($reference->copy()->subDays($notAtHomeWithinDays))

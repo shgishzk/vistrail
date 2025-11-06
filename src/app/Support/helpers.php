@@ -1,11 +1,21 @@
 <?php
 
+use App\Models\Setting;
+
 if (! function_exists('google_default_position')) {
     function google_default_position(): array
     {
+        $defaults = Setting::defaults();
+
         return [
-            'lat' => (float) config('services.google.default_position.lat'),
-            'lng' => (float) config('services.google.default_position.lng'),
+            'lat' => Setting::getFloat(
+                Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT,
+                (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT] ?? 0)
+            ),
+            'lng' => Setting::getFloat(
+                Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG,
+                (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG] ?? 0)
+            ),
         ];
     }
 }

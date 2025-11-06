@@ -3,12 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 
 class MapConfigController extends Controller
 {
     public function __invoke()
     {
-        $defaultPosition = config('services.google.default_position', ['lat' => 0, 'lng' => 0]);
+        $defaults = Setting::defaults();
+
+        $defaultPosition = [
+            'lat' => Setting::getFloat(Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT, (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT] ?? 0)),
+            'lng' => Setting::getFloat(Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG, (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG] ?? 0)),
+        ];
+
+        $mapRadiusKm = Setting::getFloat(
+            Setting::KEY_BUILDING_MAP_HALF_SIDE_KM,
+            (float) ($defaults[Setting::KEY_BUILDING_MAP_HALF_SIDE_KM] ?? 1.0),
+        );
 
         return response()->json([
             'default_position' => [
@@ -17,7 +28,7 @@ class MapConfigController extends Controller
             ],
             'marker_styles' => config('services.google.marker_styles'),
             'maps_api_key' => config('services.google.maps_api_key'),
-            'map_radius_km' => (float) config('buildings.map.half_side_km', 1.0),
+            'map_radius_km' => max((float) $mapRadiusKm, 0.1),
         ]);
     }
 }

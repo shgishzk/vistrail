@@ -3,9 +3,12 @@
 use App\Http\Controllers\Api\BuildingController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\MapConfigController;
+use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\NewsController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+
+Route::get('/settings/public', [SettingController::class, 'publicIndex']);
 
 Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->group(function () {
     Route::get('/map/config', MapConfigController::class);
@@ -17,4 +20,6 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->g
     Route::get('/news', NewsController::class);
     Route::get('/groups', [GroupController::class, 'index']);
     Route::get('/groups/buildings', [GroupController::class, 'buildings']);
+    Route::get('/settings', [SettingController::class, 'index']);
+    Route::put('/settings', [SettingController::class, 'update']);
 });

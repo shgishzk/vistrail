@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\RoomStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Building;
+use App\Models\Setting;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -16,12 +17,27 @@ class BuildingController extends Controller
      */
     public function index(Request $request)
     {
-        $defaultPosition = config('services.google.default_position');
+        $defaults = Setting::defaults();
 
-        $lat = (float) $request->input('lat', $defaultPosition['lat'] ?? 0);
-        $lng = (float) $request->input('lng', $defaultPosition['lng'] ?? 0);
+        $defaultLat = Setting::getFloat(
+            Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT,
+            (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT] ?? 0)
+        );
+        $defaultLng = Setting::getFloat(
+            Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG,
+            (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG] ?? 0)
+        );
 
-        $halfSideKm = max((float) config('buildings.map.half_side_km', 1.0), 0.1);
+        $lat = (float) $request->input('lat', $defaultLat);
+        $lng = (float) $request->input('lng', $defaultLng);
+
+        $halfSideKm = max(
+            Setting::getFloat(
+                Setting::KEY_BUILDING_MAP_HALF_SIDE_KM,
+                (float) ($defaults[Setting::KEY_BUILDING_MAP_HALF_SIDE_KM] ?? 1.0)
+            ),
+            0.1
+        );
         $latRad = deg2rad($lat);
         $kmPerDegreeLat = 110.574;
         $degLat = $halfSideKm / $kmPerDegreeLat;

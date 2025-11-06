@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NewsController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\UserAuthController;
 
 Route::get('/', [UserAuthController::class, 'showHome'])->name('home');
@@ -34,6 +35,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     
     Route::middleware('admin.auth')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
         
         Route::get('users', [\App\Http\Controllers\Admin\UsersController::class, 'index'])->name('users');
         Route::get('users/create', [\App\Http\Controllers\Admin\UsersController::class, 'create'])->name('users.create');

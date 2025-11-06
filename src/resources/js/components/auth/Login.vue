@@ -25,7 +25,7 @@
                 <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
                   <h3 class="text-sm font-semibold text-white/90">区域マップに素早くアクセス</h3>
                   <p class="mt-1 text-xs text-indigo-100/80">
-                    ログインすると半径{{ mapRadiusKmText }}kmの範囲内にあるマンションを地図上で確認できます。
+                    ログインすると近隣にあるマンションを地図上で確認できます。
                   </p>
                 </div>
                 <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
@@ -131,7 +131,7 @@
 <script>
 import { ref, reactive, computed } from 'vue';
 import axios from 'axios';
-import { Mail, Lock, AlertCircle, Compass, ArrowRight } from 'lucide-vue-next';
+import { Mail, Lock, AlertCircle } from 'lucide-vue-next';
 
 export default {
   name: 'Login',
@@ -139,8 +139,6 @@ export default {
     Mail,
     Lock,
     AlertCircle,
-    Compass,
-    ArrowRight,
   },
   emits: ['login-success'],
   setup(props, { emit }) {
@@ -159,11 +157,6 @@ export default {
       const base = 'オンライン区域';
       return prefix ? `${prefix} ${base}` : base;
     });
-
-    const mapRadiusRaw = Number.parseFloat(import.meta.env.VITE_BUILDING_MAP_HALF_SIDE_KM ?? '1.0');
-    const mapRadiusKmText = Number.isFinite(mapRadiusRaw)
-      ? (Number.isInteger(mapRadiusRaw) ? mapRadiusRaw.toFixed(0) : mapRadiusRaw.toFixed(1))
-      : '1.0';
 
     const handleSubmit = async () => {
       Object.keys(errors).forEach((key) => delete errors[key]);
@@ -207,7 +200,6 @@ export default {
       error,
       loading,
       brandLabel,
-      mapRadiusKmText,
       handleSubmit,
     };
   },
