@@ -23,43 +23,104 @@
                 @csrf
                 @method('PUT')
 
-                <div class="row g-4">
-                    @foreach ($fields as $key => $field)
-                        @php
-                            $inputId = 'setting-' . Str::kebab($key);
-                            $inputConfig = $field['input'] ?? [];
-                            $inputType = $inputConfig['type'] ?? 'text';
-                            unset($inputConfig['type']);
-                            $value = old('settings.' . $key, $values[$key] ?? '');
-                        @endphp
-                        <div class="col-md-6 col-xl-4">
-                            <div class="mb-3">
-                                <label for="{{ $inputId }}" class="form-label fw-semibold">
-                                    {{ $field['label'] ?? $key }}
-                                </label>
-                                <input
-                                    id="{{ $inputId }}"
-                                    name="settings[{{ $key }}]"
-                                    type="{{ $inputType }}"
-                                    value="{{ $value }}"
-                                    @foreach ($inputConfig as $attr => $attrValue)
-                                        {{ $attr }}="{{ $attrValue }}"
-                                    @endforeach
-                                    class="form-control {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
-                                    inputmode="{{ $inputType === 'number' ? 'decimal' : 'text' }}"
-                                />
-                                @if (!empty($field['description']))
-                                    <small class="text-muted d-block mt-1">
-                                        {{ $field['description'] }}
-                                    </small>
-                                @endif
-                                @error('settings.' . $key)
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
+                @foreach ($groups as $group)
+                    <div class="mb-5">
+                        <h5 class="fw-semibold mb-3">{{ $group['label'] }}</h5>
+
+                        @if (!empty($group['sections']))
+                            @foreach ($group['sections'] as $section)
+                                <div class="mb-4">
+                                    @if (!empty($section['label']))
+                                        <h6 class="fw-semibold mb-3">{{ $section['label'] }}</h6>
+                                    @endif
+                                    <div class="row g-4">
+                                        @foreach ($section['fields'] as $fieldRef)
+                                            @php
+                                                $field = $fields[$fieldRef['key']] ?? null;
+                                                $key = $field['key'] ?? $fieldRef['key'];
+                                                $inputId = 'setting-' . Str::kebab($key);
+                                                $inputConfig = $field['input'] ?? [];
+                                                $inputType = $inputConfig['type'] ?? 'text';
+                                                unset($inputConfig['type']);
+                                                $value = old('settings.' . $key, $field['value'] ?? '');
+                                            @endphp
+                                            @if ($field)
+                                                <div class="col-md-6 col-xl-4">
+                                                    <div class="mb-3">
+                                                        <label for="{{ $inputId }}" class="form-label fw-semibold">
+                                                            {{ $field['label'] ?? $key }}
+                                                        </label>
+                                                        <input
+                                                            id="{{ $inputId }}"
+                                                            name="settings[{{ $key }}]"
+                                                            type="{{ $inputType }}"
+                                                            value="{{ $value }}"
+                                                            @foreach ($inputConfig as $attr => $attrValue)
+                                                                {{ $attr }}="{{ $attrValue }}"
+                                                            @endforeach
+                                                            class="form-control {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
+                                                        />
+                                                        @if (!empty($field['description']))
+                                                            <small class="text-muted d-block mt-1">
+                                                                {{ $field['description'] }}
+                                                            </small>
+                                                        @endif
+                                                        @error('settings.' . $key)
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+
+                        @if (!empty($group['fields']))
+                            <div class="row g-4">
+                                @foreach ($group['fields'] as $fieldRef)
+                                    @php
+                                        $field = $fields[$fieldRef['key']] ?? null;
+                                        $key = $field['key'] ?? $fieldRef['key'];
+                                        $inputId = 'setting-' . Str::kebab($key);
+                                        $inputConfig = $field['input'] ?? [];
+                                        $inputType = $inputConfig['type'] ?? 'text';
+                                        unset($inputConfig['type']);
+                                        $value = old('settings.' . $key, $field['value'] ?? '');
+                                    @endphp
+                                    @if ($field)
+                                        <div class="col-md-6 col-xl-4">
+                                            <div class="mb-3">
+                                                <label for="{{ $inputId }}" class="form-label fw-semibold">
+                                                    {{ $field['label'] ?? $key }}
+                                                </label>
+                                                <input
+                                                    id="{{ $inputId }}"
+                                                    name="settings[{{ $key }}]"
+                                                    type="{{ $inputType }}"
+                                                    value="{{ $value }}"
+                                                    @foreach ($inputConfig as $attr => $attrValue)
+                                                        {{ $attr }}="{{ $attrValue }}"
+                                                    @endforeach
+                                                    class="form-control {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
+                                                />
+                                                @if (!empty($field['description']))
+                                                    <small class="text-muted d-block mt-1">
+                                                        {{ $field['description'] }}
+                                                    </small>
+                                                @endif
+                                                @error('settings.' . $key)
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
                             </div>
-                        </div>
-                    @endforeach
-                </div>
+                        @endif
+                    </div>
+                @endforeach
 
                 <div class="mt-4 d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary">
