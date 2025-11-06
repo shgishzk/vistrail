@@ -66,6 +66,32 @@
                     <div id="boundary-map" class="border rounded" style="height: 320px;"></div>
                     <div id="boundary-map-error" class="form-text text-danger d-none">@lang('Failed to parse KML. Please check the format or try again.')</div>
                     <div class="form-text">@lang('Valid KML updates will be shown on the map automatically.')</div>
+                    <style>
+                        #boundary-map .marker-label {
+                            display: inline-flex;
+                            flex-direction: column;
+                            align-items: center;
+                            background: rgba(33, 33, 33, 0.75);
+                            color: #fff;
+                            padding: 6px 10px;
+                            border-radius: 6px;
+                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+                            font-size: 13px;
+                            line-height: 1.35;
+                            transform: translateY(24px);
+                            white-space: nowrap;
+                            max-width: 260px;
+                        }
+                        #boundary-map .marker-label__title {
+                            font-weight: 600;
+                            font-size: 11px;
+                        }
+                        #boundary-map .marker-label__desc {
+                            margin-top: 4px;
+                            font-size: 10px;
+                            opacity: 0.9;
+                        }
+                    </style>
                 </div>
 
                 <script src="{{ asset('js/kml-parser.js') }}"></script>
@@ -82,7 +108,7 @@
                             return;
                         }
 
-                        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
+                        const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
 
                         const defaultCenter = { lat: 35.024842, lng: 135.762106 };
                         const map = new google.maps.Map(mapElement, {
@@ -93,7 +119,6 @@
 
                         const polygons = [];
                         const markers = [];
-                        let infoWindow = null;
                         const kmlUtils = window.kmlParser;
                         if (!kmlUtils) {
                             console.error('kmlParser utilities are not loaded.');
@@ -119,13 +144,10 @@
                             renderKml.debounceId = setTimeout(() => {
                                 polygons.forEach(polygon => polygon.setMap(null));
                                 polygons.length = 0;
-                                markers.forEach(marker => {
+                                markers.forEach((marker) => {
                                     marker.map = null;
                                 });
                                 markers.length = 0;
-                                if (infoWindow) {
-                                    infoWindow.close();
-                                }
                                 if (errorElement) {
                                     errorElement.textContent = defaultErrorMessage;
                                     errorElement.classList.add('d-none');
@@ -158,8 +180,8 @@
                                         const style = resolveStyle(polygonDatum.styleUrl, styles);
                                         const strokeEnabled = style.polyOutline !== '0';
                                         const fillEnabled = style.polyFill !== '0';
-                                        const stroke = parseKmlColor(style.lineColor, '#FF0000', strokeEnabled ? 0.8 : 0);
-                                        const fill = parseKmlColor(style.polyColor, '#FF0000', fillEnabled ? 0.15 : 0);
+                                        const stroke = parseKmlColor(style.lineColor, '#8e24aa', strokeEnabled ? 1 : 0);
+                                        const fill = parseKmlColor(style.polyColor, '#ba68c8', fillEnabled ? 0.3 : 0);
                                         const strokeWeight = Number.parseFloat(style.lineWidth);
 
                                         const polygon = new google.maps.Polygon({
@@ -181,47 +203,35 @@
                                             return;
                                         }
 
-                                        const style = resolveStyle(point.styleUrl, styles);
-                                        const markerStyle = parseKmlColor(style.iconColor || style.lineColor || style.polyColor, '#0288D1', 1);
-                                        const pin = new PinElement({
-                                            background: markerStyle.color,
-                                            borderColor: '#ffffff',
-                                            glyphColor: '#000000',
-                                            scale: 1.2,
-                                        });
-                                        pin.element.style.opacity = markerStyle.opacity;
+                                        const title = point.name?.trim();
+                                        const description = point.description?.trim();
+
+                                        const container = document.createElement('div');
+                                        container.className = 'marker-label';
+
+                                        const titleEl = document.createElement('div');
+                                        titleEl.className = 'marker-label__title';
+                                        titleEl.textContent = title || '{{ __("Point") }}';
+                                        container.appendChild(titleEl);
+
+                                        if (description) {
+                                            const descEl = document.createElement('div');
+                                            descEl.className = 'marker-label__desc';
+                                            descEl.textContent = description;
+                                            container.appendChild(descEl);
+                                        }
 
                                         const marker = new AdvancedMarkerElement({
                                             map,
                                             position: { lat: point.lat, lng: point.lng },
-                                            content: pin.element,
+                                            content: container,
+                                            title: title || '',
+                                            collisionBehavior: google.maps.CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY,
                                         });
 
                                         markers.push(marker);
                                         bounds.extend({ lat: point.lat, lng: point.lng });
                                         geometryCount++;
-
-                                        const title = point.name?.trim();
-                                        const description = point.description?.trim();
-
-                                        if (title || description) {
-                                            marker.addListener('click', () => {
-                                                if (!infoWindow) {
-                                                    infoWindow = new google.maps.InfoWindow();
-                                                }
-
-                                                const titleHtml = title ? `<div class="fw-bold mb-1" style="font-size:1.05rem;">${title}</div>` : '';
-                                                const descriptionHtml = description
-                                                    ? `<div class="text-muted" style="white-space: pre-line;font-size:0.95rem;">${description}</div>`
-                                                    : '';
-
-                                                infoWindow.setContent(`<div>${titleHtml}${descriptionHtml}</div>`);
-                                                infoWindow.open({
-                                                    anchor: marker,
-                                                    map,
-                                                });
-                                            });
-                                        }
                                     });
 
                                     if (!geometryCount) {
