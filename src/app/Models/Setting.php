@@ -138,7 +138,7 @@ class Setting extends Model
             ],
             self::KEY_GOOGLE_MARKER_HAS_LOCK_BACKGROUND => [
                 'type' => 'string',
-                'default' => '#FFC107',
+                'default' => '#EA4335',
                 'label' => 'オートロックあり（背景）',
                 'description' => 'オートロックありマンションのマーカー背景色です。',
                 'group' => 'google_maps',
@@ -154,7 +154,7 @@ class Setting extends Model
             ],
             self::KEY_GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR => [
                 'type' => 'string',
-                'default' => '#FF8F00',
+                'default' => '#C5221F',
                 'label' => 'オートロックあり（枠）',
                 'description' => 'オートロックありマンションのマーカー枠線色です。',
                 'group' => 'google_maps',
@@ -170,7 +170,7 @@ class Setting extends Model
             ],
             self::KEY_GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR => [
                 'type' => 'string',
-                'default' => '#FF8F00',
+                'default' => '#FFFFFF',
                 'label' => 'オートロックあり（アイコン）',
                 'description' => 'オートロックありマンションのマーカー内アイコン色です。',
                 'group' => 'google_maps',

@@ -24,9 +24,9 @@ class MapConfigController extends Controller
         $markerStyles = config('services.google.marker_styles', []);
         $markerDefaults = [
             'has_lock' => [
-                'background' => $defaults[Setting::KEY_GOOGLE_MARKER_HAS_LOCK_BACKGROUND] ?? '#FFC107',
-                'borderColor' => $defaults[Setting::KEY_GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR] ?? '#FF8F00',
-                'glyphColor' => $defaults[Setting::KEY_GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR] ?? '#FF8F00',
+                'background' => $defaults[Setting::KEY_GOOGLE_MARKER_HAS_LOCK_BACKGROUND] ?? '#EA4335',
+                'borderColor' => $defaults[Setting::KEY_GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR] ?? '#C5221F',
+                'glyphColor' => $defaults[Setting::KEY_GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR] ?? '#FFFFFF',
             ],
             'no_lock' => [
                 'background' => $defaults[Setting::KEY_GOOGLE_MARKER_NO_LOCK_BACKGROUND] ?? '#4CAF50',

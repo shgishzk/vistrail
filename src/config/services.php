@@ -43,9 +43,9 @@ return [
         ],
         'marker_styles' => [
             'has_lock' => [
-                'background' => env('GOOGLE_MARKER_HAS_LOCK_BACKGROUND', '#FFC107'),
-                'borderColor' => env('GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR', '#FF8F00'),
-                'glyphColor' => env('GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR', '#FF8F00'),
+                'background' => env('GOOGLE_MARKER_HAS_LOCK_BACKGROUND', '#EA4335'),
+                'borderColor' => env('GOOGLE_MARKER_HAS_LOCK_BORDER_COLOR', '#C5221F'),
+                'glyphColor' => env('GOOGLE_MARKER_HAS_LOCK_GLYPH_COLOR', '#FFFFFF'),
             ],
             'no_lock' => [
                 'background' => env('GOOGLE_MARKER_NO_LOCK_BACKGROUND', '#4CAF50'),

@@ -408,6 +408,7 @@
                         mapTypeControl: false,
                         zoomControl: true,
                         mapId: 'group-building-map-id',
+                        fullscreenControl: false,
                     });
 
                     infoWindow = new google.maps.InfoWindow();
@@ -525,6 +526,7 @@
                         mapTypeControl: false,
                         zoomControl: true,
                         mapId: 'group-preview-map-id',
+                        fullscreenControl: false,
                     });
                     previewInfoWindow = new google.maps.InfoWindow();
                 }

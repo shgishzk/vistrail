@@ -444,6 +444,7 @@ export default {
           zoom: 17,
           zoomControl: true,
           mapId: 'buildings-map',
+          fullscreenControl: false,
         });
 
         renderTerritoryBoundary(config.assigned_boundary_kml);

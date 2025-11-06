@@ -414,6 +414,7 @@ export default {
           zoom: 14,
           zoomControl: true,
           mapId: 'groups-map',
+          fullscreenControl: false,
         });
 
         renderTerritoryBoundary(config.assigned_boundary_kml);

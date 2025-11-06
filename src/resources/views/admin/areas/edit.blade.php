@@ -114,7 +114,8 @@
                         const map = new google.maps.Map(mapElement, {
                             center: defaultCenter,
                             zoom: 10,
-                            mapId: 'roadmap'
+                            mapId: 'roadmap',
+                            fullscreenControl: false,
                         });
 
                         const polygons = [];

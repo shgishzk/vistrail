@@ -106,7 +106,8 @@
                 center: initialCenter,
                 zoom: 12,
                 mapTypeId: 'roadmap',
-                mapId: 'area-print-map'
+                mapId: 'area-print-map',
+                fullscreenControl: false,
             });
 
             const bounds = new google.maps.LatLngBounds();
