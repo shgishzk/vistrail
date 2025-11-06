@@ -278,7 +278,7 @@ export default {
         const pinOptions = {
           background: style.background,
           borderColor: style.borderColor,
-          glyphColor: style.glyphColor,
+          glyphColor: '#000000',
         };
 
         if (building.group_initial) {
@@ -286,6 +286,11 @@ export default {
         }
 
         const pin = new markerLibrary.PinElement(pinOptions);
+        const glyphElement = pin.element?.querySelector('span');
+        if (glyphElement) {
+          glyphElement.style.fontWeight = '900';
+          glyphElement.style.color = '#000000';
+        }
 
         const marker = new markerLibrary.AdvancedMarkerElement({
           map: mapInstance,
