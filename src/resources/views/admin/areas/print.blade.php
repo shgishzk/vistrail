@@ -81,11 +81,21 @@
     <script>
         const areaKml = @json($area->boundary_kml);
         const defaultPosition = @json($defaultPosition);
+        const storedCenter = @json([
+            'lat' => $area->center_lat,
+            'lng' => $area->center_lng,
+        ]);
 
         async function initMap() {
+            const parseOrFallback = (value, fallback) => {
+                const number = Number(value);
+                return Number.isFinite(number) ? number : fallback;
+            };
+            const fallbackLat = parseOrFallback(defaultPosition?.lat, 35.0238868);
+            const fallbackLng = parseOrFallback(defaultPosition?.lng, 135.760201);
             const initialCenter = {
-                lat: Number(defaultPosition?.lat) || 35.0238868,
-                lng: Number(defaultPosition?.lng) || 135.760201,
+                lat: parseOrFallback(storedCenter?.lat, fallbackLat),
+                lng: parseOrFallback(storedCenter?.lng, fallbackLng),
             };
 
             const kmlUtils = window.kmlParser;

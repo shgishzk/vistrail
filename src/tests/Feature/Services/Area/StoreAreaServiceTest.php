@@ -22,6 +22,8 @@ class StoreAreaServiceTest extends TestCase
             'number' => 'A123',
             'name' => 'Test Area',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.1234567,
+            'center_lng' => 135.7654321,
             'memo' => 'Test memo',
         ];
         
@@ -47,6 +49,8 @@ class StoreAreaServiceTest extends TestCase
             'number' => 'B456',
             'name' => 'Another Area',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.9876543,
+            'center_lng' => 135.1234567,
             'memo' => 'Another memo',
         ];
         
@@ -72,6 +76,8 @@ class StoreAreaServiceTest extends TestCase
         $areaData = [
             'number' => 'C789',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.0000000,
+            'center_lng' => 135.0000000,
         ];
         
         $area = $service->execute($areaData);

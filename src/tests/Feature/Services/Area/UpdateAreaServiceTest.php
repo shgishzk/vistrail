@@ -29,6 +29,8 @@ class UpdateAreaServiceTest extends TestCase
             'number' => 'B456',
             'name' => 'Updated Area',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.2345678,
+            'center_lng' => 135.8765432,
             'memo' => 'Updated memo',
         ];
         
@@ -59,6 +61,8 @@ class UpdateAreaServiceTest extends TestCase
             'number' => 'C789',
             'name' => 'New Name',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.3456789,
+            'center_lng' => 135.2345678,
             'memo' => 'New memo',
         ];
         
@@ -93,6 +97,8 @@ class UpdateAreaServiceTest extends TestCase
             'number' => 'D123', // Same number
             'name' => 'Updated Name',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.4567890,
+            'center_lng' => 135.3456789,
             'memo' => 'Original memo', // Same memo
         ];
         

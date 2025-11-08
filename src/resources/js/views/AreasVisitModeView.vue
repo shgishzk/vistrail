@@ -250,7 +250,7 @@ const loadVisits = async () => {
     syncActiveVisit();
   } catch (error) {
     console.error('Failed to load my areas:', error);
-    state.error = '担当区域の取得に失敗しました。時間をおいて再度お試しください。';
+    state.error = '自分の区域の取得に失敗しました。時間をおいて再度お試しください。';
     visits.value = [];
     activeVisit.value = null;
   } finally {

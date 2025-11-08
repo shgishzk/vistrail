@@ -106,6 +106,8 @@
 | number | string(255) | NO |  |  | 区域番号 |
 | name | string(255) | YES |  |  | 区域名称 |
 | boundary_kml | longText | NO |  |  | 境界情報（KML） |
+| center_lat | decimal(10, 7) | NO |  | 0 | 地図中心（緯度） |
+| center_lng | decimal(11, 7) | NO |  | 0 | 地図中心（経度） |
 | memo | text | YES |  |  | メモ |
 | created_at | timestamp | YES |  |  | 作成日時 |
 | updated_at | timestamp | YES |  |  | 更新日時 |

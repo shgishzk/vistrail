@@ -4,7 +4,7 @@
       <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-400">My Areas</p>
-          <h1 class="text-2xl font-semibold text-slate-900 sm:text-3xl">担当区域</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 sm:text-3xl">自分の区域</h1>
           <p class="mt-2 text-sm text-slate-500">
             現在担当中の区域一覧です。区域を選択すると地図と詳細を表示します。
           </p>
@@ -20,7 +20,7 @@
       <div class="lg:col-span-2">
         <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div class="border-b border-slate-200 px-5 py-4">
-            <h2 class="text-base font-semibold text-slate-900">担当区域一覧</h2>
+            <h2 class="text-base font-semibold text-slate-900">自分の区域一覧</h2>
             <p class="text-xs text-slate-500">区域を選択して詳細を確認します。</p>
           </div>
           <div class="max-h-[520px] divide-y divide-slate-100 overflow-y-auto">
@@ -219,7 +219,7 @@ const loadVisits = async () => {
     }
   } catch (error) {
     console.error('Failed to load my areas:', error);
-    state.error = '担当区域の取得に失敗しました。時間をおいて再度お試しください。';
+    state.error = '自分の区域の取得に失敗しました。時間をおいて再度お試しください。';
     visits.value = [];
     selectedVisit.value = null;
   } finally {

@@ -30,7 +30,10 @@ class AreasController extends Controller
      */
     public function create(): View
     {
-        return view('admin.areas.create');
+        $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = $this->defaultMapPosition();
+
+        return view('admin.areas.create', compact('googleMapsApiKey', 'defaultPosition'));
     }
 
     /**
@@ -53,8 +56,9 @@ class AreasController extends Controller
     public function edit(Area $area): View
     {
         $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = $this->defaultMapPosition();
 
-        return view('admin.areas.edit', compact('area', 'googleMapsApiKey'));
+        return view('admin.areas.edit', compact('area', 'googleMapsApiKey', 'defaultPosition'));
     }
 
     /**
@@ -86,8 +90,20 @@ class AreasController extends Controller
     public function print(Area $area): View
     {
         $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = $this->defaultMapPosition();
+
+        return view('admin.areas.print', [
+            'area' => $area,
+            'googleMapsApiKey' => $googleMapsApiKey,
+            'defaultPosition' => $defaultPosition,
+        ]);
+    }
+
+    private function defaultMapPosition(): array
+    {
         $defaults = Setting::defaults();
-        $defaultPosition = [
+
+        return [
             'lat' => Setting::getFloat(
                 Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT,
                 (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT] ?? 0)
@@ -97,12 +113,6 @@ class AreasController extends Controller
                 (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG] ?? 0)
             ),
         ];
-
-        return view('admin.areas.print', [
-            'area' => $area,
-            'googleMapsApiKey' => $googleMapsApiKey,
-            'defaultPosition' => $defaultPosition,
-        ]);
     }
 
     private function getLatestVisitorSuggestions(): array

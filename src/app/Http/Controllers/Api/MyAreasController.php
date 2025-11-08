@@ -36,6 +36,8 @@ class MyAreasController extends Controller
                         'number' => $area->number,
                         'name' => $area->name,
                         'boundary_kml' => $area->boundary_kml,
+                        'center_lat' => $area->center_lat,
+                        'center_lng' => $area->center_lng,
                     ] : null,
                 ];
             })
