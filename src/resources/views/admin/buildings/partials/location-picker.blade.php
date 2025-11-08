@@ -301,6 +301,6 @@
     }
 </script>
 @once('building-location-picker-script')
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&callback=initBuildingLocationPicker" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=marker&callback=initBuildingLocationPicker" async defer></script>
 @endonce
 @endpush
