@@ -19,6 +19,7 @@ class StoreVisitRequest extends FormRequest
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'memo' => 'nullable|string',
+            'status' => 'prohibited',
         ];
     }
 
@@ -33,6 +34,7 @@ class StoreVisitRequest extends FormRequest
             'start_date.date' => '訪問開始日は日付形式で入力してください。',
             'end_date.date' => '訪問終了日は日付形式で入力してください。',
             'end_date.after_or_equal' => '訪問終了日は訪問開始日以降の日付を指定してください。',
+            'status.prohibited' => '訪問作成時に状態を指定することはできません。',
         ];
     }
 }

@@ -1,5 +1,9 @@
 @extends('admin.layouts.app')
 
+@php
+    use App\Enums\VisitStatus;
+@endphp
+
 @section('title', __('Visits for :area', ['area' => $area->number]))
 
 @section('content')
@@ -35,6 +39,7 @@
                     <th>@lang('Start Date')</th>
                     <th>@lang('End Date')</th>
                     <th>@lang('Memo')</th>
+                    <th>@lang('Status')</th>
                     <th>@lang('Created At')</th>
                     <th>@lang('Actions')</th>
                 </tr>
@@ -49,6 +54,16 @@
                     <td>{{ optional($visit->start_date)->format('Y-m-d') }}</td>
                     <td>{{ optional($visit->end_date)->format('Y-m-d') }}</td>
                     <td>{{ Str::limit($visit->memo, 50) }}</td>
+                    <td>
+                        @php
+                            $status = $visit->status instanceof VisitStatus
+                                ? $visit->status
+                                : VisitStatus::from($visit->status ?? VisitStatus::default()->value);
+                        @endphp
+                        <span class="badge {{ $status->badgeClass() }}">
+                            {{ $status->label() }}
+                        </span>
+                    </td>
                     <td>{{ $visit->created_at->format('Y-m-d H:i') }}</td>
                     <td>
                         <a href="{{ route('admin.visits.edit', $visit) }}" class="btn btn-outline-primary">

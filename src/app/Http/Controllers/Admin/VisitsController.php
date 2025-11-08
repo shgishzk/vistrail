@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateVisitRequest;
 use App\Models\Area;
 use App\Models\User;
 use App\Models\Visit;
+use App\States\VisitStatus\VisitStatusContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -72,12 +73,15 @@ class VisitsController extends Controller
     public function edit(Visit $visit): View
     {
         [$users, $areas] = $this->getSuggestionLists();
+        $statusContext = VisitStatusContext::from($visit->status);
 
         return view('admin.visits.edit', [
             'visit' => $visit,
             'users' => $users,
             'areas' => $areas,
             'preselectedAreaId' => null,
+            'currentStatus' => $statusContext->current(),
+            'statusTransitions' => $statusContext->availableTransitions(),
         ]);
     }
 
