@@ -37,26 +37,37 @@
             <div v-else-if="!visits.length" class="px-5 py-6 text-center text-sm text-slate-500">
               担当中の区域はありません。
             </div>
-            <button
+            <div
               v-else
               v-for="visit in visits"
               :key="visit.id"
-              type="button"
-              class="flex w-full flex-col gap-1 px-5 py-4 text-left transition hover:bg-slate-50 focus:bg-slate-100 focus:outline-none"
+              class="flex flex-col gap-3 px-5 py-4 transition hover:bg-slate-50"
               :class="selectedVisit?.id === visit.id ? 'bg-slate-100' : ''"
-              @click="selectVisit(visit)"
             >
-              <div class="flex items-center justify-between">
-                <div class="text-sm font-semibold text-slate-900">
-                  {{ visit.area?.number ?? '区域' }} <span v-if="visit.area?.name" class="text-slate-500">/{{ visit.area?.name }}</span>
+              <button
+                type="button"
+                class="flex w-full flex-col gap-1 text-left focus:outline-none"
+                @click="selectVisit(visit)"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="text-sm font-semibold text-slate-900">
+                    {{ visit.area?.number ?? '区域' }} <span v-if="visit.area?.name" class="text-slate-500">/{{ visit.area?.name }}</span>
+                  </div>
+                  <span class="text-xs font-semibold uppercase tracking-wide text-emerald-600">訪問中</span>
                 </div>
-                <span class="text-xs font-semibold uppercase tracking-wide text-emerald-600">訪問中</span>
-              </div>
-              <p class="text-xs text-slate-500">
-                訪問開始日: {{ visit.start_date ?? '未設定' }}
-              </p>
-              <p v-if="visit.memo" class="text-xs text-slate-500 line-clamp-2">{{ visit.memo }}</p>
-            </button>
+                <p class="text-xs text-slate-500">
+                  訪問開始日: {{ visit.start_date ?? '未設定' }}
+                </p>
+                <p v-if="visit.memo" class="text-xs text-slate-500 line-clamp-2">{{ visit.memo }}</p>
+              </button>
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-sky-300 hover:text-sky-600"
+                @click="openVisitMode(visit)"
+              >
+                訪問モード
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -82,29 +93,35 @@
                   <dd class="mt-1 font-semibold text-slate-900">{{ selectedVisit.start_date ?? '未設定' }}</dd>
                 </div>
                 <div>
-                  <dt class="text-xs uppercase tracking-wide text-slate-400">訪問終了日</dt>
-                  <dd class="mt-1 font-semibold text-slate-900">{{ selectedVisit.end_date ?? '未設定' }}</dd>
-                </div>
-                <div>
                   <dt class="text-xs uppercase tracking-wide text-slate-400">メモ</dt>
                   <dd class="mt-1 min-h-[1.5rem] text-slate-700">{{ selectedVisit.memo ?? '—' }}</dd>
                 </div>
               </dl>
-              <div class="space-y-2">
-                <p class="text-sm font-semibold text-slate-900">区域地図</p>
-                <div class="areas-my-map relative h-[360px] overflow-hidden rounded-2xl border border-slate-200">
-                  <div
-                    v-if="mapError"
-                    class="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center text-sm text-red-600"
-                  >
-                    {{ mapError }}
+              <div class="space-y-3">
+                <div>
+                  <p class="text-sm font-semibold text-slate-900">区域地図</p>
+                  <div class="areas-my-map relative h-[360px] overflow-hidden rounded-2xl border border-slate-200">
+                    <div
+                      v-if="mapError"
+                      class="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center text-sm text-red-600"
+                    >
+                      {{ mapError }}
+                    </div>
+                    <div
+                      ref="mapContainer"
+                      class="h-full w-full"
+                      :class="{ 'opacity-30': mapError }"
+                    ></div>
                   </div>
-                  <div
-                    ref="mapContainer"
-                    class="h-full w-full"
-                    :class="{ 'opacity-30': mapError }"
-                  ></div>
                 </div>
+                <button
+                  type="button"
+                  class="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-sky-300 hover:text-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="!selectedVisit"
+                  @click="openVisitMode"
+                >
+                  訪問モードで表示
+                </button>
               </div>
             </div>
             <div v-else-if="state.isLoading" class="h-[360px] animate-pulse rounded-2xl bg-slate-100"></div>
@@ -117,6 +134,7 @@
 
 <script setup>
 import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { fetchMyAreas } from '../services/areasService';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
@@ -127,6 +145,7 @@ const state = reactive({
   error: '',
 });
 
+const router = useRouter();
 const visits = ref([]);
 const selectedVisit = ref(null);
 const mapContainer = ref(null);
@@ -164,6 +183,19 @@ const loadVisits = async () => {
 
 const selectVisit = (visit) => {
   selectedVisit.value = visit;
+};
+
+const openVisitMode = (visit = selectedVisit.value) => {
+  if (!visit) {
+    return;
+  }
+
+  router.push({
+    name: 'areasMyVisit',
+    params: {
+      visitId: visit.id,
+    },
+  });
 };
 
 const initializeMap = async () => {

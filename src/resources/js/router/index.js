@@ -3,6 +3,7 @@ import MainMenu from '../components/MainMenu.vue';
 
 const AreasView = () => import('../views/AreasView.vue');
 const AreasMyView = () => import('../views/AreasMyView.vue');
+const AreasVisitModeView = () => import('../views/AreasVisitModeView.vue');
 const BuildingsView = () => import('../views/BuildingsView.vue');
 const BuildingDetailView = () => import('../views/BuildingDetailView.vue');
 const GroupsView = () => import('../views/GroupsView.vue');
@@ -11,6 +12,7 @@ const titleMap = {
   home: 'メニュー',
   areas: '区域一覧',
   areasMy: '自分の区域',
+  areasMyVisit: '訪問モード',
   buildings: 'マンション',
   buildingDetail: 'マンション詳細',
   groups: 'グループ',
@@ -31,6 +33,11 @@ const routes = [
     path: '/areas/my',
     name: 'areasMy',
     component: AreasMyView,
+  },
+  {
+    path: '/areas/my/:visitId/visit',
+    name: 'areasMyVisit',
+    component: AreasVisitModeView,
   },
   {
     path: '/buildings',
