@@ -87,7 +87,7 @@
                 {{ selectedVisit.area?.number }}
                 <span v-if="selectedVisit.area?.name" class="text-base font-medium text-slate-500">/ {{ selectedVisit.area?.name }}</span>
               </h3>
-              <dl class="grid grid-cols-1 gap-4 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600 sm:grid-cols-3">
+              <dl class="grid grid-cols-1 gap-4 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600 sm:grid-cols-2">
                 <div>
                   <dt class="text-xs uppercase tracking-wide text-slate-400">訪問開始日</dt>
                   <dd class="mt-1 font-semibold text-slate-900">{{ selectedVisit.start_date ?? '未設定' }}</dd>
