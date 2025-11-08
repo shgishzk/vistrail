@@ -52,8 +52,10 @@ class BuildingsController extends Controller
     {
         $selfLockOptions = SelfLockType::cases();
         $selfLockLabels = SelfLockType::labels();
+        $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = config('services.google.default_position');
 
-        return view('admin.buildings.create', compact('selfLockOptions', 'selfLockLabels'));
+        return view('admin.buildings.create', compact('selfLockOptions', 'selfLockLabels', 'googleMapsApiKey', 'defaultPosition'));
     }
 
     public function store(StoreBuildingRequest $request): RedirectResponse
@@ -69,8 +71,10 @@ class BuildingsController extends Controller
     {
         $selfLockOptions = SelfLockType::cases();
         $selfLockLabels = SelfLockType::labels();
+        $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = config('services.google.default_position');
 
-        return view('admin.buildings.edit', compact('building', 'selfLockOptions', 'selfLockLabels'));
+        return view('admin.buildings.edit', compact('building', 'selfLockOptions', 'selfLockLabels', 'googleMapsApiKey', 'defaultPosition'));
     }
 
     public function update(UpdateBuildingRequest $request, Building $building): RedirectResponse

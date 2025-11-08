@@ -100,12 +100,133 @@ const pinForm = reactive({
 
 let mapInstance = null;
 let mapInitPromise = null;
-let advancedMarkerModule = null;
+let markerModule = null;
 let mapClickListener = null;
 let pinInfoWindow = null;
 const polygonOverlays = [];
 const pointMarkers = [];
 const userPinMarkers = [];
+const buildingMarkers = [];
+let buildingInfoWindow = null;
+let buildingFetchAbortController = null;
+let buildingFetchTimeout = null;
+let buildingIdleListener = null;
+let lastBuildingFetchCenter = null;
+
+const markerStyles = {
+  default: {
+    background: '#607D8B',
+    borderColor: '#455A64',
+    glyphColor: '#455A64',
+  },
+  has_lock: {
+    background: '#EA766C',
+    borderColor: '#C81714',
+    glyphColor: '#C81714',
+  },
+  no_lock: {
+    background: '#6AAF6C',
+    borderColor: '#2D8F32',
+    glyphColor: '#2D8F32',
+  },
+};
+
+const applyMarkerStyles = (styles = {}) => {
+  Object.keys(markerStyles).forEach((key) => {
+    if (styles[key]) {
+      markerStyles[key] = {
+        background: styles[key].background || markerStyles[key].background,
+        borderColor: styles[key].borderColor || markerStyles[key].borderColor,
+        glyphColor: styles[key].glyphColor || markerStyles[key].glyphColor,
+      };
+    }
+  });
+};
+
+const getMarkerStyle = (type) => {
+  if (!type) {
+    return markerStyles.default;
+  }
+  return markerStyles[type] || markerStyles.default;
+};
+
+const escapeHtml = (value = '') => {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+const formatVisitRate = (value) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return '―';
+  }
+  return `${value.toFixed(1)}%`;
+};
+
+const formatMemo = (value) => {
+  if (!value) {
+    return '―';
+  }
+  return escapeHtml(value).replace(/\n/g, '<br>');
+};
+
+const appendQueryParams = (url, params = {}) => {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      query.append(key, value);
+    }
+  });
+  const queryString = query.toString();
+  if (!queryString) {
+    return url;
+  }
+  return url.includes('?') ? `${url}&${queryString}` : `${url}?${queryString}`;
+};
+
+const distanceInMeters = (lat1, lng1, lat2, lng2) => {
+  const toRad = (value) => (value * Math.PI) / 180;
+  const R = 6371000;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+const BUILDING_RADIUS_METERS = 500;
+const BUILDING_FETCH_DEBOUNCE_MS = 300;
+const BUILDING_MIN_CENTER_CHANGE_METERS = 50;
+
+const createBuildingInfoWindowContent = (building) => {
+  const visitId = activeVisit.value?.id;
+  const detailUrl = appendQueryParams(building.detail_url || `/buildings/${building.id}`, {
+    from: 'areasVisit',
+    visitId: visitId ?? undefined,
+  });
+  const safeName = escapeHtml(building.name || 'マンション');
+  const lastVisit = building.last_visit_date ? escapeHtml(building.last_visit_date) : '―';
+  const visitRate = formatVisitRate(building.visit_rate);
+  const memo = formatMemo(building.memo);
+
+  return `
+    <div class="min-w-[220px] max-w-xs space-y-2">
+      <a href="${detailUrl}" class="block text-base font-semibold text-indigo-600 hover:text-indigo-500 hover:underline" target="_self">
+        ${safeName}
+      </a>
+      <div class="space-y-1 text-sm text-slate-600">
+        <div><span class="font-medium text-slate-700">最終訪問日:</span> ${lastVisit}</div>
+        <div><span class="font-medium text-slate-700">訪問率:</span> ${visitRate}</div>
+        <div><span class="font-medium text-slate-700">メモ:</span> ${memo}</div>
+      </div>
+    </div>
+  `;
+};
 
 const syncActiveVisit = () => {
   const targetId = Number(route.params.visitId);
@@ -192,11 +313,13 @@ const initializeMap = async () => {
       lng: Number(mapConfig.value?.default_position?.lng) || 135.760201,
     };
 
+    applyMarkerStyles(mapConfig.value?.marker_styles || {});
+
     await loadGoogleMaps(mapConfig.value.maps_api_key);
     if (google.maps?.importLibrary) {
       await google.maps.importLibrary('maps');
-      if (!advancedMarkerModule) {
-        advancedMarkerModule = await google.maps.importLibrary('marker');
+      if (!markerModule) {
+        markerModule = await google.maps.importLibrary('marker');
       }
     }
 
@@ -215,6 +338,13 @@ const initializeMap = async () => {
       mapClickListener.remove();
     }
     mapClickListener = mapInstance.addListener('click', handleMapClick);
+
+    if (buildingIdleListener) {
+      buildingIdleListener.remove();
+    }
+    buildingIdleListener = mapInstance.addListener('idle', scheduleBuildingFetch);
+
+    fetchNearbyBuildings(defaultPosition.lat, defaultPosition.lng);
   })();
 
   return mapInitPromise;
@@ -234,8 +364,24 @@ const clearOverlays = () => {
     }
   }
 
+  clearUserPinMarkers();
+  clearBuildingMarkers();
+};
+
+const clearUserPinMarkers = () => {
   while (userPinMarkers.length) {
     const marker = userPinMarkers.pop();
+    if (marker?.map) {
+      marker.map = null;
+    } else if (marker?.setMap) {
+      marker.setMap(null);
+    }
+  }
+};
+
+const clearBuildingMarkers = () => {
+  while (buildingMarkers.length) {
+    const marker = buildingMarkers.pop();
     if (marker?.map) {
       marker.map = null;
     } else if (marker?.setMap) {
@@ -329,9 +475,7 @@ const renderSelectedArea = async () => {
     });
 
     const AdvancedMarkerElement =
-      advancedMarkerModule?.AdvancedMarkerElement ||
-      google.maps.marker?.AdvancedMarkerElement ||
-      null;
+      markerModule?.AdvancedMarkerElement || google.maps.marker?.AdvancedMarkerElement || null;
 
     const createMarkerLabel = (point) => {
       const container = document.createElement('div');
@@ -390,6 +534,7 @@ const renderSelectedArea = async () => {
     }
 
     renderLocalPins();
+    fetchNearbyBuildings();
 
     mapError.value = '';
   } catch (error) {
@@ -404,19 +549,140 @@ const renderLocalPins = () => {
     return;
   }
 
-  while (userPinMarkers.length) {
-    const marker = userPinMarkers.pop();
-    if (marker?.map) {
-      marker.map = null;
-    } else if (marker?.setMap) {
-      marker.setMap(null);
-    }
-  }
+  clearUserPinMarkers();
 
   const visitPins = createdPins[activeVisit.value.id] || [];
   visitPins.forEach((pin) => {
     addCustomPinMarker(pin);
   });
+};
+
+const renderBuildingMarkers = (buildings, centerLat, centerLng) => {
+  if (!mapInstance) {
+    return;
+  }
+
+  const module = markerModule || google.maps.marker;
+  const PinElement = module?.PinElement;
+  const AdvancedMarkerElement = module?.AdvancedMarkerElement;
+
+  if (!PinElement || !AdvancedMarkerElement) {
+    return;
+  }
+
+  clearBuildingMarkers();
+
+  buildings.forEach((building) => {
+    if (typeof building.lat !== 'number' || typeof building.lng !== 'number') {
+      return;
+    }
+
+    const distance = distanceInMeters(centerLat, centerLng, building.lat, building.lng);
+    if (distance > BUILDING_RADIUS_METERS) {
+      return;
+    }
+
+    const style = getMarkerStyle(building.self_lock_type);
+    const pin = new PinElement({
+      background: style.background,
+      borderColor: style.borderColor,
+      glyphColor: style.glyphColor,
+    });
+
+    const marker = new AdvancedMarkerElement({
+      map: mapInstance,
+      position: { lat: building.lat, lng: building.lng },
+      title: building.name || 'Building',
+      content: pin.element,
+    });
+
+    marker.addListener('click', () => {
+      if (!buildingInfoWindow) {
+        buildingInfoWindow = new google.maps.InfoWindow({
+          disableAutoPan: true,
+          shouldFocus: false,
+        });
+      }
+      buildingInfoWindow.setContent(createBuildingInfoWindowContent(building));
+      buildingInfoWindow.open({ anchor: marker, map: mapInstance });
+    });
+
+    buildingMarkers.push(marker);
+  });
+};
+
+const fetchNearbyBuildings = async (lat, lng) => {
+  const center = mapInstance?.getCenter();
+  const targetLat = typeof lat === 'number' ? lat : center?.lat();
+  const targetLng = typeof lng === 'number' ? lng : center?.lng();
+
+  if (!Number.isFinite(targetLat) || !Number.isFinite(targetLng)) {
+    return;
+  }
+
+  try {
+    if (buildingFetchAbortController) {
+      buildingFetchAbortController.abort();
+    }
+    buildingFetchAbortController = new AbortController();
+
+    const { data } = await axios.get('/api/buildings', {
+      params: { lat: targetLat, lng: targetLng },
+      signal: buildingFetchAbortController.signal,
+    });
+
+    const buildings = Array.isArray(data?.buildings) ? data.buildings : [];
+    renderBuildingMarkers(buildings, targetLat, targetLng);
+  } catch (error) {
+    const isCanceled =
+      error?.name === 'CanceledError' ||
+      error?.message === 'canceled' ||
+      error?.message === 'cancelled' ||
+      error?.code === 'ERR_CANCELED';
+    if (!isCanceled) {
+      console.error('Failed to load nearby buildings:', error);
+    }
+  } finally {
+    buildingFetchAbortController = null;
+  }
+};
+
+const scheduleBuildingFetch = () => {
+  if (!mapInstance) {
+    return;
+  }
+
+  const center = mapInstance.getCenter();
+  if (!center) {
+    return;
+  }
+
+  const lat = center.lat();
+  const lng = center.lng();
+
+  if (lastBuildingFetchCenter) {
+    const moved = distanceInMeters(
+      lastBuildingFetchCenter.lat,
+      lastBuildingFetchCenter.lng,
+      lat,
+      lng
+    );
+    if (moved < BUILDING_MIN_CENTER_CHANGE_METERS) {
+      return;
+    }
+  }
+
+  lastBuildingFetchCenter = { lat, lng };
+
+  if (buildingFetchTimeout) {
+    clearTimeout(buildingFetchTimeout);
+    buildingFetchTimeout = null;
+  }
+
+  buildingFetchTimeout = setTimeout(() => {
+    buildingFetchTimeout = null;
+    fetchNearbyBuildings(lat, lng);
+  }, BUILDING_FETCH_DEBOUNCE_MS);
 };
 
 const addCustomPinMarker = (pin) => {
@@ -426,9 +692,7 @@ const addCustomPinMarker = (pin) => {
 
   const position = { lat: Number(pin.lat), lng: Number(pin.lng) };
   const AdvancedMarkerElement =
-    advancedMarkerModule?.AdvancedMarkerElement ||
-    google.maps.marker?.AdvancedMarkerElement ||
-    null;
+    markerModule?.AdvancedMarkerElement || google.maps.marker?.AdvancedMarkerElement || null;
 
   if (AdvancedMarkerElement) {
     const container = document.createElement('div');
@@ -701,6 +965,18 @@ onBeforeUnmount(() => {
   if (mapClickListener) {
     mapClickListener.remove();
     mapClickListener = null;
+  }
+  if (buildingIdleListener) {
+    buildingIdleListener.remove();
+    buildingIdleListener = null;
+  }
+  if (buildingFetchTimeout) {
+    clearTimeout(buildingFetchTimeout);
+    buildingFetchTimeout = null;
+  }
+  if (buildingFetchAbortController) {
+    buildingFetchAbortController.abort('component-unmounted');
+    buildingFetchAbortController = null;
   }
   if (pinInfoWindow) {
     pinInfoWindow.close();

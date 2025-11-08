@@ -22,6 +22,9 @@ Route::get('/buildings/{any}', [UserAuthController::class, 'showHome'])
 Route::get('/areas/{any}', [UserAuthController::class, 'showHome'])
     ->where('any', '.*');
 
+Route::get('/groups/{any}', [UserAuthController::class, 'showHome'])
+    ->where('any', '.*');
+
 Route::get('/{spa}', [UserAuthController::class, 'showHome'])
     ->where('spa', 'areas|buildings|groups');
 

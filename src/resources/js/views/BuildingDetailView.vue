@@ -1,11 +1,21 @@
 <template>
   <div class="mx-auto max-w-4xl space-y-6">
-    <RouterLink
-      to="/buildings"
+    <template v-if="backLink.to">
+      <RouterLink
+        :to="backLink.to"
+        class="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500"
+      >
+        ← {{ backLink.label }}
+      </RouterLink>
+    </template>
+    <button
+      v-else
+      type="button"
       class="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500"
+      @click="goBack"
     >
-      ← マンションマップへ戻る
-    </RouterLink>
+      ← {{ backLink.label }}
+    </button>
 
     <div class="rounded-3xl bg-gradient-to-r from-indigo-500 via-indigo-400 to-purple-500 px-6 py-10 text-white shadow-xl">
       <div class="space-y-3">
@@ -180,7 +190,7 @@
 
 <script>
 import { onMounted, ref, nextTick, computed } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { toast } from '../utils/toast';
 import { AlertCircle, AlertTriangle, ChevronDown, Check, Loader2, RefreshCcw } from 'lucide-vue-next';
@@ -198,6 +208,7 @@ export default {
   },
   setup() {
     const route = useRoute();
+    const router = useRouter();
     const loading = ref(true);
     const error = ref('');
     const building = ref(null);
@@ -368,6 +379,52 @@ export default {
       }
     };
 
+    const backLink = computed(() => {
+      const from = route.query.from;
+      if (from === 'groups') {
+        const groupQueryValue = route.query.groupId;
+        const hasGroup = groupQueryValue !== undefined && groupQueryValue !== null && groupQueryValue !== '';
+        const groupParam = hasGroup
+          ? (Number.isNaN(Number(groupQueryValue)) ? groupQueryValue : Number(groupQueryValue))
+          : null;
+
+        return {
+          label: 'グループマップへ戻る',
+          to: groupParam !== null ? { name: 'groups', params: { groupId: groupParam } } : { name: 'groups' },
+        };
+      }
+
+      if (from === 'areasVisit') {
+        const visitId = route.query.visitId;
+        if (visitId) {
+          return {
+            label: '区域訪問モードへ戻る',
+            to: { name: 'areasMyVisit', params: { visitId } },
+          };
+        }
+        return {
+          label: '区域一覧へ戻る',
+          to: { name: 'areas' },
+        };
+      }
+
+      if (from === 'areas') {
+        return {
+          label: '区域一覧へ戻る',
+          to: { name: 'areas' },
+        };
+      }
+
+      return {
+        label: 'マンションマップへ戻る',
+        to: { name: 'buildings' },
+      };
+    });
+
+    const goBack = () => {
+      router.back();
+    };
+
     return {
       building,
       loading,
@@ -383,6 +440,8 @@ export default {
       statusLabel,
       onStatusSelect,
       touchRoomTimestamp,
+      backLink,
+      goBack,
     };
   },
 };

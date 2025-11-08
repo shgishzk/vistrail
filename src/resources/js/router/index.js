@@ -50,7 +50,7 @@ const routes = [
     component: BuildingDetailView,
   },
   {
-    path: '/groups',
+    path: '/groups/:groupId?',
     name: 'groups',
     component: GroupsView,
   },

@@ -95,7 +95,8 @@
 </template>
 
 <script>
-import { onBeforeUnmount, onMounted, reactive, ref, computed } from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { ChevronDown, Check } from 'lucide-vue-next';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
@@ -108,6 +109,8 @@ export default {
     Check,
   },
   setup() {
+    const route = useRoute();
+    const router = useRouter();
     const mapContainer = ref(null);
     const groupDropdownRef = ref(null);
     const groupDropdownOpen = ref(false);
@@ -116,7 +119,15 @@ export default {
     const groupLoading = ref(true);
     const error = ref('');
     const groups = ref([]);
-    const selectedGroupId = ref(null);
+    const parseGroupId = (value) => {
+      if (value === undefined || value === null || value === '') {
+        return null;
+      }
+
+      const number = Number(value);
+      return Number.isNaN(number) ? null : number;
+    };
+    const selectedGroupId = ref(parseGroupId(route.params.groupId));
     const selectedGroupLabel = computed(() => {
       if (selectedGroupId.value === null) {
         return '---';
@@ -228,6 +239,20 @@ export default {
       return `${value.toFixed(1)}%`;
     };
 
+    const appendQueryParams = (url, params = {}) => {
+      const query = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          query.append(key, value);
+        }
+      });
+      const queryString = query.toString();
+      if (!queryString) {
+        return url;
+      }
+      return url.includes('?') ? `${url}&${queryString}` : `${url}?${queryString}`;
+    };
+
     const formatMemo = (value) => {
       if (!value) {
         return '―';
@@ -236,7 +261,10 @@ export default {
     };
 
     const createInfoWindowContent = (building) => {
-      const detailUrl = building.detail_url || `/buildings/${building.id}`;
+      const detailUrl = appendQueryParams(building.detail_url || `/buildings/${building.id}`, {
+        from: 'groups',
+        groupId: selectedGroupId.value ?? undefined,
+      });
       const safeName = escapeHtml(building.name || 'マンション');
       const lastVisit = building.last_visit_date ? escapeHtml(building.last_visit_date) : '―';
       const visitRate = formatVisitRate(building.visit_rate);
@@ -384,7 +412,7 @@ export default {
         if (selectedGroupId.value !== null) {
           const exists = groups.value.some((group) => group.id === selectedGroupId.value);
           if (!exists) {
-            selectedGroupId.value = null;
+            selectGroup(null);
           }
         }
       } catch (err) {
@@ -431,8 +459,8 @@ export default {
       }
     };
 
-    const selectGroup = (groupId) => {
-      const normalized = groupId === null ? null : Number(groupId);
+    const selectGroup = (groupId, { skipNavigation } = {}) => {
+      const normalized = parseGroupId(groupId);
       if (selectedGroupId.value === normalized) {
         groupDropdownOpen.value = false;
         return;
@@ -440,6 +468,12 @@ export default {
       selectedGroupId.value = normalized;
       groupDropdownOpen.value = false;
       fetchGroupBuildings(selectedGroupId.value);
+
+      if (!skipNavigation) {
+        const params = normalized === null ? {} : { groupId: normalized };
+        const query = { ...route.query };
+        router.push({ name: 'groups', params, query }).catch(() => {});
+      }
     };
 
     const toggleGroupDropdown = (event) => {
@@ -469,6 +503,17 @@ export default {
         await fetchGroupBuildings(selectedGroupId.value);
       }
     });
+
+    watch(
+      () => route.params.groupId,
+      (value) => {
+        const normalized = parseGroupId(value);
+        if (selectedGroupId.value !== normalized) {
+          selectedGroupId.value = normalized;
+          fetchGroupBuildings(selectedGroupId.value);
+        }
+      }
+    );
 
     onBeforeUnmount(() => {
       if (typeof document !== 'undefined') {

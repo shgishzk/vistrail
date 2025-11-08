@@ -70,7 +70,7 @@
             </div>
             <div class="flex flex-wrap gap-2">
               <RouterLink
-                :to="`/buildings/${building.id}`"
+                :to="buildDetailRoute(building.id)"
                 class="inline-flex items-center justify-center rounded-full border border-indigo-200 bg-white px-3 py-1 text-xs font-medium text-indigo-600 transition hover:border-indigo-400 hover:text-indigo-700"
               >
                 詳細を見る
@@ -214,8 +214,31 @@ export default {
       return escapeHtml(value).replace(/\n/g, '<br>');
     };
 
+    const appendQueryParams = (url, params = {}) => {
+      const query = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          query.append(key, value);
+        }
+      });
+      const queryString = query.toString();
+      if (!queryString) {
+        return url;
+      }
+      return url.includes('?') ? `${url}&${queryString}` : `${url}?${queryString}`;
+    };
+
+    const buildDetailRoute = (buildingId) => ({
+      name: 'buildingDetail',
+      params: { id: buildingId },
+      query: { from: 'buildings' },
+    });
+
+    const buildDetailUrl = (building) =>
+      appendQueryParams(building.detail_url || `/buildings/${building.id}`, { from: 'buildings' });
+
     const createInfoWindowContent = (building) => {
-      const detailUrl = building.detail_url || `/buildings/${building.id}`;
+      const detailUrl = buildDetailUrl(building);
       const safeName = escapeHtml(building.name || 'マンション');
       const lastVisit = building.last_visit_date ? escapeHtml(building.last_visit_date) : '―';
       const visitRate = formatVisitRate(building.visit_rate);
@@ -528,6 +551,7 @@ export default {
       searchError,
       searchPerformed,
       handleSearch,
+      buildDetailRoute,
       focusOnBuilding,
     };
   },
