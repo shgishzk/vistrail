@@ -563,9 +563,6 @@ const openPinInfoWindow = (latLng, mode = 'create', pin = null) => {
       if (pinForm.isDeleting) {
         return;
       }
-      if (!window.confirm('このピンを削除しますか？')) {
-        return;
-      }
       pinForm.isDeleting = true;
       deleteButton.disabled = true;
       try {

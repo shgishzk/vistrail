@@ -185,7 +185,12 @@ const selectVisit = (visit) => {
   selectedVisit.value = visit;
 };
 
-const openVisitMode = (visit = selectedVisit.value) => {
+const openVisitMode = (candidate) => {
+  const visit =
+    candidate && typeof candidate === 'object' && 'id' in candidate
+      ? candidate
+      : selectedVisit.value;
+
   if (!visit) {
     return;
   }
