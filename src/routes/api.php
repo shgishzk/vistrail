@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\MapConfigController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\NewsController;
+use App\Http\Controllers\Api\MyAreasController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -22,4 +23,5 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->g
     Route::get('/groups/buildings', [GroupController::class, 'buildings']);
     Route::get('/settings', [SettingController::class, 'index']);
     Route::put('/settings', [SettingController::class, 'update']);
+    Route::get('/areas/my', MyAreasController::class);
 });

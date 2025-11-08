@@ -19,3 +19,30 @@
 .avatar-logo {
     @apply h-9 w-9 rounded-full object-cover;
 }
+
+.marker-label {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(33, 33, 33, 0.75);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    font-size: 13px;
+    line-height: 1.35;
+    transform: translateY(24px);
+    white-space: nowrap;
+    max-width: 260px;
+}
+
+.marker-label__title {
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.marker-label__desc {
+    margin-top: 4px;
+    font-size: 10px;
+    opacity: 0.9;
+}

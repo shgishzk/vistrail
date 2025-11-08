@@ -19,6 +19,9 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/buildings/{any}', [UserAuthController::class, 'showHome'])
     ->where('any', '.*');
 
+Route::get('/areas/{any}', [UserAuthController::class, 'showHome'])
+    ->where('any', '.*');
+
 Route::get('/{spa}', [UserAuthController::class, 'showHome'])
     ->where('spa', 'areas|buildings|groups');
 
