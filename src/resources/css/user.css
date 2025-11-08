@@ -101,6 +101,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transform: translateY(15px);
+    transform-origin: center center;
 }
 
 .visit-pin-marker__ripple {
