@@ -68,6 +68,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.action_logs*') ? 'active' : '' }}" href="{{ route('admin.action_logs') }}">
+                    <i class="nav-icon cil-list-rich"></i> @lang('Action Logs')
+                </a>
+            </li>
+            <li class="nav-item">
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
                     <button type="submit" class="nav-link border-0 bg-transparent text-start w-100">

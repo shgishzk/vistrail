@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,
+            'admin.log' => \App\Http\Middleware\AdminActionLogger::class,
         ]);
         $middleware->appendToGroup('api', [\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class]);
     })
