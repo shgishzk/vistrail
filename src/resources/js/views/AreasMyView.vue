@@ -140,6 +140,10 @@ import { fetchMyAreas } from '../services/areasService';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
 import { kmlParser } from '../utils/kmlParser';
 
+const BUILDING_RADIUS_METERS = 500;
+const BUILDING_FETCH_DEBOUNCE_MS = 250;
+const BUILDING_MIN_CENTER_CHANGE_METERS = 50;
+
 const state = reactive({
   isLoading: true,
   error: '',
@@ -157,6 +161,48 @@ let mapInitPromise = null;
 let advancedMarkerModule = null;
 const polygonOverlays = [];
 const pointMarkers = [];
+const buildingMarkers = [];
+let buildingFetchAbortController = null;
+let buildingFetchTimeoutId = null;
+let lastBuildingFetchCenter = null;
+let buildingIdleListener = null;
+
+let markerStyles = {};
+let fallbackMarkerStyle = {
+  background: '#607D8B',
+  borderColor: '#455A64',
+  glyphColor: '#455A64',
+};
+
+const applyMarkerStyles = (styles = {}) => {
+  markerStyles = styles || {};
+  fallbackMarkerStyle = {
+    background: markerStyles.default?.background || '#607D8B',
+    borderColor: markerStyles.default?.borderColor || '#455A64',
+    glyphColor: markerStyles.default?.glyphColor || markerStyles.default?.borderColor || '#455A64',
+  };
+};
+
+const getMarkerStyle = (type) => {
+  const style = markerStyles?.[type] || markerStyles?.default || {};
+  return {
+    background: style.background || fallbackMarkerStyle.background,
+    borderColor: style.borderColor || fallbackMarkerStyle.borderColor,
+    glyphColor: style.glyphColor || fallbackMarkerStyle.glyphColor || fallbackMarkerStyle.borderColor,
+  };
+};
+
+const distanceInMeters = (lat1, lng1, lat2, lng2) => {
+  const toRad = (value) => (value * Math.PI) / 180;
+  const R = 6371000;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
 const loadVisits = async () => {
   state.isLoading = true;
@@ -218,6 +264,8 @@ const initializeMap = async () => {
       mapConfig.value = data;
     }
 
+    applyMarkerStyles(mapConfig.value?.marker_styles || {});
+
     if (!mapConfig.value?.maps_api_key) {
       throw new Error('Google Maps APIキーが設定されていません。');
     }
@@ -244,6 +292,11 @@ const initializeMap = async () => {
       streetViewControl: false,
       fullscreenControl: false,
     });
+
+    if (buildingIdleListener) {
+      buildingIdleListener.remove();
+    }
+    buildingIdleListener = mapInstance.addListener('idle', scheduleBuildingFetch);
   })();
 
   return mapInitPromise;
@@ -260,6 +313,19 @@ const clearOverlays = () => {
     if (marker.map) {
       marker.map = null;
     } else if (marker.setMap) {
+      marker.setMap(null);
+    }
+  }
+
+  clearBuildingMarkers();
+};
+
+const clearBuildingMarkers = () => {
+  while (buildingMarkers.length) {
+    const marker = buildingMarkers.pop();
+    if (marker?.map) {
+      marker.map = null;
+    } else if (marker?.setMap) {
       marker.setMap(null);
     }
   }
@@ -401,6 +467,8 @@ const renderSelectedArea = async () => {
 
     if (!bounds.isEmpty()) {
       mapInstance.fitBounds(bounds, 40);
+      const center = bounds.getCenter();
+      fetchNearbyBuildings(center.lat(), center.lng());
     }
 
     mapError.value = '';
@@ -409,6 +477,119 @@ const renderSelectedArea = async () => {
     mapError.value = '境界データの解析に失敗しました。';
     clearOverlays();
   }
+};
+
+const renderBuildingMarkers = (buildings, centerLat, centerLng) => {
+  if (!mapInstance || !advancedMarkerModule) {
+    return;
+  }
+
+  const PinElement = advancedMarkerModule?.PinElement;
+  const AdvancedMarkerElement = advancedMarkerModule?.AdvancedMarkerElement;
+
+  if (!PinElement || !AdvancedMarkerElement) {
+    return;
+  }
+
+  clearBuildingMarkers();
+
+  buildings.forEach((building) => {
+    if (typeof building.lat !== 'number' || typeof building.lng !== 'number') {
+      return;
+    }
+
+    const distance = distanceInMeters(centerLat, centerLng, building.lat, building.lng);
+    if (distance > BUILDING_RADIUS_METERS) {
+      return;
+    }
+
+    const style = getMarkerStyle(building.self_lock_type);
+    const pin = new PinElement({
+      background: style.background,
+      borderColor: style.borderColor,
+      glyphColor: style.glyphColor,
+    });
+
+    const marker = new AdvancedMarkerElement({
+      map: mapInstance,
+      position: { lat: building.lat, lng: building.lng },
+      title: building.name || 'Building',
+      content: pin.element,
+    });
+
+    buildingMarkers.push(marker);
+  });
+};
+
+const fetchNearbyBuildings = async (lat, lng) => {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return;
+  }
+
+  try {
+    if (buildingFetchAbortController) {
+      buildingFetchAbortController.abort();
+    }
+
+    buildingFetchAbortController = new AbortController();
+
+    const { data } = await axios.get('/api/buildings', {
+      params: { lat, lng },
+      signal: buildingFetchAbortController.signal,
+    });
+
+    const buildings = Array.isArray(data?.buildings) ? data.buildings : [];
+    renderBuildingMarkers(buildings, lat, lng);
+  } catch (error) {
+    const isCancelled =
+      error?.name === 'CanceledError' ||
+      error?.message === 'canceled' ||
+      error?.message === 'cancelled' ||
+      error?.code === 'ERR_CANCELED';
+    if (!isCancelled) {
+      console.error('Failed to load buildings for area map:', error);
+    }
+  } finally {
+    buildingFetchAbortController = null;
+  }
+};
+
+const scheduleBuildingFetch = () => {
+  if (!mapInstance) {
+    return;
+  }
+
+  const center = mapInstance.getCenter();
+  if (!center) {
+    return;
+  }
+
+  const lat = center.lat();
+  const lng = center.lng();
+
+  if (lastBuildingFetchCenter) {
+    const moved = distanceInMeters(
+      lastBuildingFetchCenter.lat,
+      lastBuildingFetchCenter.lng,
+      lat,
+      lng
+    );
+    if (moved < BUILDING_MIN_CENTER_CHANGE_METERS) {
+      return;
+    }
+  }
+
+  lastBuildingFetchCenter = { lat, lng };
+
+  if (buildingFetchTimeoutId) {
+    clearTimeout(buildingFetchTimeoutId);
+    buildingFetchTimeoutId = null;
+  }
+
+  buildingFetchTimeoutId = setTimeout(() => {
+    buildingFetchTimeoutId = null;
+    fetchNearbyBuildings(lat, lng);
+  }, BUILDING_FETCH_DEBOUNCE_MS);
 };
 
 watch(selectedVisit, () => {
@@ -427,6 +608,18 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   clearOverlays();
+  if (buildingFetchTimeoutId) {
+    clearTimeout(buildingFetchTimeoutId);
+    buildingFetchTimeoutId = null;
+  }
+  if (buildingFetchAbortController) {
+    buildingFetchAbortController.abort('component-unmounted');
+    buildingFetchAbortController = null;
+  }
+  if (buildingIdleListener) {
+    buildingIdleListener.remove();
+    buildingIdleListener = null;
+  }
   mapInstance = null;
   mapInitPromise = null;
 });
