@@ -2,6 +2,7 @@
 
 @php
     use App\Enums\VisitStatus;
+    $filters = $filters ?? [];
 @endphp
 
 @section('title', __('Visits'))
@@ -21,6 +22,56 @@
                 <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+
+        <form action="{{ route('admin.visits') }}" method="GET" class="card card-body mb-4 border-0 shadow-sm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="user_id" class="form-label">@lang('User')</label>
+                    <select name="user_id" id="user_id" class="form-select">
+                        <option value="">@lang('All')</option>
+                        @foreach($filterUsers as $user)
+                            <option value="{{ $user->id }}" @selected(($filters['user_id'] ?? '') == $user->id)>
+                                {{ $user->name }} @if($user->email) ({{ $user->email }}) @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="area_id" class="form-label">@lang('Area')</label>
+                    <select name="area_id" id="area_id" class="form-select">
+                        <option value="">@lang('All')</option>
+                        @foreach($filterAreas as $areaOption)
+                            <option value="{{ $areaOption->id }}" @selected(($filters['area_id'] ?? '') == $areaOption->id)>
+                                {{ $areaOption->number }} @if($areaOption->name) - {{ $areaOption->name }} @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">@lang('Status')</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">@lang('All')</option>
+                        @foreach($statusOptions as $value => $label)
+                            <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="start_from" class="form-label">@lang('Visit Start Date')</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="date" class="form-control" id="start_from" name="start_from" value="{{ $filters['start_from'] ?? '' }}">
+                        <span class="text-muted">-</span>
+                        <input type="date" class="form-control" id="start_to" name="start_to" value="{{ $filters['start_to'] ?? '' }}">
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a href="{{ route('admin.visits') }}" class="btn btn-outline-secondary">@lang('Reset')</a>
+                <button type="submit" class="btn btn-primary">@lang('Search')</button>
+            </div>
+        </form>
 
         <table class="table table-responsive-sm table-striped">
             <thead>
