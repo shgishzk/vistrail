@@ -21,9 +21,48 @@ class AdminActionLogger
      * @var array<string, string>
      */
     private const ROUTE_CONTENT_MAP = [
+        // Users
         'admin.users.store' => 'log.action.user.store',
         'admin.users.update' => 'log.action.user.update',
         'admin.users.destroy' => 'log.action.user.destroy',
+
+        // Areas
+        'admin.areas.store' => 'log.action.area.store',
+        'admin.areas.update' => 'log.action.area.update',
+        'admin.areas.destroy' => 'log.action.area.destroy',
+
+        // Visits
+        'admin.visits.store' => 'log.action.visit.store',
+        'admin.visits.update' => 'log.action.visit.update',
+        'admin.visits.destroy' => 'log.action.visit.destroy',
+
+        // Buildings
+        'admin.buildings.store' => 'log.action.building.store',
+        'admin.buildings.update' => 'log.action.building.update',
+        'admin.buildings.destroy' => 'log.action.building.destroy',
+
+        // Groups
+        'admin.groups.store' => 'log.action.group.store',
+        'admin.groups.update' => 'log.action.group.update',
+        'admin.groups.destroy' => 'log.action.group.destroy',
+
+        // Rooms
+        'admin.rooms.store' => 'log.action.room.store',
+        'admin.rooms.update' => 'log.action.room.update',
+        'admin.rooms.destroy' => 'log.action.room.destroy',
+
+        // News
+        'admin.news.store' => 'log.action.news.store',
+        'admin.news.update' => 'log.action.news.update',
+        'admin.news.destroy' => 'log.action.news.destroy',
+
+        // Admins
+        'admin.admins.store' => 'log.action.admin.store',
+        'admin.admins.update' => 'log.action.admin.update',
+        'admin.admins.destroy' => 'log.action.admin.destroy',
+
+        // Settings
+        'admin.settings.update' => 'log.action.setting.update',
     ];
 
     /**
@@ -83,6 +122,8 @@ class AdminActionLogger
     private function buildContext(Request $request): array
     {
         $route = $request->route();
+        $payload = $this->sanitizeInput($request->except($this->excludedInputKeys()));
+        $payload = $this->truncateBoundaryPayload($payload);
 
         return [
             'method' => strtoupper($request->method()),
@@ -91,7 +132,7 @@ class AdminActionLogger
             'ip' => $request->ip(),
             'query' => $request->query(),
             'route_parameters' => $route ? $route->parameters() : [],
-            'payload' => $this->sanitizeInput($request->except($this->excludedInputKeys())),
+            'payload' => $payload,
             'user_agent' => $request->userAgent(),
         ];
     }
@@ -143,6 +184,26 @@ class AdminActionLogger
         }
 
         return $value;
+    }
+
+    private function truncateBoundaryPayload(array $payload): array
+    {
+        $keysToTruncate = [
+            'GOOGLE_MAPS_ASSIGNED_TERRITORY_BOUNDARY',
+            'boundary_kml',
+        ];
+
+        return Arr::map($payload, function ($value, $key) use ($keysToTruncate) {
+            if (is_array($value)) {
+                return $this->truncateBoundaryPayload($value);
+            }
+
+            if (is_string($value) && in_array((string) $key, $keysToTruncate, true)) {
+                return '(... truncated ...)';
+            }
+
+            return $value;
+        });
     }
 
     private function resolveCustomContent(Request $request): ?string
