@@ -16,6 +16,17 @@ class AdminActionLogger
     private const LOGGABLE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
     /**
+     * Map specific route names to localized log content keys.
+     *
+     * @var array<string, string>
+     */
+    private const ROUTE_CONTENT_MAP = [
+        'admin.users.store' => 'log.action.user.store',
+        'admin.users.update' => 'log.action.user.update',
+        'admin.users.destroy' => 'log.action.user.destroy',
+    ];
+
+    /**
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
@@ -57,10 +68,16 @@ class AdminActionLogger
 
     private function buildContent(Request $request): string
     {
-        $routeName = $request->route()?->getName();
-        $target = $routeName ?: $request->path();
+        if ($customContent = $this->resolveCustomContent($request)) {
+            return Str::limit($customContent, 255, '');
+        }
 
-        return Str::limit(sprintf('%s %s', strtoupper($request->method()), $target), 255, '');
+        $method = strtoupper($request->method());
+
+        return Str::limit(__('log.middleware.content', [
+            'method' => $this->translateMethod($method),
+            'target' => $this->describeTarget($request),
+        ]), 255, '');
     }
 
     private function buildContext(Request $request): array
@@ -126,5 +143,47 @@ class AdminActionLogger
         }
 
         return $value;
+    }
+
+    private function resolveCustomContent(Request $request): ?string
+    {
+        $routeName = $request->route()?->getName();
+        if (! $routeName) {
+            return null;
+        }
+
+        $translationKey = self::ROUTE_CONTENT_MAP[$routeName] ?? null;
+        if (! $translationKey) {
+            return null;
+        }
+
+        $translated = __($translationKey);
+
+        return $translated === $translationKey ? null : $translated;
+    }
+
+    private function translateMethod(string $method): string
+    {
+        $key = 'log.middleware.method.' . $method;
+        $translated = __($key);
+
+        if ($translated !== $key) {
+            return $translated;
+        }
+
+        return __('log.middleware.method.default', ['method' => $method]);
+    }
+
+    private function describeTarget(Request $request): string
+    {
+        $routeName = $request->route()?->getName();
+
+        if ($routeName) {
+            return __('log.middleware.target.named', ['name' => $routeName]);
+        }
+
+        $path = '/' . ltrim($request->path(), '/');
+
+        return __('log.middleware.target.path', ['path' => $path]);
     }
 }
