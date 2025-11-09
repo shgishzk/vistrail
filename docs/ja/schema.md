@@ -121,6 +121,7 @@
 | area_id | unsignedBigInteger | NO | FK, INDEX |  | 区域ID |
 | start_date | date | NO |  |  | 訪問開始日 |
 | end_date | date | YES |  |  | 訪問終了日 |
+| status | string(32) | NO |  |  | ステータス |
 | memo | text | YES |  |  | メモ |
 | created_at | timestamp | YES |  |  | 作成日時 |
 | updated_at | timestamp | YES |  |  | 更新日時 |

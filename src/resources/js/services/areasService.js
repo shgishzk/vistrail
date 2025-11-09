@@ -14,3 +14,10 @@ export const fetchAreaDetail = async (areaId) => {
   const { data } = await axios.get(`/api/areas/${areaId}`);
   return data;
 };
+
+export const pickupArea = async (areaId) => {
+  const { data } = await axios.post('/api/areas/pickup', {
+    area_id: areaId,
+  });
+  return data;
+};

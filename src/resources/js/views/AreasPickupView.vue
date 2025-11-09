@@ -250,20 +250,40 @@
             </div>
           </div>
         </div>
-        <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4">
+        <div class="flex flex-col gap-3 border-t border-slate-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-end">
           <button
             type="button"
-            class="inline-flex items-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800"
-            :data-hs-overlay="`#${modalId}`"
+            class="inline-flex flex-1 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 sm:flex-none"
+            :disabled="isSubmittingPickup || !modalArea"
+            @click="submitPickup('start')"
           >
-            キャンセル
+            <svg
+              v-if="isSubmittingPickup"
+              class="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4A4 4 0 0 0 8 12H4z"></path>
+            </svg>
+            選択して奉仕を開始
           </button>
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
-            @click="confirmPickup"
+            class="inline-flex flex-1 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 sm:flex-none"
+            :disabled="isSubmittingPickup || !modalArea"
+            @click="submitPickup('continue')"
           >
-            OK
+            選択してさらに区域を選ぶ
+          </button>
+          <button
+            type="button"
+            class="inline-flex flex-1 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 sm:flex-none"
+            :disabled="isSubmittingPickup"
+            @click="cancelPickup"
+          >
+            キャンセル
           </button>
         </div>
       </div>
@@ -273,10 +293,12 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { fetchAreaDetail, fetchAreas } from '../services/areasService';
+import { fetchAreaDetail, fetchAreas, pickupArea } from '../services/areasService';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
 import { kmlParser } from '../utils/kmlParser';
+import { toast } from '../utils/toast';
 
 const modalId = 'hs-area-pickup-confirm';
 const SEARCH_MAP_MOVE_THRESHOLD_METERS = 100;
@@ -296,10 +318,12 @@ const pagination = reactive({
   hasMore: false,
 });
 
+const router = useRouter();
 const selectedAreaSummary = ref(null);
 const selectedAreaDetail = ref(null);
 const areaDetailsCache = reactive({});
 const modalArea = ref(null);
+const isSubmittingPickup = ref(false);
 
 const searchCenter = ref(null);
 const selectedAreaDisplay = computed(() => selectedAreaDetail.value || selectedAreaSummary.value);
@@ -409,12 +433,31 @@ const loadMore = () => {
   loadAreas();
 };
 
-const refreshAreas = () => {
-  loadAreas({ reset: true });
-};
+const refreshAreas = () => loadAreas({ reset: true });
 
 const selectArea = (area) => {
   selectedAreaSummary.value = area;
+};
+
+const cleanupOverlayArtifacts = () => {
+  if (typeof document === 'undefined') {
+    return;
+  }
+  document.documentElement.classList.remove('hs-overlay-open');
+  document.body.classList.remove('overflow-hidden');
+  document.querySelectorAll('.hs-overlay-backdrop').forEach((el) => el.remove());
+};
+
+const closeModal = () => {
+  if (typeof window !== 'undefined' && window.HSOverlay?.close) {
+    window.HSOverlay.close(`#${modalId}`);
+  }
+  cleanupOverlayArtifacts();
+};
+
+const cancelPickup = () => {
+  modalArea.value = null;
+  closeModal();
 };
 
 const openConfirm = async (area) => {
@@ -727,14 +770,34 @@ const renderSelectedArea = async () => {
   }
 };
 
-const confirmPickup = () => {
-  if (!modalArea.value) {
+const submitPickup = async (action) => {
+  if (!modalArea.value || isSubmittingPickup.value) {
     return;
   }
 
-  console.log('pickup: ', modalArea.value);
-  if (typeof window !== 'undefined' && window.HSOverlay) {
-    window.HSOverlay.close(`#${modalId}`);
+  isSubmittingPickup.value = true;
+  try {
+    await pickupArea(modalArea.value.id);
+    toast.success('区域を割り当てました。');
+
+    const navigateToMyAreas = action === 'start';
+    closeModal();
+    modalArea.value = null;
+
+    if (navigateToMyAreas) {
+      await router.push({ name: 'areasMy' });
+      return;
+    }
+
+    await refreshAreas();
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      '区域の割り当て処理に失敗しました。';
+    toast.error(message);
+  } finally {
+    isSubmittingPickup.value = false;
   }
 };
 
