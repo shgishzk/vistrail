@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\VisitStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,7 +14,14 @@ class Area extends Model
         'number',
         'name',
         'boundary_kml',
+        'center_lat',
+        'center_lng',
         'memo',
+    ];
+
+    protected $casts = [
+        'center_lat' => 'float',
+        'center_lng' => 'float',
     ];
 
     /**
@@ -32,5 +40,12 @@ class Area extends Model
     public function latestVisit()
     {
         return $this->hasOne(Visit::class)->latestOfMany('start_date');
+    }
+
+    public function currentVisit()
+    {
+        return $this->hasOne(Visit::class)
+            ->where('status', VisitStatus::IN_PROGRESS->value)
+            ->latestOfMany('start_date');
     }
 }

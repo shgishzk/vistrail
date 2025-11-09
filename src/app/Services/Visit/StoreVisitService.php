@@ -2,6 +2,7 @@
 
 namespace App\Services\Visit;
 
+use App\Enums\VisitStatus;
 use App\Models\Visit;
 
 class StoreVisitService
@@ -11,6 +12,8 @@ class StoreVisitService
      */
     public function execute(array $data): Visit
     {
+        $data['status'] = VisitStatus::default()->value;
+
         return Visit::create($data);
     }
 }

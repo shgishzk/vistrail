@@ -106,6 +106,8 @@
 | number | string(255) | NO |  |  | 区域番号 |
 | name | string(255) | YES |  |  | 区域名称 |
 | boundary_kml | longText | NO |  |  | 境界情報（KML） |
+| center_lat | decimal(10, 7) | NO |  | 0 | 地図中心（緯度） |
+| center_lng | decimal(11, 7) | NO |  | 0 | 地図中心（経度） |
 | memo | text | YES |  |  | メモ |
 | created_at | timestamp | YES |  |  | 作成日時 |
 | updated_at | timestamp | YES |  |  | 更新日時 |
@@ -119,6 +121,7 @@
 | area_id | unsignedBigInteger | NO | FK, INDEX |  | 区域ID |
 | start_date | date | NO |  |  | 訪問開始日 |
 | end_date | date | YES |  |  | 訪問終了日 |
+| status | string(32) | NO |  |  | ステータス |
 | memo | text | YES |  |  | メモ |
 | created_at | timestamp | YES |  |  | 作成日時 |
 | updated_at | timestamp | YES |  |  | 更新日時 |
@@ -160,6 +163,21 @@
 | created_at | timestamp | YES |  |  | 作成日時 |
 | updated_at | timestamp | YES |  |  | 更新日時 |
 
+## action_logs
+
+| カラム | 型 | NULL | キー | 既定値 | 説明 |
+| --- | --- | --- | --- | --- | --- |
+| id | unsignedBigInteger | NO | PK | auto increment | ログID |
+| admin_id | unsignedBigInteger | YES | FK |  | 実行した管理者ID（削除時は `NULL`） |
+| content | string(255) | NO |  |  | アクションの概要（`METHOD route-name` 形式） |
+| context | json | YES |  |  | 付随情報（ルート・IP・パラメータなど） |
+| created_at | timestamp | YES | INDEX |  | 作成日時 |
+| updated_at | timestamp | YES |  |  | 更新日時 |
+
+**外部キー / インデックス**
+- `admin_id` → `admins.id`（`onDelete('set null')`）
+- `created_at` にインデックス（新しい順ソートの高速化）
+
 ## buildings
 
 | カラム | 型 | NULL | キー | 既定値 | 説明 |
@@ -188,4 +206,4 @@
 
 ---
 
-最終更新日時: 2025-11-01
+最終更新日時: 2026-01-10

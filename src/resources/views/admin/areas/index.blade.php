@@ -91,10 +91,10 @@
                         <a href="{{ route('admin.areas.print', $area) }}" target="_blank" class="btn btn-outline-secondary" title="@lang('Print')">
                             <i class="cil-print"></i>
                         </a>
-                        <a href="{{ route('admin.areas.edit', $area) }}" class="btn btn-primary">
+                        <a href="{{ route('admin.areas.edit', $area) }}" class="btn btn-outline-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $area->id }}">
+                        <button type="button" class="btn btn-outline-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $area->id }}">
                             <i class="cil-trash"></i>
                         </button>
                         
@@ -114,7 +114,7 @@
                                         <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">@lang('Delete')</button>
+                                            <button type="submit" class="btn btn-outline-danger">@lang('Delete')</button>
                                         </form>
                                     </div>
                                 </div>

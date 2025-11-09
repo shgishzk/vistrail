@@ -54,10 +54,22 @@
                 </a>
             </li>
 
+            <li class="nav-title">@lang('Communication')</li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.news*') ? 'active' : '' }}" href="{{ route('admin.news') }}">
+                    <i class="nav-icon cil-newspaper"></i> @lang('News')
+                </a>
+            </li>
+
             <li class="nav-title">@lang('Account Management')</li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.admins*') ? 'active' : '' }}" href="{{ route('admin.admins') }}">
                     <i class="nav-icon cil-people"></i> @lang('Admins')
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.action_logs*') ? 'active' : '' }}" href="{{ route('admin.action_logs') }}">
+                    <i class="nav-icon cil-list-rich"></i> @lang('Action Logs')
                 </a>
             </li>
             <li class="nav-item">
@@ -74,9 +86,22 @@
     <div class="wrapper flex-grow-1" style="min-width: 0;">
         <header class="docs-header header header-sticky elevation-0 mb-5">
             <div class="container-fluid">
-                <ul class="header-nav ms-auto">
+                <ul class="header-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a
+                            class="nav-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"
+                            href="{{ route('admin.settings') }}"
+                            title="@lang('Settings')"
+                            aria-label="@lang('Settings')"
+                        >
+                            <i class="nav-icon cil-settings"></i>
+                        </a>
+                    </li>
                     <li class="nav-item dropdown">
-                        <span class="nav-link">{{ Auth::guard('admin')->user()->name ?? 'Admin' }}</span>
+                        <span class="nav-link d-inline-flex align-items-center gap-2">
+                            <i class="nav-icon cil-user"></i>
+                            <span>{{ Auth::guard('admin')->user()->name ?? 'Admin' }}</span>
+                        </span>
                     </li>
                 </ul>
             </div>

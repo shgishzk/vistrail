@@ -36,37 +36,20 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{{ route('admin.groups.buildings.edit', $group) }}" class="btn btn-sm btn-outline-primary" title="@lang('Manage Buildings')">
+                        <a href="{{ route('admin.groups.buildings.edit', $group) }}" class="btn btn btn-outline-primary" title="@lang('Manage Buildings')">
                             <i class="cil-building"></i>
                         </a>
-                        <a href="{{ route('admin.groups.edit', $group) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.groups.edit', $group) }}" class="btn btn btn-outline-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $group->id }}">
+                        <button
+                            type="button"
+                            class="btn btn btn-outline-danger"
+                            data-coreui-toggle="modal"
+                            data-coreui-target="#deleteGroupModal{{ $group->id }}"
+                        >
                             <i class="cil-trash"></i>
                         </button>
-
-                        <div class="modal fade" id="deleteModal{{ $group->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $group->id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="deleteModalLabel{{ $group->id }}">@lang('Confirm Delete')</h5>
-                                        <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        @lang('Are you sure you want to delete group :name?', ['name' => $group->name])
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">@lang('Cancel')</button>
-                                        <form action="{{ route('admin.groups.destroy', $group) }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">@lang('Delete')</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </td>
                 </tr>
                 @endforeach
@@ -78,4 +61,29 @@
         </div>
     </div>
 </div>
+
+@foreach($groups as $group)
+    <div class="modal fade" id="deleteGroupModal{{ $group->id }}" tabindex="-1" aria-labelledby="deleteGroupModalLabel{{ $group->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteGroupModalLabel{{ $group->id }}">@lang('Confirm Delete')</h5>
+                    <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @lang('Are you sure you want to delete group :name?', ['name' => $group->name])
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">@lang('Cancel')</button>
+                    <form action="{{ route('admin.groups.destroy', $group) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger">@lang('Delete')</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endforeach
+
 @endsection

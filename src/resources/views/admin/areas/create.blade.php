@@ -26,6 +26,12 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+
+            <div class="mb-3">
+                <label for="boundary_kml_upload" class="form-label">@lang('Upload KML')</label>
+                <input type="file" class="form-control" id="boundary_kml_upload" accept=".kml">
+                <div class="form-text">@lang('Select a .kml file to load into the editor.')</div>
+            </div>
             
             <div class="mb-3">
                 <label for="boundary_kml" class="form-label">@lang('Boundary KML')</label>
@@ -37,6 +43,27 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+
+            @php
+                $currentCenterLat = old('center_lat', $defaultPosition['lat'] ?? 0);
+                $currentCenterLng = old('center_lng', $defaultPosition['lng'] ?? 0);
+            @endphp
+
+            @include('admin.areas.partials.boundary-map-preview', [
+                'googleMapsApiKey' => $googleMapsApiKey,
+                'initialCenterLat' => $currentCenterLat,
+                'initialCenterLng' => $currentCenterLng,
+                'defaultPosition' => $defaultPosition,
+            ])
+
+            <input type="hidden" id="center_lat" name="center_lat" value="{{ $currentCenterLat }}">
+            <input type="hidden" id="center_lng" name="center_lng" value="{{ $currentCenterLng }}">
+            @error('center_lat')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+            @error('center_lng')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
             
             <div class="mb-3">
                 <label for="memo" class="form-label">@lang('Memo')</label>

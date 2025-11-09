@@ -36,10 +36,10 @@
                     <td>{{ $user->email }}</td>
                     <td>{{ $user->created_at->format('Y-m-d H:i') }}</td>
                     <td>
-                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-primary">
+                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-outline-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $user->id }}">
+                        <button type="button" class="btn btn-outline-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $user->id }}">
                             <i class="cil-trash"></i>
                         </button>
                         
@@ -59,7 +59,7 @@
                                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">@lang('Delete')</button>
+                                            <button type="submit" class="btn btn-outline-danger">@lang('Delete')</button>
                                         </form>
                                     </div>
                                 </div>

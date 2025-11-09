@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAreaRequest;
 use App\Http\Requests\Admin\UpdateAreaRequest;
 use App\Models\Area;
+use App\Models\Setting;
 use App\Services\Area\FilterAreaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,7 +30,10 @@ class AreasController extends Controller
      */
     public function create(): View
     {
-        return view('admin.areas.create');
+        $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = $this->defaultMapPosition();
+
+        return view('admin.areas.create', compact('googleMapsApiKey', 'defaultPosition'));
     }
 
     /**
@@ -52,8 +56,9 @@ class AreasController extends Controller
     public function edit(Area $area): View
     {
         $googleMapsApiKey = config('services.google.maps_api_key');
+        $defaultPosition = $this->defaultMapPosition();
 
-        return view('admin.areas.edit', compact('area', 'googleMapsApiKey'));
+        return view('admin.areas.edit', compact('area', 'googleMapsApiKey', 'defaultPosition'));
     }
 
     /**
@@ -85,13 +90,29 @@ class AreasController extends Controller
     public function print(Area $area): View
     {
         $googleMapsApiKey = config('services.google.maps_api_key');
-        $defaultPosition = config('services.google.default_position');
+        $defaultPosition = $this->defaultMapPosition();
 
         return view('admin.areas.print', [
             'area' => $area,
             'googleMapsApiKey' => $googleMapsApiKey,
             'defaultPosition' => $defaultPosition,
         ]);
+    }
+
+    private function defaultMapPosition(): array
+    {
+        $defaults = Setting::defaults();
+
+        return [
+            'lat' => Setting::getFloat(
+                Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT,
+                (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LAT] ?? 0)
+            ),
+            'lng' => Setting::getFloat(
+                Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG,
+                (float) ($defaults[Setting::KEY_GOOGLE_MAPS_DEFAULT_LNG] ?? 0)
+            ),
+        ];
     }
 
     private function getLatestVisitorSuggestions(): array

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\VisitStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateVisitRequest extends FormRequest
@@ -19,6 +20,7 @@ class UpdateVisitRequest extends FormRequest
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'memo' => 'nullable|string',
+            'status' => 'sometimes|required|string|in:' . implode(',', VisitStatus::values()),
         ];
     }
 
@@ -33,6 +35,7 @@ class UpdateVisitRequest extends FormRequest
             'start_date.date' => '訪問開始日は日付形式で入力してください。',
             'end_date.date' => '訪問終了日は日付形式で入力してください。',
             'end_date.after_or_equal' => '訪問終了日は訪問開始日以降の日付を指定してください。',
+            'status.in' => '訪問状態に不正な値が指定されました。',
         ];
     }
 }

@@ -32,6 +32,8 @@ class UpdateAreaRequestTest extends TestCase
             'number' => 'B456',
             'name' => 'Updated Area',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.2222222,
+            'center_lng' => 135.8888888,
             'memo' => 'Updated memo',
         ], $request->rules());
         
@@ -58,6 +60,8 @@ class UpdateAreaRequestTest extends TestCase
             'number' => 'A123', // Same number
             'name' => 'Updated Area',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.3333333,
+            'center_lng' => 135.7777777,
         ], $request->rules());
         
         $this->assertTrue($validator->passes());
@@ -84,6 +88,8 @@ class UpdateAreaRequestTest extends TestCase
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('number', $validator->errors()->toArray());
         $this->assertArrayHasKey('boundary_kml', $validator->errors()->toArray());
+        $this->assertArrayHasKey('center_lat', $validator->errors()->toArray());
+        $this->assertArrayHasKey('center_lng', $validator->errors()->toArray());
     }
     
     /**
@@ -110,6 +116,8 @@ class UpdateAreaRequestTest extends TestCase
             'number' => 'A123', // Already used by area1
             'name' => 'Updated Area',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.4444444,
+            'center_lng' => 135.6666666,
         ], $request->rules());
         
         $this->assertTrue($validator->fails());

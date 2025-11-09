@@ -8,23 +8,42 @@ use App\Http\Requests\Admin\UpdateVisitRequest;
 use App\Models\Area;
 use App\Models\User;
 use App\Models\Visit;
+use App\States\VisitStatus\VisitStatusContext;
+use App\Services\Visit\VisitFilterService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class VisitsController extends Controller
 {
+    public function __construct(private VisitFilterService $visitFilterService)
+    {
+    }
+
     /**
      * Display a listing of the visits.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $visits = Visit::with(['user', 'area'])
+        $filters = $this->visitFilterService->extractFilters($request);
+
+        $visitsQuery = Visit::with(['user', 'area']);
+
+        $visits = $this->visitFilterService->apply($visitsQuery, $filters)
             ->orderByDesc('created_at')
             ->orderByDesc('id')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('admin.visits.index', compact('visits'));
+        $options = $this->visitFilterService->options();
+
+        return view('admin.visits.index', [
+            'visits' => $visits,
+            'filters' => $filters,
+            'filterUsers' => $options['users'],
+            'filterAreas' => $options['areas'],
+            'statusOptions' => $options['statuses'],
+        ]);
     }
 
     /**
@@ -72,12 +91,15 @@ class VisitsController extends Controller
     public function edit(Visit $visit): View
     {
         [$users, $areas] = $this->getSuggestionLists();
+        $statusContext = VisitStatusContext::from($visit->status);
 
         return view('admin.visits.edit', [
             'visit' => $visit,
             'users' => $users,
             'areas' => $areas,
             'preselectedAreaId' => null,
+            'currentStatus' => $statusContext->current(),
+            'statusTransitions' => $statusContext->availableTransitions(),
         ]);
     }
 

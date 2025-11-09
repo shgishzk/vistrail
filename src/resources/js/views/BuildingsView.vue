@@ -10,13 +10,91 @@
       </svg>
     </div>
     <div v-show="!isLoading" ref="mapContainer" class="h-[600px] w-full rounded-lg shadow" />
+    <div v-show="!isLoading" class="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+      <div class="flex items-center gap-2">
+        <span
+          class="inline-flex h-3 w-3 rounded-full border border-current"
+          :style="{ backgroundColor: legendStyles.hasLock.background, borderColor: legendStyles.hasLock.borderColor }"
+        ></span>
+        <span>オートロックのマンション</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span
+          class="inline-flex h-3 w-3 rounded-full border border-current"
+          :style="{ backgroundColor: legendStyles.noLock.background, borderColor: legendStyles.noLock.borderColor }"
+        ></span>
+        <span>出入り可能なマンション</span>
+      </div>
+    </div>
+    <section v-show="!isLoading" class="space-y-4 rounded-lg border border-slate-200 bg-white p-5 text-sm shadow-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-slate-900">マンション名で検索</h2>
+      </div>
+      <form class="flex flex-col gap-3 sm:flex-row" @submit.prevent="handleSearch">
+        <label for="building-search" class="sr-only">マンション名を入力</label>
+        <input
+          id="building-search"
+          v-model="searchTerm"
+          type="search"
+          class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          placeholder="マンション名を入力"
+        />
+        <button
+          type="submit"
+          :disabled="searchLoading"
+          class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-indigo-400"
+        >
+          <svg v-if="searchLoading" class="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          検索
+        </button>
+      </form>
+      <p v-if="searchError" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-600">
+        {{ searchError }}
+      </p>
+      <div v-if="!searchLoading && searchPerformed && searchResults.length === 0" class="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center text-slate-500">
+        該当するマンションは見つかりませんでした。
+      </div>
+      <ul v-if="searchResults.length" class="space-y-3">
+        <li
+          v-for="building in searchResults"
+          :key="building.id"
+          class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm"
+        >
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm font-semibold text-slate-900">{{ building.name }}</p>
+              <p v-if="building.last_visit_date" class="text-xs text-slate-500">最終訪問日: {{ building.last_visit_date }}</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <RouterLink
+                :to="buildDetailRoute(building.id)"
+                class="inline-flex items-center justify-center rounded-full border border-indigo-200 bg-white px-3 py-1 text-xs font-medium text-indigo-600 transition hover:border-indigo-400 hover:text-indigo-700"
+              >
+                詳細を見る
+              </RouterLink>
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-1"
+                @click="focusOnBuilding(building)"
+              >
+                地図で表示
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
   </div>
 </template>
 
 <script>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import axios from 'axios';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
+import { parseKmlPolygonCoordinates } from '../utils/kml';
 
 export default {
   name: 'BuildingsView',
@@ -38,12 +116,70 @@ export default {
       borderColor: '#455A64',
       glyphColor: '#455A64',
     };
+    let territoryPolygon = null;
+    const legendStyles = reactive({
+      hasLock: {
+        background: fallbackMarkerStyle.background,
+        borderColor: fallbackMarkerStyle.borderColor,
+      },
+      noLock: {
+        background: fallbackMarkerStyle.background,
+        borderColor: fallbackMarkerStyle.borderColor,
+      },
+    });
+
+    const applyMarkerStyles = (styles = {}) => {
+      markerStyles = styles || {};
+      fallbackMarkerStyle = {
+        background: markerStyles.default?.background || '#607D8B',
+        borderColor: markerStyles.default?.borderColor || '#455A64',
+        glyphColor: markerStyles.default?.glyphColor || markerStyles.default?.borderColor || '#455A64',
+      };
+      Object.assign(legendStyles.hasLock, {
+        background: markerStyles.has_lock?.background || fallbackMarkerStyle.background,
+        borderColor: markerStyles.has_lock?.borderColor || fallbackMarkerStyle.borderColor,
+      });
+      Object.assign(legendStyles.noLock, {
+        background: markerStyles.no_lock?.background || fallbackMarkerStyle.background,
+        borderColor: markerStyles.no_lock?.borderColor || fallbackMarkerStyle.borderColor,
+      });
+    };
 
     const clearMarkers = () => {
       markers.forEach(marker => {
         marker.map = null;
       });
       markers = [];
+    };
+
+    const renderTerritoryBoundary = (kmlString) => {
+      if (territoryPolygon) {
+        territoryPolygon.setMap(null);
+        territoryPolygon = null;
+      }
+
+      if (!mapInstance || typeof window === 'undefined' || !window.google?.maps) {
+        return;
+      }
+
+      const coordinates = parseKmlPolygonCoordinates(kmlString);
+
+      if (!coordinates.length) {
+        return;
+      }
+
+      territoryPolygon = new google.maps.Polygon({
+        paths: coordinates,
+        strokeColor: '#d81b60',
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        fillColor: '#f8bbd0',
+        fillOpacity: 0.15,
+        geodesic: true,
+        clickable: false,
+      });
+
+      territoryPolygon.setMap(mapInstance);
     };
 
     const getMarkerStyle = (type) => {
@@ -55,15 +191,69 @@ export default {
       };
     };
 
+    const escapeHtml = (value = '') => {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    };
+
+    const formatVisitRate = (value) => {
+      if (typeof value !== 'number' || Number.isNaN(value)) {
+        return '―';
+      }
+      return `${value.toFixed(1)}%`;
+    };
+
+    const formatMemo = (value) => {
+      if (!value) {
+        return '―';
+      }
+      return escapeHtml(value).replace(/\n/g, '<br>');
+    };
+
+    const appendQueryParams = (url, params = {}) => {
+      const query = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          query.append(key, value);
+        }
+      });
+      const queryString = query.toString();
+      if (!queryString) {
+        return url;
+      }
+      return url.includes('?') ? `${url}&${queryString}` : `${url}?${queryString}`;
+    };
+
+    const buildDetailRoute = (buildingId) => ({
+      name: 'buildingDetail',
+      params: { id: buildingId },
+      query: { from: 'buildings' },
+    });
+
+    const buildDetailUrl = (building) =>
+      appendQueryParams(building.detail_url || `/buildings/${building.id}`, { from: 'buildings' });
+
     const createInfoWindowContent = (building) => {
-      const urlSection = building.url
-        ? `<div class="text-sm"><a href="${building.url}" target="_blank" rel="noopener">公式サイトを見る</a></div>`
-        : '';
+      const detailUrl = buildDetailUrl(building);
+      const safeName = escapeHtml(building.name || 'マンション');
+      const lastVisit = building.last_visit_date ? escapeHtml(building.last_visit_date) : '―';
+      const visitRate = formatVisitRate(building.visit_rate);
+      const memo = formatMemo(building.memo);
 
       return `
-        <div class="p-2">
-          <div class="font-semibold">${building.name}</div>
-          ${urlSection}
+        <div class="min-w-[220px] max-w-xs space-y-2">
+          <a href="${detailUrl}" class="block text-base font-semibold text-indigo-600 hover:text-indigo-500 hover:underline" target="_self">
+            ${safeName}
+          </a>
+          <div class="space-y-1 text-sm text-slate-600">
+            <div><span class="font-medium text-slate-700">最終訪問日:</span> ${lastVisit}</div>
+            <div><span class="font-medium text-slate-700">訪問率:</span> ${visitRate}</div>
+            <div><span class="font-medium text-slate-700">メモ:</span> ${memo}</div>
+          </div>
         </div>
       `;
     };
@@ -94,10 +284,14 @@ export default {
           title: building.name,
           content: pin.element,
         });
+        marker.__buildingId = building.id;
 
         marker.addListener('click', () => {
           if (!infoWindow) {
-            infoWindow = new google.maps.InfoWindow();
+            infoWindow = new google.maps.InfoWindow({
+              disableAutoPan: true,
+              shouldFocus: false,
+            });
           }
           infoWindow.setContent(createInfoWindowContent(building));
           infoWindow.open({ anchor: marker, map: mapInstance });
@@ -114,17 +308,10 @@ export default {
         }
         abortController = new AbortController();
 
-        const { data } = await axios.get('/api/buildings/map', {
+        const { data } = await axios.get('/api/buildings', {
           params: { lat, lng },
           signal: abortController.signal,
         });
-
-        markerStyles = data.marker_styles || {};
-        fallbackMarkerStyle = {
-          background: markerStyles.default?.background || '#607D8B',
-          borderColor: markerStyles.default?.borderColor || '#455A64',
-          glyphColor: markerStyles.default?.glyphColor || markerStyles.default?.borderColor || '#455A64',
-        };
 
         error.value = null;
         renderMarkers(data.buildings || []);
@@ -167,40 +354,126 @@ export default {
       }, 250);
     };
 
+    const searchTerm = ref('');
+    const searchResults = ref([]);
+    const searchLoading = ref(false);
+    const searchError = ref('');
+    const searchPerformed = ref(false);
+
+    watch(searchTerm, () => {
+      if (searchError.value) {
+        searchError.value = '';
+      }
+    });
+
+    const handleSearch = async () => {
+      const keyword = searchTerm.value.trim();
+
+      if (!keyword) {
+        searchError.value = '検索キーワードを入力してください。';
+        searchResults.value = [];
+        searchPerformed.value = false;
+        return;
+      }
+
+      searchLoading.value = true;
+      searchError.value = '';
+
+      try {
+        const { data } = await axios.get('/api/buildings/search', {
+          params: { q: keyword },
+        });
+        searchResults.value = Array.isArray(data.buildings) ? data.buildings : [];
+        searchPerformed.value = true;
+      } catch (err) {
+        if (err?.response?.status === 422) {
+          searchError.value = '検索キーワードは1文字以上で入力してください。';
+        } else {
+          console.error(err);
+          searchError.value = 'マンションの検索に失敗しました。時間をおいて再度お試しください。';
+        }
+        searchResults.value = [];
+        searchPerformed.value = false;
+      } finally {
+        searchLoading.value = false;
+      }
+    };
+
+    const focusOnBuilding = (building) => {
+      if (!mapInstance || !building) {
+        return;
+      }
+
+      if (mapContainer.value) {
+        mapContainer.value.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+
+      const lat = Number(building.lat);
+      const lng = Number(building.lng);
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return;
+      }
+
+      const position = { lat, lng };
+
+      mapInstance.panTo(position);
+      if (mapInstance.getZoom() < 17) {
+        mapInstance.setZoom(17);
+      }
+
+      const marker = markers.find((item) => item.__buildingId === building.id);
+      if (!infoWindow) {
+        infoWindow = new google.maps.InfoWindow({
+          disableAutoPan: true,
+          shouldFocus: false,
+        });
+      }
+      infoWindow.setContent(createInfoWindowContent(building));
+      if (marker) {
+        infoWindow.open({ anchor: marker, map: mapInstance });
+      } else {
+        infoWindow.open({ position, map: mapInstance });
+      }
+    };
+
     const initialiseMap = async () => {
       try {
-        const { data } = await axios.get('/api/buildings/map');
+        const { data: config } = await axios.get('/api/map/config');
 
-        markerStyles = data.marker_styles || {};
-        fallbackMarkerStyle = {
-          background: markerStyles.default?.background || '#607D8B',
-          borderColor: markerStyles.default?.borderColor || '#455A64',
-          glyphColor: markerStyles.default?.glyphColor || markerStyles.default?.borderColor || '#455A64',
-        };
+        applyMarkerStyles(config.marker_styles);
 
         const defaultPosition = {
-          lat: Number(data.default_position?.lat) || 35.0238868,
-          lng: Number(data.default_position?.lng) || 135.760201,
+          lat: Number(config.default_position?.lat) || 35.0238868,
+          lng: Number(config.default_position?.lng) || 135.760201,
         };
 
-        if (!data.maps_api_key) {
+        if (!config.maps_api_key) {
           throw new Error('Google Maps APIキーが設定されていません。');
         }
 
-        await loadGoogleMaps(data.maps_api_key);
+        await loadGoogleMaps(config.maps_api_key);
         await google.maps.importLibrary('maps');
         markerLibrary = await google.maps.importLibrary('marker');
 
+        const centerPosition = await resolveInitialPosition(defaultPosition);
+
         error.value = null;
         mapInstance = new google.maps.Map(mapContainer.value, {
-          center: defaultPosition,
-          zoom: 14,
+          center: centerPosition,
+          zoom: 17,
           zoomControl: true,
           mapId: 'buildings-map',
+          fullscreenControl: false,
         });
 
-        renderMarkers(data.buildings || []);
-        lastFetchCenter = { ...defaultPosition };
+        renderTerritoryBoundary(config.assigned_boundary_kml);
+
+        await fetchBuildings(centerPosition.lat, centerPosition.lng);
+        lastFetchCenter = { ...centerPosition };
 
         google.maps.event.addListener(mapInstance, 'idle', scheduleFetch);
       } catch (err) {
@@ -209,6 +482,40 @@ export default {
       } finally {
         isLoading.value = false;
       }
+    };
+
+    const resolveInitialPosition = (fallbackPosition) => {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          resolve(fallbackPosition);
+          return;
+        }
+
+        const timer = setTimeout(() => {
+          resolve(fallbackPosition);
+        }, 5000);
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            clearTimeout(timer);
+            const { latitude, longitude } = position.coords || {};
+            if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+              resolve({ lat: latitude, lng: longitude });
+            } else {
+              resolve(fallbackPosition);
+            }
+          },
+          () => {
+            clearTimeout(timer);
+            resolve(fallbackPosition);
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 60_000,
+            timeout: 5000,
+          },
+        );
+      });
     };
 
     onMounted(() => {
@@ -227,12 +534,25 @@ export default {
       if (mapInstance && window.google && window.google.maps) {
         google.maps.event.clearInstanceListeners(mapInstance);
       }
+      if (territoryPolygon) {
+        territoryPolygon.setMap(null);
+        territoryPolygon = null;
+      }
     });
 
     return {
       mapContainer,
       isLoading,
       error,
+      legendStyles,
+      searchTerm,
+      searchResults,
+      searchLoading,
+      searchError,
+      searchPerformed,
+      handleSearch,
+      buildDetailRoute,
+      focusOnBuilding,
     };
   },
 };

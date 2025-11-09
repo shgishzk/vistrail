@@ -49,6 +49,8 @@ KML;
             'number' => $this->sequence++,
             'name' => fake()->city(),
             'boundary_kml' => $boundary,
+            'center_lat' => fake()->latitude(),
+            'center_lng' => fake()->longitude(),
         ];
     }
 }

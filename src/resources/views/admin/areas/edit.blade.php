@@ -60,222 +60,26 @@
                 @enderror
             </div>
 
-            @if(!empty($googleMapsApiKey))
-                <div class="mb-3">
-                    <label class="form-label">@lang('Map Preview')</label>
-                    <div id="boundary-map" class="border rounded" style="height: 320px;"></div>
-                    <div id="boundary-map-error" class="form-text text-danger d-none">@lang('Failed to parse KML. Please check the format or try again.')</div>
-                    <div class="form-text">@lang('Valid KML updates will be shown on the map automatically.')</div>
-                </div>
+            @php
+                $currentCenterLat = old('center_lat', $area->center_lat ?? $defaultPosition['lat']);
+                $currentCenterLng = old('center_lng', $area->center_lng ?? $defaultPosition['lng']);
+            @endphp
 
-                <script src="{{ asset('js/kml-parser.js') }}"></script>
-                <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&callback=initBoundaryKmlMap" async defer></script>
-                <script>
-                    async function initBoundaryKmlMap() {
-                        const textarea = document.getElementById('boundary_kml');
-                        const fileInput = document.getElementById('boundary_kml_upload');
-                        const mapElement = document.getElementById('boundary-map');
-                        const errorElement = document.getElementById('boundary-map-error');
-                        const defaultErrorMessage = errorElement ? errorElement.textContent : '';
+            @include('admin.areas.partials.boundary-map-preview', [
+                'googleMapsApiKey' => $googleMapsApiKey,
+                'initialCenterLat' => $currentCenterLat,
+                'initialCenterLng' => $currentCenterLng,
+                'defaultPosition' => $defaultPosition,
+            ])
 
-                        if (!textarea || !mapElement) {
-                            return;
-                        }
-
-                        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
-
-                        const defaultCenter = { lat: 35.024842, lng: 135.762106 };
-                        const map = new google.maps.Map(mapElement, {
-                            center: defaultCenter,
-                            zoom: 10,
-                            mapId: 'roadmap'
-                        });
-
-                        const polygons = [];
-                        const markers = [];
-                        let infoWindow = null;
-                        const kmlUtils = window.kmlParser;
-                        if (!kmlUtils) {
-                            console.error('kmlParser utilities are not loaded.');
-                            return;
-                        }
-                        const {
-                            parseDocument,
-                            parseStyles,
-                            parsePolygons,
-                            parsePoints,
-                            parseKmlColor,
-                        } = kmlUtils;
-
-                        const resolveStyle = (styleUrl, styles) => {
-                            if (!styleUrl) {
-                                return {};
-                            }
-                            return styles[styleUrl] || styles[styleUrl.replace(/^#/, '')] || {};
-                        };
-
-                        const renderKml = () => {
-                            clearTimeout(renderKml.debounceId);
-                            renderKml.debounceId = setTimeout(() => {
-                                polygons.forEach(polygon => polygon.setMap(null));
-                                polygons.length = 0;
-                                markers.forEach(marker => {
-                                    marker.map = null;
-                                });
-                                markers.length = 0;
-                                if (infoWindow) {
-                                    infoWindow.close();
-                                }
-                                if (errorElement) {
-                                    errorElement.textContent = defaultErrorMessage;
-                                    errorElement.classList.add('d-none');
-                                }
-
-                                const raw = textarea.value.trim();
-                                if (!raw) {
-                                    return;
-                                }
-
-                                try {
-                                    const xml = parseDocument(raw);
-                                    if (!xml || xml.querySelector('parsererror')) {
-                                        throw new Error('invalid_xml');
-                                    }
-
-                                    const bounds = new google.maps.LatLngBounds();
-                                    const styles = parseStyles(xml);
-                                    const polygonData = parsePolygons(xml);
-                                    const pointData = parsePoints(xml);
-                                    let geometryCount = 0;
-
-                                    polygonData.forEach((polygonDatum) => {
-                                        if (!Array.isArray(polygonDatum.coordinates) || polygonDatum.coordinates.length < 3) {
-                                            return;
-                                        }
-
-                                        polygonDatum.coordinates.forEach((point) => bounds.extend(point));
-
-                                        const style = resolveStyle(polygonDatum.styleUrl, styles);
-                                        const strokeEnabled = style.polyOutline !== '0';
-                                        const fillEnabled = style.polyFill !== '0';
-                                        const stroke = parseKmlColor(style.lineColor, '#FF0000', strokeEnabled ? 0.8 : 0);
-                                        const fill = parseKmlColor(style.polyColor, '#FF0000', fillEnabled ? 0.15 : 0);
-                                        const strokeWeight = Number.parseFloat(style.lineWidth);
-
-                                        const polygon = new google.maps.Polygon({
-                                            paths: polygonDatum.coordinates,
-                                            strokeColor: stroke.color,
-                                            strokeOpacity: stroke.opacity,
-                                            strokeWeight: Number.isFinite(strokeWeight) ? strokeWeight : 2,
-                                            fillColor: fill.color,
-                                            fillOpacity: fill.opacity,
-                                        });
-
-                                        polygon.setMap(map);
-                                        polygons.push(polygon);
-                                        geometryCount++;
-                                    });
-
-                                    pointData.forEach((point) => {
-                                        if (!Number.isFinite(point.lat) || !Number.isFinite(point.lng)) {
-                                            return;
-                                        }
-
-                                        const style = resolveStyle(point.styleUrl, styles);
-                                        const markerStyle = parseKmlColor(style.iconColor || style.lineColor || style.polyColor, '#0288D1', 1);
-                                        const pin = new PinElement({
-                                            background: markerStyle.color,
-                                            borderColor: '#ffffff',
-                                            glyphColor: '#000000',
-                                            scale: 1.2,
-                                        });
-                                        pin.element.style.opacity = markerStyle.opacity;
-
-                                        const marker = new AdvancedMarkerElement({
-                                            map,
-                                            position: { lat: point.lat, lng: point.lng },
-                                            content: pin.element,
-                                        });
-
-                                        markers.push(marker);
-                                        bounds.extend({ lat: point.lat, lng: point.lng });
-                                        geometryCount++;
-
-                                        const title = point.name?.trim();
-                                        const description = point.description?.trim();
-
-                                        if (title || description) {
-                                            marker.addListener('click', () => {
-                                                if (!infoWindow) {
-                                                    infoWindow = new google.maps.InfoWindow();
-                                                }
-
-                                                const titleHtml = title ? `<div class="fw-bold mb-1" style="font-size:1.05rem;">${title}</div>` : '';
-                                                const descriptionHtml = description
-                                                    ? `<div class="text-muted" style="white-space: pre-line;font-size:0.95rem;">${description}</div>`
-                                                    : '';
-
-                                                infoWindow.setContent(`<div>${titleHtml}${descriptionHtml}</div>`);
-                                                infoWindow.open({
-                                                    anchor: marker,
-                                                    map,
-                                                });
-                                            });
-                                        }
-                                    });
-
-                                    if (!geometryCount) {
-                                        throw new Error('no_coordinates');
-                                    }
-
-                                    if (!bounds.isEmpty()) {
-                                        map.fitBounds(bounds);
-                                    }
-                                } catch (error) {
-                                    console.error('Failed to render KML preview.', error);
-                                    if (errorElement) {
-                                        errorElement.textContent = defaultErrorMessage;
-                                        errorElement.classList.remove('d-none');
-                                    }
-                                }
-                            }, 250);
-                        };
-
-                        textarea.addEventListener('input', renderKml);
-                        if (fileInput) {
-                            fileInput.addEventListener('change', (event) => {
-                                const file = event.target.files?.[0];
-                                if (!file) {
-                                    return;
-                                }
-
-                                if (!file.name.toLowerCase().endsWith('.kml')) {
-                                    if (errorElement) {
-                                        errorElement.textContent = @json(__('Only .kml files can be uploaded.'));
-                                        errorElement.classList.remove('d-none');
-                                    }
-                                    event.target.value = '';
-                                    return;
-                                }
-
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    textarea.value = e.target?.result || '';
-                                    renderKml();
-                                };
-                                reader.onerror = () => {
-                                    if (errorElement) {
-                                        errorElement.textContent = @json(__('Failed to read the selected file.'));
-                                        errorElement.classList.remove('d-none');
-                                    }
-                                };
-                                reader.readAsText(file);
-                            });
-                        }
-                        renderKml();
-                    }
-                </script>
-            @endif
+            <input type="hidden" id="center_lat" name="center_lat" value="{{ $currentCenterLat }}">
+            <input type="hidden" id="center_lng" name="center_lng" value="{{ $currentCenterLng }}">
+            @error('center_lat')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+            @error('center_lng')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
             
             <div class="mb-3">
                 <label for="memo" class="form-label">@lang('Memo')</label>

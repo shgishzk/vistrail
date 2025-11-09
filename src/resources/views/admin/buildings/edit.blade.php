@@ -67,6 +67,17 @@
                 </div>
             </div>
 
+            @if(!empty($googleMapsApiKey))
+                @include('admin.buildings.partials.location-picker', [
+                    'mapId' => 'building-location-picker',
+                    'googleMapsApiKey' => $googleMapsApiKey,
+                    'defaultLat' => $defaultPosition['lat'] ?? 35.0238868,
+                    'defaultLng' => $defaultPosition['lng'] ?? 135.760201,
+                    'currentLat' => old('lat', $building->lat),
+                    'currentLng' => old('lng', $building->lng),
+                ])
+            @endif
+
             <div class="mb-3">
                 <label for="is_public" class="form-label">@lang('Public')</label>
                 <select class="form-select @error('is_public') is-invalid @enderror" id="is_public" name="is_public">

@@ -23,6 +23,8 @@ class StoreAreaRequestTest extends TestCase
             'number' => 'A123',
             'name' => 'Test Area',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.1234567,
+            'center_lng' => 135.7654321,
             'memo' => 'Test memo',
         ], $request->rules());
         
@@ -43,6 +45,8 @@ class StoreAreaRequestTest extends TestCase
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('number', $validator->errors()->toArray());
         $this->assertArrayHasKey('boundary_kml', $validator->errors()->toArray());
+        $this->assertArrayHasKey('center_lat', $validator->errors()->toArray());
+        $this->assertArrayHasKey('center_lng', $validator->errors()->toArray());
     }
     
     /**
@@ -60,6 +64,8 @@ class StoreAreaRequestTest extends TestCase
             'number' => 'A123',
             'name' => 'Test Area',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.9876543,
+            'center_lng' => 135.1234567,
         ], $request->rules());
         
         $this->assertTrue($validator->fails());
@@ -76,6 +82,8 @@ class StoreAreaRequestTest extends TestCase
         $validator = Validator::make([
             'number' => 'B456',
             'boundary_kml' => $this->sampleKml(),
+            'center_lat' => 35.0000000,
+            'center_lng' => 135.0000000,
         ], $request->rules());
         
         $this->assertTrue($validator->passes());

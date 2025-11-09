@@ -33,8 +33,31 @@
             </div>
         @endif
 
-        <div class="alert alert-info" role="alert">
-            @lang('Total rooms: :count', ['count' => number_format($totalRooms)])
+        <div class="row row-cols-1 row-cols-md-4 g-3 mb-4">
+            <div class="col">
+                <div class="border rounded-3 p-3 h-100 bg-light">
+                    <p class="text-uppercase text-muted small mb-1">@lang('Last Visit Date')</p>
+                    <p class="h5 mb-0">{{ $summary['last_visit_date'] ?? '―' }}</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="border rounded-3 p-3 h-100 bg-light">
+                    <p class="text-uppercase text-muted small mb-1">@lang('Visit Rate (1 year)')</p>
+                    <p class="h5 mb-0">{{ number_format($summary['visit_rate_year'], 1) }}%</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="border rounded-3 p-3 h-100 bg-light">
+                    <p class="text-uppercase text-muted small mb-1">@lang('Registered Rooms')</p>
+                    <p class="h5 mb-0">{{ number_format($summary['total_rooms']) }}</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="border rounded-3 p-3 h-100 bg-light">
+                    <p class="text-uppercase text-muted small mb-1">@lang('Visited within 1 year')</p>
+                    <p class="h5 mb-0">{{ number_format($summary['recent_rooms_count']) }}</p>
+                </div>
+            </div>
         </div>
 
         <form action="{{ route('admin.buildings.rooms.update', $building) }}" method="POST">

@@ -6,7 +6,7 @@
     <title>@lang('Admin Login')</title>
     @vite(['resources/js/admin.js', 'resources/css/admin.css'])
 </head>
-<body class="bg-light d-flex flex-row align-items-center">
+<body class="bg-light min-vh-100 d-flex flex-column align-items-center justify-content-center">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6">

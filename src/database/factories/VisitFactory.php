@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\VisitStatus;
 use App\Models\Area;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,6 +28,7 @@ class VisitFactory extends Factory
             'start_date' => $startDate,
             'end_date' => $endDate,
             'memo' => fake()->optional(0.8)->paragraph(),
+            'status' => VisitStatus::default()->value,
         ];
     }
 }

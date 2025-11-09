@@ -1,5 +1,9 @@
 @extends('admin.layouts.app')
 
+@php
+    use App\Enums\VisitStatus;
+@endphp
+
 @section('title', __('Visits for :area', ['area' => $area->number]))
 
 @section('content')
@@ -28,6 +32,59 @@
             </div>
         @endif
 
+        @php
+            $filters = $filters ?? [];
+        @endphp
+
+        <form action="{{ route('admin.areas.visits', $area) }}" method="GET" class="card card-body mb-4 border-0 shadow-sm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="area_id" class="form-label">@lang('Area')</label>
+                    <select name="area_id" id="area_id" class="form-select">
+                        @foreach($filterAreas as $filterArea)
+                            <option value="{{ $filterArea->id }}" @selected(($filters['area_id'] ?? $area->id) == $filterArea->id)>
+                                {{ $filterArea->number }} @if($filterArea->name) - {{ $filterArea->name }} @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="user_id" class="form-label">@lang('User')</label>
+                    <select name="user_id" id="user_id" class="form-select">
+                        <option value="">@lang('All')</option>
+                        @foreach($filterUsers as $user)
+                            <option value="{{ $user->id }}" @selected(($filters['user_id'] ?? '') == $user->id)>
+                                {{ $user->name }} @if($user->email) ({{ $user->email }}) @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">@lang('Status')</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">@lang('All')</option>
+                        @foreach($statusOptions as $value => $label)
+                            <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="start_from" class="form-label">@lang('Visit Start Date')</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="date" class="form-control" id="start_from" name="start_from" value="{{ $filters['start_from'] ?? '' }}">
+                        <span class="text-muted">-</span>
+                        <input type="date" class="form-control" id="start_to" name="start_to" value="{{ $filters['start_to'] ?? '' }}">
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a href="{{ route('admin.areas.visits', $area) }}" class="btn btn-outline-secondary">@lang('Reset')</a>
+                <button type="submit" class="btn btn-primary">@lang('Search')</button>
+            </div>
+        </form>
+
         <table class="table table-responsive-sm table-striped">
             <thead>
                 <tr>
@@ -35,6 +92,7 @@
                     <th>@lang('Start Date')</th>
                     <th>@lang('End Date')</th>
                     <th>@lang('Memo')</th>
+                    <th>@lang('Status')</th>
                     <th>@lang('Created At')</th>
                     <th>@lang('Actions')</th>
                 </tr>
@@ -49,12 +107,22 @@
                     <td>{{ optional($visit->start_date)->format('Y-m-d') }}</td>
                     <td>{{ optional($visit->end_date)->format('Y-m-d') }}</td>
                     <td>{{ Str::limit($visit->memo, 50) }}</td>
+                    <td>
+                        @php
+                            $status = $visit->status instanceof VisitStatus
+                                ? $visit->status
+                                : VisitStatus::from($visit->status ?? VisitStatus::default()->value);
+                        @endphp
+                        <span class="badge {{ $status->badgeClass() }}">
+                            {{ $status->label() }}
+                        </span>
+                    </td>
                     <td>{{ $visit->created_at->format('Y-m-d H:i') }}</td>
                     <td>
-                        <a href="{{ route('admin.visits.edit', $visit) }}" class="btn btn-primary">
+                        <a href="{{ route('admin.visits.edit', $visit) }}" class="btn btn-outline-primary">
                             <i class="cil-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $visit->id }}">
+                        <button type="button" class="btn btn-outline-danger" data-coreui-toggle="modal" data-coreui-target="#deleteModal{{ $visit->id }}">
                             <i class="cil-trash"></i>
                         </button>
 
@@ -73,7 +141,7 @@
                                         <form action="{{ route('admin.visits.destroy', $visit) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">@lang('Delete')</button>
+                                            <button type="submit" class="btn btn-outline-danger">@lang('Delete')</button>
                                         </form>
                                     </div>
                                 </div>

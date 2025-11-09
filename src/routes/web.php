@@ -1,8 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ActionLogController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\NewsController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\UserAuthController;
 
 Route::get('/', [UserAuthController::class, 'showHome'])->name('home');
@@ -12,6 +15,15 @@ Route::post('logout', [UserAuthController::class, 'logout'])->name('logout');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/api/user', [UserAuthController::class, 'user']);
 });
+
+Route::get('/buildings/{any}', [UserAuthController::class, 'showHome'])
+    ->where('any', '.*');
+
+Route::get('/areas/{any}', [UserAuthController::class, 'showHome'])
+    ->where('any', '.*');
+
+Route::get('/groups/{any}', [UserAuthController::class, 'showHome'])
+    ->where('any', '.*');
 
 Route::get('/{spa}', [UserAuthController::class, 'showHome'])
     ->where('spa', 'areas|buildings|groups');
@@ -28,8 +40,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     
-    Route::middleware('admin.auth')->group(function () {
+    Route::middleware(['admin.auth', 'admin.log'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
         
         Route::get('users', [\App\Http\Controllers\Admin\UsersController::class, 'index'])->name('users');
         Route::get('users/create', [\App\Http\Controllers\Admin\UsersController::class, 'create'])->name('users.create');
@@ -87,5 +101,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('admins/{admin}/edit', [\App\Http\Controllers\Admin\AdminsController::class, 'edit'])->name('admins.edit');
         Route::put('admins/{admin}', [\App\Http\Controllers\Admin\AdminsController::class, 'update'])->name('admins.update');
         Route::delete('admins/{admin}', [\App\Http\Controllers\Admin\AdminsController::class, 'destroy'])->name('admins.destroy');
+        Route::get('action-logs', [ActionLogController::class, 'index'])->name('action_logs');
+
+        Route::get('news', [NewsController::class, 'index'])->name('news');
+        Route::get('news/create', [NewsController::class, 'create'])->name('news.create');
+        Route::post('news', [NewsController::class, 'store'])->name('news.store');
+        Route::get('news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
+        Route::put('news/{news}', [NewsController::class, 'update'])->name('news.update');
+        Route::delete('news/{news}', [NewsController::class, 'destroy'])->name('news.destroy');
     });
 });
