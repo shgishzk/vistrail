@@ -4,6 +4,7 @@ import MainMenu from '../components/MainMenu.vue';
 const AreasView = () => import('../views/AreasView.vue');
 const AreasMyView = () => import('../views/AreasMyView.vue');
 const AreasExploreView = () => import('../views/AreasExploreView.vue');
+const AreasPickupView = () => import('../views/AreasPickupView.vue');
 const AreasVisitModeView = () => import('../views/AreasVisitModeView.vue');
 const BuildingsView = () => import('../views/BuildingsView.vue');
 const BuildingDetailView = () => import('../views/BuildingDetailView.vue');
@@ -15,6 +16,7 @@ const titleMap = {
   areasMy: '自分の区域',
   areasMyVisit: '訪問モード',
   areasExplore: 'すべての区域を閲覧',
+  areasPickup: '区域を選ぶ',
   buildings: 'マンション',
   buildingDetail: 'マンション詳細',
   groups: 'グループ',
@@ -35,6 +37,11 @@ const routes = [
     path: '/areas/my',
     name: 'areasMy',
     component: AreasMyView,
+  },
+  {
+    path: '/areas/pickup',
+    name: 'areasPickup',
+    component: AreasPickupView,
   },
   {
     path: '/areas/explore',

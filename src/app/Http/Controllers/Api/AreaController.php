@@ -23,8 +23,12 @@ class AreaController extends Controller
         $perPage = max(10, min($perPage, 100));
         $statusFilter = (string) $request->input('status', 'all');
         $search = trim((string) $request->input('search', ''));
+        $nearLat = $request->input('near_lat');
+        $nearLng = $request->input('near_lng');
+        $shouldOrderByDistance = is_numeric($nearLat) && is_numeric($nearLng);
 
         $query = Area::query()
+            ->select('areas.*')
             ->with([
                 'currentVisit.user:id,name',
                 'latestVisit.user:id,name',
@@ -50,7 +54,20 @@ class AreaController extends Controller
             });
         }
 
-        $query->orderBy('number');
+        if ($shouldOrderByDistance) {
+            $lat = (float) $nearLat;
+            $lng = (float) $nearLng;
+            $query->selectRaw(
+                '(6371000 * 2 * ASIN(SQRT(POWER(SIN(RADIANS(? - areas.center_lat) / 2), 2) + COS(RADIANS(areas.center_lat)) * COS(RADIANS(?)) * POWER(SIN(RADIANS(? - areas.center_lng) / 2), 2)))) AS distance_meters',
+                [$lat, $lat, $lng]
+            );
+        }
+
+        if ($shouldOrderByDistance) {
+            $query->orderBy('distance_meters');
+        } else {
+            $query->orderBy('number');
+        }
 
         $areas = $query->paginate($perPage);
         $items = $areas->getCollection()
@@ -96,6 +113,7 @@ class AreaController extends Controller
             'center_lng' => $area->center_lng,
             'memo' => $area->memo,
             'has_boundary' => !empty($area->boundary_kml),
+            'distance_meters' => isset($area->distance_meters) ? (float) $area->distance_meters : null,
             'current_visit' => $currentVisit ? $this->transformVisit($currentVisit) : null,
             'latest_visit' => $latestVisit ? $this->transformVisit($latestVisit) : null,
             'is_available' => $this->availabilityService->isAvailable($latestVisit),

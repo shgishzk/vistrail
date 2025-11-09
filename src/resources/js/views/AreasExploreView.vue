@@ -359,6 +359,14 @@ const selectArea = (area) => {
   selectedAreaSummary.value = area;
 };
 
+const sortAreasByNumber = (list) => {
+  return [...list].sort((a, b) => {
+    const aNum = a?.number ?? '';
+    const bNum = b?.number ?? '';
+    return String(aNum).localeCompare(String(bNum), 'ja', { numeric: true, sensitivity: 'base' });
+  });
+};
+
 const loadAreas = async ({ reset = false } = {}) => {
   if (!reset && (state.isListLoading || state.isLoadingMore)) {
     return;
@@ -399,9 +407,9 @@ const loadAreas = async ({ reset = false } = {}) => {
 
     const items = Array.isArray(response?.data) ? response.data : [];
     if (reset) {
-      areas.value = items;
+      areas.value = sortAreasByNumber(items);
     } else {
-      areas.value = [...areas.value, ...items];
+      areas.value = sortAreasByNumber([...areas.value, ...items]);
     }
 
     const meta = response?.meta || {};
