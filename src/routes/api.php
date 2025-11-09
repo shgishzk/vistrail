@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\BuildingController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\MapConfigController;
@@ -25,6 +26,9 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->g
     Route::get('/settings', [SettingController::class, 'index']);
     Route::put('/settings', [SettingController::class, 'update']);
     Route::get('/areas/my', MyAreasController::class);
+    Route::get('/areas', [AreaController::class, 'index']);
+    Route::get('/areas/{area}', [AreaController::class, 'show'])
+        ->whereNumber('area');
     Route::get('/pins', [PinController::class, 'index']);
     Route::post('/pins', [PinController::class, 'store']);
     Route::put('/pins/{pin}', [PinController::class, 'update']);

@@ -21,6 +21,10 @@ class Setting extends Model
     public const KEY_GOOGLE_MARKER_NO_LOCK_BORDER_COLOR = 'GOOGLE_MARKER_NO_LOCK_BORDER_COLOR';
     public const KEY_GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR = 'GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR';
     public const KEY_GOOGLE_MAPS_ASSIGNED_TERRITORY_BOUNDARY = 'GOOGLE_MAPS_ASSIGNED_TERRITORY_BOUNDARY';
+    public const KEY_AREA_VACANCY_REQUIRE_START_ELAPSED_ENABLED = 'AREA_VACANCY_REQUIRE_START_ELAPSED_ENABLED';
+    public const KEY_AREA_VACANCY_REQUIRE_START_ELAPSED_DAYS = 'AREA_VACANCY_REQUIRE_START_ELAPSED_DAYS';
+    public const KEY_AREA_VACANCY_REQUIRE_END_ELAPSED_ENABLED = 'AREA_VACANCY_REQUIRE_END_ELAPSED_ENABLED';
+    public const KEY_AREA_VACANCY_REQUIRE_END_ELAPSED_DAYS = 'AREA_VACANCY_REQUIRE_END_ELAPSED_DAYS';
 
     /**
      * Cached key/value settings to avoid repeated database queries per request.
@@ -330,6 +334,80 @@ KML),
                 'input' => [
                     'type' => 'textarea',
                     'rows' => 12,
+                ],
+            ],
+            self::KEY_AREA_VACANCY_REQUIRE_START_ELAPSED_ENABLED => [
+                'type' => 'int',
+                'default' => 0,
+                'label' => '訪問開始日によるクールダウンを有効化',
+                'description' => '最新訪問の開始日から指定日数が経過するまで空き区域として扱いません。',
+                'group' => 'areas',
+                'group_label' => '区域',
+                'group_order' => 3,
+                'section' => 'areas_vacancy',
+                'section_label' => '空き区域の判定',
+                'section_order' => 1,
+                'field_order' => 1,
+                'input' => [
+                    'type' => 'checkbox',
+                    'data-controls' => '#setting-area-vacancy-require-start-elapsed-days',
+                ],
+            ],
+            self::KEY_AREA_VACANCY_REQUIRE_START_ELAPSED_DAYS => [
+                'type' => 'int',
+                'default' => 30,
+                'label' => '訪問開始から経過させる日数 (n)',
+                'description' => '最新訪問の開始日からこの日数が過ぎていない区域は「空き区域」に含めません。',
+                'group' => 'areas',
+                'group_label' => '区域',
+                'group_order' => 3,
+                'section' => 'areas_vacancy',
+                'section_label' => '空き区域の判定',
+                'section_order' => 1,
+                'field_order' => 2,
+                'input' => [
+                    'type' => 'number',
+                    'min' => '0',
+                    'step' => '1',
+                    'placeholder' => '例: 30',
+                    'data-controlled-by' => '#setting-area-vacancy-require-start-elapsed-enabled',
+                ],
+            ],
+            self::KEY_AREA_VACANCY_REQUIRE_END_ELAPSED_ENABLED => [
+                'type' => 'int',
+                'default' => 0,
+                'label' => '訪問終了日によるクールダウンを有効化',
+                'description' => '最新訪問の終了日から指定日数が経過するまで空き区域として扱いません。',
+                'group' => 'areas',
+                'group_label' => '区域',
+                'group_order' => 3,
+                'section' => 'areas_vacancy',
+                'section_label' => '空き区域の判定',
+                'section_order' => 1,
+                'field_order' => 3,
+                'input' => [
+                    'type' => 'checkbox',
+                    'data-controls' => '#setting-area-vacancy-require-end-elapsed-days',
+                ],
+            ],
+            self::KEY_AREA_VACANCY_REQUIRE_END_ELAPSED_DAYS => [
+                'type' => 'int',
+                'default' => 14,
+                'label' => '訪問終了から経過させる日数 (i)',
+                'description' => '最新訪問の終了日からこの日数が過ぎていない区域は「空き区域」に含めません。',
+                'group' => 'areas',
+                'group_label' => '区域',
+                'group_order' => 3,
+                'section' => 'areas_vacancy',
+                'section_label' => '空き区域の判定',
+                'section_order' => 1,
+                'field_order' => 4,
+                'input' => [
+                    'type' => 'number',
+                    'min' => '0',
+                    'step' => '1',
+                    'placeholder' => '例: 14',
+                    'data-controlled-by' => '#setting-area-vacancy-require-end-elapsed-enabled',
                 ],
             ],
         ];

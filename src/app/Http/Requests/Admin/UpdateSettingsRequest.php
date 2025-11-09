@@ -35,6 +35,22 @@ class UpdateSettingsRequest extends FormRequest
             'settings.GOOGLE_MARKER_NO_LOCK_BORDER_COLOR' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
             'settings.GOOGLE_MARKER_NO_LOCK_GLYPH_COLOR' => ['required', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
             'settings.GOOGLE_MAPS_ASSIGNED_TERRITORY_BOUNDARY' => ['nullable', 'string'],
+            'settings.AREA_VACANCY_REQUIRE_START_ELAPSED_ENABLED' => ['required', 'boolean'],
+            'settings.AREA_VACANCY_REQUIRE_START_ELAPSED_DAYS' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:3650',
+                'required_if:settings.AREA_VACANCY_REQUIRE_START_ELAPSED_ENABLED,1',
+            ],
+            'settings.AREA_VACANCY_REQUIRE_END_ELAPSED_ENABLED' => ['required', 'boolean'],
+            'settings.AREA_VACANCY_REQUIRE_END_ELAPSED_DAYS' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:3650',
+                'required_if:settings.AREA_VACANCY_REQUIRE_END_ELAPSED_ENABLED,1',
+            ],
         ];
     }
 

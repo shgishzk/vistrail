@@ -44,13 +44,50 @@
                                                 unset($inputConfig['type']);
                                                 $value = old('settings.' . $key, $field['value'] ?? '');
                                                 $isColor = $inputType === 'color';
+                                                $isTextarea = $inputType === 'textarea';
+                                                $isCheckbox = $inputType === 'checkbox';
                                                 $inputClasses = $isColor
                                                     ? 'form-control form-control-color w-100'
                                                     : 'form-control';
-                                                @endphp
-                                                @if ($field)
-                                                    <div class="col-md-6 col-xl-4">
-                                                        <div class="mb-3">
+                                                if ($isCheckbox) {
+                                                    $inputClasses = 'form-check-input';
+                                                }
+                                                $isChecked = $isCheckbox && in_array((string) $value, ['1', 'true', 'on'], true);
+                                            @endphp
+                                            @if ($field)
+                                                <div class="col-md-6 col-xl-4">
+                                                    <div class="mb-3" data-settings-field="{{ $key }}">
+                                                        @if ($isCheckbox)
+                                                            <div class="form-check form-switch">
+                                                                <input type="hidden" name="settings[{{ $key }}]" value="0">
+                                                                <input
+                                                                    id="{{ $inputId }}"
+                                                                    name="settings[{{ $key }}]"
+                                                                    type="checkbox"
+                                                                    value="1"
+                                                                    class="{{ $inputClasses }} {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
+                                                                    {{ $isChecked ? 'checked' : '' }}
+                                                                    @foreach ($inputConfig as $attr => $attrValue)
+                                                                        {{ $attr }}="{{ $attrValue }}"
+                                                                    @endforeach
+                                                                />
+                                                                <label class="form-check-label fw-semibold ms-2" for="{{ $inputId }}">
+                                                                    {{ $field['label'] ?? $key }}
+                                                                </label>
+                                                            </div>
+                                                        @elseif ($isTextarea)
+                                                            <label for="{{ $inputId }}" class="form-label fw-semibold">
+                                                                {{ $field['label'] ?? $key }}
+                                                            </label>
+                                                            <textarea
+                                                                id="{{ $inputId }}"
+                                                                name="settings[{{ $key }}]"
+                                                                class="{{ $inputClasses }} {{ $errors->has('settings.' . $key) ? 'is-invalid' : '' }}"
+                                                                @foreach ($inputConfig as $attr => $attrValue)
+                                                                    {{ $attr }}="{{ $attrValue }}"
+                                                                @endforeach
+                                                            >{{ $value }}</textarea>
+                                                        @else
                                                             <label for="{{ $inputId }}" class="form-label fw-semibold">
                                                                 {{ $field['label'] ?? $key }}
                                                             </label>
@@ -68,17 +105,18 @@
                                                                     {{ $attr }}="{{ $attrValue }}"
                                                                 @endforeach
                                                             />
-                                                            @if ($isColor)
-                                                                <div class="form-text mt-1">
-                                                                    <span class="text-muted">現在値:</span>
-                                                                    <span id="{{ $inputId }}-value" class="ms-1 font-monospace">{{ $value }}</span>
-                                                                </div>
-                                                            @endif
-                                                            @if (!empty($field['description']))
-                                                                <small class="text-muted d-block mt-1">
-                                                                    {{ $field['description'] }}
-                                                                </small>
-                                                            @endif
+                                                        @endif
+                                                        @if ($isColor && !$isCheckbox && !$isTextarea)
+                                                            <div class="form-text mt-1">
+                                                                <span class="text-muted">現在値:</span>
+                                                                <span id="{{ $inputId }}-value" class="ms-1 font-monospace">{{ $value }}</span>
+                                                            </div>
+                                                        @endif
+                                                        @if (!empty($field['description']))
+                                                            <small class="text-muted d-block mt-1">
+                                                                {{ $field['description'] }}
+                                                            </small>
+                                                        @endif
                                                         @error('settings.' . $key)
                                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                                         @enderror
@@ -176,6 +214,28 @@
                 input.addEventListener('input', updateValue);
                 input.addEventListener('change', updateValue);
                 updateValue();
+            });
+
+            const controlledInputs = document.querySelectorAll('[data-controlled-by]');
+            controlledInputs.forEach((input) => {
+                const controllerSelector = input.getAttribute('data-controlled-by');
+                if (!controllerSelector) {
+                    return;
+                }
+                const controller = document.querySelector(controllerSelector);
+                if (!controller) {
+                    return;
+                }
+                const wrapper = input.closest('[data-settings-field]');
+                const updateState = () => {
+                    const isActive = controller instanceof HTMLInputElement ? controller.checked : true;
+                    input.toggleAttribute('disabled', !isActive);
+                    if (wrapper) {
+                        wrapper.classList.toggle('opacity-50', !isActive);
+                    }
+                };
+                controller.addEventListener('change', updateState);
+                updateState();
             });
         });
     </script>
