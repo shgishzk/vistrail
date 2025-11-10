@@ -62,7 +62,7 @@
               </button>
               <button
                 type="button"
-                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-sky-300 hover:text-sky-600"
+                class="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-200"
                 @click="openVisitMode(visit)"
               >
                 訪問モード
@@ -114,14 +114,32 @@
                     ></div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  class="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-sky-300 hover:text-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="!selectedVisit"
-                  @click="openVisitMode"
-                >
-                  訪問モードで表示
-                </button>
+                <div class="space-y-2">
+                  <button
+                    type="button"
+                    class="inline-flex w-full items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="!selectedVisit"
+                    @click="openVisitMode"
+                  >
+                    訪問モードで表示
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex w-full items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 shadow-sm transition hover:border-amber-300 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="!selectedVisit"
+                    @click="openActionConfirm('release')"
+                  >
+                    別の人が受け取れるようにする
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex w-full items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 shadow-sm transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="!selectedVisit"
+                    @click="openActionConfirm('cancel')"
+                  >
+                    未着手として返却する
+                  </button>
+                </div>
               </div>
             </div>
             <div v-else-if="state.isLoading" class="h-[360px] animate-pulse rounded-2xl bg-slate-100"></div>
@@ -129,16 +147,101 @@
         </div>
       </div>
     </section>
+    <transition name="fade">
+      <div
+        v-if="confirmDialog.action && confirmDialogContent"
+        class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-slate-900/70 p-4 sm:px-6 md:p-8"
+        role="dialog"
+        aria-modal="true"
+        @click.self="closeActionConfirm"
+      >
+        <div class="mx-auto mt-10 w-full max-w-md rounded-3xl bg-white shadow-2xl ring-1 ring-slate-900/5">
+          <div class="space-y-6 p-6 sm:p-8">
+            <div class="flex items-start gap-4">
+            <span
+              class="inline-flex h-12 w-12 items-center justify-center rounded-2xl"
+              :class="confirmDialog.action === 'cancel' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path
+                  v-if="confirmDialog.action === 'cancel'"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 9l-6 6m0-6 6 6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                />
+                <path
+                  v-else
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4.5 7.5h13.5M4.5 7.5l3-3m-3 3 3 3M19.5 16.5H6m13.5 0-3-3m3 3-3 3"
+                />
+              </svg>
+            </span>
+              <div class="space-y-2 text-left">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Confirm</p>
+                <h3 class="text-xl font-semibold text-slate-900">
+                  {{ confirmDialogContent.title }}
+                </h3>
+                <p class="text-sm text-slate-600">
+                  {{ confirmDialogContent.description }}
+                </p>
+              </div>
+            </div>
+
+            <div v-if="selectedVisit" class="rounded-2xl bg-slate-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">対象区域</p>
+              <p class="mt-1 text-base font-semibold text-slate-900">
+                {{ selectedVisit.area?.number ?? '区域' }}
+                <span v-if="selectedVisit.area?.name" class="text-sm font-medium text-slate-500">/ {{ selectedVisit.area.name }}</span>
+              </p>
+              <p class="text-xs text-slate-500">訪問開始日: {{ selectedVisit.start_date ?? '未設定' }}</p>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <button
+                type="button"
+                class="inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+                :class="confirmDialogContent.confirmButtonClass"
+                :disabled="confirmDialog.isSubmitting"
+                @click="handleVisitAction"
+              >
+                <svg
+                  v-if="confirmDialog.isSubmitting"
+                  class="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4A4 4 0 0 0 8 12H4z" />
+                </svg>
+                {{ confirmDialogContent.confirmLabel }}
+              </button>
+              <button
+                type="button"
+                class="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 sm:w-auto"
+                :disabled="confirmDialog.isSubmitting"
+                @click="closeActionConfirm"
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { fetchMyAreas } from '../services/areasService';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
 import { kmlParser } from '../utils/kmlParser';
+import { requestVisitReassignment, returnVisitAsUnstarted } from '../services/visitsService';
+import { toast } from '../utils/toast';
 
 const BUILDING_RADIUS_METERS = 500;
 const BUILDING_FETCH_DEBOUNCE_MS = 250;
@@ -155,6 +258,32 @@ const selectedVisit = ref(null);
 const mapContainer = ref(null);
 const mapError = ref('');
 const mapConfig = ref(null);
+const confirmDialog = reactive({
+  action: null,
+  isSubmitting: false,
+});
+const visitActionCopy = {
+  release: {
+    title: '別の人が受け取れるようにする',
+    description:
+      '他の奉仕社がこの区域を受け取れるようにします。現在の訪問は終了し、進捗は保持されます。',
+    confirmLabel: '別の人が受取可能に変更',
+    confirmButtonClass: 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500',
+  },
+  cancel: {
+    title: '未着手として返却する',
+    description:
+      '区域の訪問をキャンセルし、未着手として返却します。他の人が新しい訪問を開始できます。',
+    confirmLabel: '未着手で返却',
+    confirmButtonClass: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
+  },
+};
+const confirmDialogContent = computed(() => {
+  if (!confirmDialog.action) {
+    return null;
+  }
+  return visitActionCopy[confirmDialog.action] || null;
+});
 
 let mapInstance = null;
 let mapInitPromise = null;
@@ -249,6 +378,51 @@ const openVisitMode = (candidate) => {
   });
 };
 
+const openActionConfirm = (action) => {
+  if (!selectedVisit.value || !visitActionCopy[action]) {
+    return;
+  }
+  confirmDialog.action = action;
+  confirmDialog.isSubmitting = false;
+};
+
+const closeActionConfirm = () => {
+  confirmDialog.action = null;
+  confirmDialog.isSubmitting = false;
+};
+
+const handleVisitAction = async () => {
+  if (!selectedVisit.value || !confirmDialog.action) {
+    return;
+  }
+  confirmDialog.isSubmitting = true;
+  try {
+    if (confirmDialog.action === 'release') {
+      await requestVisitReassignment(selectedVisit.value.id);
+      toast.success('他の人が受け取れる状態に更新しました。');
+    } else if (confirmDialog.action === 'cancel') {
+      await returnVisitAsUnstarted(selectedVisit.value.id);
+      toast.success('未着手として返却しました。');
+    }
+    closeActionConfirm();
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
+    } else {
+      await loadVisits();
+    }
+  } catch (error) {
+    console.error('Failed to update visit status:', error);
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.errors?.status?.[0] ||
+      'ステータスの更新に失敗しました。';
+    toast.error(message);
+  } finally {
+    confirmDialog.isSubmitting = false;
+  }
+};
 const initializeMap = async () => {
   if (mapInitPromise) {
     return mapInitPromise;
@@ -592,8 +766,11 @@ const scheduleBuildingFetch = () => {
   }, BUILDING_FETCH_DEBOUNCE_MS);
 };
 
-watch(selectedVisit, () => {
+watch(selectedVisit, (next) => {
   renderSelectedArea();
+  if (!next && confirmDialog.action) {
+    closeActionConfirm();
+  }
 });
 
 watch(mapContainer, () => {

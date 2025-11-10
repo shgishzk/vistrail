@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\MyAreasController;
 use App\Http\Controllers\Api\PinController;
+use App\Http\Controllers\Api\VisitActionController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -35,4 +36,8 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->g
     Route::post('/pins', [PinController::class, 'store']);
     Route::put('/pins/{pin}', [PinController::class, 'update']);
     Route::delete('/pins/{pin}', [PinController::class, 'destroy']);
+    Route::patch('/visits/{visit}/request-reassignment', [VisitActionController::class, 'requestReassignment'])
+        ->whereNumber('visit');
+    Route::patch('/visits/{visit}/return-unstarted', [VisitActionController::class, 'returnAsUnstarted'])
+        ->whereNumber('visit');
 });
