@@ -186,7 +186,15 @@ export default {
     });
     const shouldShowDesktop = computed(() => isDesktop.value);
     const shouldShowNav = computed(() => isDesktop.value || isMobileNavOpen.value);
-    const showReloadButton = computed(() => route.path.startsWith('/buildings'));
+    const showReloadButton = computed(() => {
+      if (route.path.startsWith('/buildings')) {
+        return true;
+      }
+      if (route.path.startsWith('/areas/accept-reassign')) {
+        return true;
+      }
+      return false;
+    });
     const reloadInProgress = ref(false);
     
     const fetchUser = async () => {

@@ -46,6 +46,23 @@ class VisitActionController extends Controller
         ]);
     }
 
+    public function complete(Request $request, Visit $visit, UpdateVisitService $service): JsonResponse
+    {
+        $this->authorizeVisit($request, $visit);
+
+        $this->ensureTransitionIsAllowed($visit, VisitStatus::COMPLETED);
+
+        $updated = $service->execute($visit, [
+            'status' => VisitStatus::COMPLETED->value,
+            'end_date' => Carbon::today(),
+        ])->loadMissing('area');
+
+        return response()->json([
+            'message' => __('訪問を完了しました。'),
+            'visit' => $this->transformVisit($updated),
+        ]);
+    }
+
     private function authorizeVisit(Request $request, Visit $visit): void
     {
         if ((int) $visit->user_id !== (int) $request->user()->id) {

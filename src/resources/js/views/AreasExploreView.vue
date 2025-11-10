@@ -9,29 +9,6 @@
             検索とフィルターで目的の区域を探し、区域地図を確認できます。
           </p>
         </div>
-        <div class="rounded-2xl border border-white/20 bg-white/10 p-6 text-sm leading-relaxed text-white/90 shadow-lg backdrop-blur">
-          <p class="text-sm font-semibold text-white">閲覧モードのポイント</p>
-          <ul class="mt-3 space-y-2 text-white/80">
-            <li class="flex items-center gap-3">
-              <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/80 text-xs font-bold shadow">
-                1
-              </span>
-              検索バーとステータスで絞り込み
-            </li>
-            <li class="flex items-center gap-3">
-              <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/80 text-xs font-bold shadow">
-                2
-              </span>
-              リストから区域を選択して詳細を表示
-            </li>
-            <li class="flex items-center gap-3">
-              <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/80 text-xs font-bold shadow">
-                3
-              </span>
-              区域地図を確認
-            </li>
-          </ul>
-        </div>
       </div>
     </section>
 

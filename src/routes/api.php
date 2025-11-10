@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\MyAreasController;
 use App\Http\Controllers\Api\PinController;
 use App\Http\Controllers\Api\VisitActionController;
+use App\Http\Controllers\Api\VisitReassignmentController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -39,5 +40,10 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum'])->g
     Route::patch('/visits/{visit}/request-reassignment', [VisitActionController::class, 'requestReassignment'])
         ->whereNumber('visit');
     Route::patch('/visits/{visit}/return-unstarted', [VisitActionController::class, 'returnAsUnstarted'])
+        ->whereNumber('visit');
+    Route::get('/visits/pending-reassignment', [VisitReassignmentController::class, 'index']);
+    Route::post('/visits/{visit}/accept-reassignment', [VisitReassignmentController::class, 'accept'])
+        ->whereNumber('visit');
+    Route::patch('/visits/{visit}/complete', [VisitActionController::class, 'complete'])
         ->whereNumber('visit');
 });

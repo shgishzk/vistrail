@@ -31,6 +31,13 @@ class UpdateVisitService
 
         $visit->update($data);
 
+        if (isset($data['status']) && in_array($data['status'], [
+            VisitStatus::CANCELED->value,
+            VisitStatus::COMPLETED->value,
+        ], true)) {
+            $visit->pins()->delete();
+        }
+
         return $visit->refresh();
     }
 }

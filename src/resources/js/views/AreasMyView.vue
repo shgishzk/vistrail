@@ -114,7 +114,7 @@
                     ></div>
                   </div>
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-4">
                   <button
                     type="button"
                     class="inline-flex w-full items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:opacity-50"
@@ -123,22 +123,32 @@
                   >
                     訪問モードで表示
                   </button>
-                  <button
-                    type="button"
-                    class="inline-flex w-full items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 shadow-sm transition hover:border-amber-300 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
-                    :disabled="!selectedVisit"
-                    @click="openActionConfirm('release')"
-                  >
-                    別の人が受け取れるようにする
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex w-full items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 shadow-sm transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                    :disabled="!selectedVisit"
-                    @click="openActionConfirm('cancel')"
-                  >
-                    未着手として返却する
-                  </button>
+                  <div class="space-y-3 border-t border-slate-100 pt-4">
+                    <button
+                      type="button"
+                      class="inline-flex w-full items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="!selectedVisit"
+                      @click="openActionConfirm('complete')"
+                    >
+                      訪問を完了する
+                    </button>
+                    <button
+                      type="button"
+                      class="inline-flex w-full items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 shadow-sm transition hover:border-amber-300 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="!selectedVisit"
+                      @click="openActionConfirm('release')"
+                    >
+                      別の人が受け取れるようにする
+                    </button>
+                    <button
+                      type="button"
+                      class="inline-flex w-full items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 shadow-sm transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="!selectedVisit"
+                      @click="openActionConfirm('cancel')"
+                    >
+                      未着手として返却する
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -158,25 +168,35 @@
         <div class="mx-auto mt-10 w-full max-w-md rounded-3xl bg-white shadow-2xl ring-1 ring-slate-900/5">
           <div class="space-y-6 p-6 sm:p-8">
             <div class="flex items-start gap-4">
-            <span
-              class="inline-flex h-12 w-12 items-center justify-center rounded-2xl"
-              :class="confirmDialog.action === 'cancel' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path
-                  v-if="confirmDialog.action === 'cancel'"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M15 9l-6 6m0-6 6 6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                />
-                <path
-                  v-else
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M4.5 7.5h13.5M4.5 7.5l3-3m-3 3 3 3M19.5 16.5H6m13.5 0-3-3m3 3-3 3"
-                />
-              </svg>
-            </span>
+              <span
+                class="inline-flex h-12 w-12 items-center justify-center rounded-2xl"
+                :class="{
+                  'bg-red-100 text-red-600': confirmDialog.action === 'cancel',
+                  'bg-emerald-100 text-emerald-600': confirmDialog.action === 'complete',
+                  'bg-amber-100 text-amber-600': confirmDialog.action === 'release',
+                }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path
+                    v-if="confirmDialog.action === 'cancel'"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 9l-6 6m0-6 6 6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                  />
+                  <path
+                    v-else-if="confirmDialog.action === 'complete'"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4.5 12.75 9 17.25 19.5 6"
+                  />
+                  <path
+                    v-else
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4.5 7.5h13.5M4.5 7.5l3-3m-3 3 3 3M19.5 16.5H6m13.5 0-3-3m3 3-3 3"
+                  />
+                </svg>
+              </span>
               <div class="space-y-2 text-left">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Confirm</p>
                 <h3 class="text-xl font-semibold text-slate-900">
@@ -240,7 +260,7 @@ import axios from 'axios';
 import { fetchMyAreas } from '../services/areasService';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
 import { kmlParser } from '../utils/kmlParser';
-import { requestVisitReassignment, returnVisitAsUnstarted } from '../services/visitsService';
+import { completeVisit, requestVisitReassignment, returnVisitAsUnstarted } from '../services/visitsService';
 import { toast } from '../utils/toast';
 
 const BUILDING_RADIUS_METERS = 500;
@@ -263,11 +283,18 @@ const confirmDialog = reactive({
   isSubmitting: false,
 });
 const visitActionCopy = {
+  complete: {
+    title: '訪問を完了しますか？',
+    description:
+      '訪問を完了として記録し、訪問終了日に本日の日付を設定します。関連するピンは整理され、区域は返却されます。',
+    confirmLabel: '訪問を完了する',
+    confirmButtonClass: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500',
+  },
   release: {
     title: '別の人が受け取れるようにする',
     description:
-      '他の奉仕社がこの区域を受け取れるようにします。現在の訪問は終了し、進捗は保持されます。',
-    confirmLabel: '別の人が受取可能に変更',
+      'この区域を「再割当待機」に変更し、他の人が同じ区域を受け取れるようにします。現在の訪問は終了し、進捗は保持されます。',
+    confirmLabel: '再割当待機にする',
     confirmButtonClass: 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500',
   },
   cancel: {
@@ -403,6 +430,9 @@ const handleVisitAction = async () => {
     } else if (confirmDialog.action === 'cancel') {
       await returnVisitAsUnstarted(selectedVisit.value.id);
       toast.success('未着手として返却しました。');
+    } else if (confirmDialog.action === 'complete') {
+      await completeVisit(selectedVisit.value.id);
+      toast.success('訪問を完了しました。');
     }
     closeActionConfirm();
     if (typeof window !== 'undefined') {

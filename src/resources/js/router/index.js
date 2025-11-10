@@ -5,6 +5,7 @@ const AreasView = () => import('../views/AreasView.vue');
 const AreasMyView = () => import('../views/AreasMyView.vue');
 const AreasExploreView = () => import('../views/AreasExploreView.vue');
 const AreasPickupView = () => import('../views/AreasPickupView.vue');
+const AreasAcceptReassignView = () => import('../views/AreasAcceptReassignView.vue');
 const AreasVisitModeView = () => import('../views/AreasVisitModeView.vue');
 const BuildingsView = () => import('../views/BuildingsView.vue');
 const BuildingDetailView = () => import('../views/BuildingDetailView.vue');
@@ -17,6 +18,7 @@ const titleMap = {
   areasMyVisit: '訪問モード',
   areasExplore: 'すべての区域を閲覧',
   areasPickup: '区域を選ぶ',
+  areasAcceptReassign: '再割当区域',
   buildings: 'マンション',
   buildingDetail: 'マンション詳細',
   groups: 'グループ',
@@ -42,6 +44,11 @@ const routes = [
     path: '/areas/pickup',
     name: 'areasPickup',
     component: AreasPickupView,
+  },
+  {
+    path: '/areas/accept-reassign',
+    name: 'areasAcceptReassign',
+    component: AreasAcceptReassignView,
   },
   {
     path: '/areas/explore',
